@@ -1,0 +1,16 @@
+Extra Botany (NeoForge 1.21.1 for Botania Revived) - provenance notice
+======================================================================
+
+Source chain
+  ExtraMeteorP/Extra-Botany          original mod
+  Lounode/ExtraBotany                "Extra Botany: Reburn", Minecraft 1.20.1 (MIT)
+  rianfalltwilight-lab/scex-extrabotany   1.21.1 / NeoForge port for Botania 456
+                                     taken at commit 3713387 ("Unify maintainer identity in mod metadata"),
+                                     the last revision before the licensing policy change; all of its content is MIT.
+
+This repository adapts that source to Botania Revived 1.0.3 (package velrondevs.botania): registry names,
+Botania API calls, mixins, data (recipes, tags, loot, Patchouli entries) and the build setup were changed.
+Data generators and game tests of the upstream port are not included.
+
+ExtraBotany, Botania, Minecraft, NeoForge and all referenced names and assets remain the property of their respective owners.
+The MIT license of the upstream project is kept in LICENSE.

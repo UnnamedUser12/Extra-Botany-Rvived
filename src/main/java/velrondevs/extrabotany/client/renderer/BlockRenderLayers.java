@@ -1,0 +1,36 @@
+package velrondevs.extrabotany.client.renderer;
+
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.FlowerBlock;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.TallFlowerBlock;
+
+import velrondevs.botania.common.block.decor.FloatingFlowerBlock;
+
+import velrondevs.extrabotany.common.lib.LibMisc;
+
+import java.util.function.BiConsumer;
+
+/**
+ * 把本模组的花、浮空花和花盆设为镂空渲染。
+ * Sets the flowers, the floating flowers and the flower pots of this mod to the cutout render type.
+ */
+public final class BlockRenderLayers {
+	public static boolean skipPlatformBlocks;
+
+	private BlockRenderLayers() {}
+
+	public static void init(BiConsumer<Block, RenderType> consumer) {
+
+		BuiltInRegistries.BLOCK.stream().filter(b -> BuiltInRegistries.BLOCK.getKey(b).getNamespace().equals(LibMisc.MOD_ID))
+				.forEach(b -> {
+					if (b instanceof FloatingFlowerBlock || b instanceof FlowerBlock
+							|| b instanceof TallFlowerBlock 
+							|| b instanceof FlowerPotBlock) {
+						consumer.accept(b, RenderType.cutout());
+					}
+				});
+	}
+}

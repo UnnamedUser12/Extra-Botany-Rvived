@@ -1,0 +1,17 @@
+{
+  "type": "extrabotany:stonesia",
+  "input": {
+    "type": "compound",
+    "ingredients": [
+      {
+        "type": "tag",
+        "tag": "minecraft:copper_ores"
+      },
+      {
+        "type": "tag",
+        "tag": "c:ores/copper"
+      }
+    ]
+  },
+  "outputMana": 320
+}

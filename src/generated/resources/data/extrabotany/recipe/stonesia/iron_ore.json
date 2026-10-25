@@ -1,0 +1,17 @@
+{
+  "type": "extrabotany:stonesia",
+  "input": {
+    "type": "compound",
+    "ingredients": [
+      {
+        "type": "tag",
+        "tag": "minecraft:iron_ores"
+      },
+      {
+        "type": "tag",
+        "tag": "c:ores/iron"
+      }
+    ]
+  },
+  "outputMana": 370
+}

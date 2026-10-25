@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "botania:lens_normal"
+    },
+    {
+      "item": "botania:rune_autumn"
+    },
+    {
+      "tag": "botania:mana_dusts"
+    },
+    {
+      "tag": "botania:dragonstone_gems"
+    },
+    {
+      "item": "botania:ender_air_bottle"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "extrabotany:lens_cloud"
+  }
+}

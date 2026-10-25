@@ -1,0 +1,26 @@
+{
+  "category": "botania:extrabotanies",
+  "icon": "extrabotany:boat_manasteel",
+  "name": "extrabotany.entry.airship",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "extrabotany.page.airship0"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "extrabotany:boat_manasteel",
+      "text": "extrabotany.page.airship1"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "extrabotany:boat_elementium",
+      "text": "extrabotany.page.airship2"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "extrabotany:boat_terrasteel",
+      "text": "extrabotany.page.airship3"
+    }
+  ]
+}

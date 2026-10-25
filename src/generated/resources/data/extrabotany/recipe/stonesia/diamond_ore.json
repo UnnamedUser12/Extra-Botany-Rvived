@@ -1,0 +1,17 @@
+{
+  "type": "extrabotany:stonesia",
+  "input": {
+    "type": "compound",
+    "ingredients": [
+      {
+        "type": "tag",
+        "tag": "minecraft:diamond_ores"
+      },
+      {
+        "type": "tag",
+        "tag": "c:ores/diamond"
+      }
+    ]
+  },
+  "outputMana": 750
+}

@@ -1,0 +1,16 @@
+{
+  "category": "botania:baubles",
+  "icon": "extrabotany:mana_driver_ring",
+  "name": "extrabotany.entry.mana_driver_ring",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "extrabotany.page.mana_driver_ring0"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "extrabotany:mana_driver_ring",
+      "text": "extrabotany.page.mana_driver_ring1"
+    }
+  ]
+}

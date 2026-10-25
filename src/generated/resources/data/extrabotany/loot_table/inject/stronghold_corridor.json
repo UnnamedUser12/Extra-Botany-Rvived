@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "extrabotany:bottled_flame",
+          "weight": 16
+        },
+        {
+          "type": "minecraft:item",
+          "name": "extrabotany:bottled_star",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "extrabotany:bottled_pixie",
+          "weight": 8
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 64
+        }
+      ],
+      "name": "main",
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "extrabotany:inject/stronghold_corridor"
+}
