@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.1
+- No gameplay changes. This version is built and uploaded automatically by GitHub Actions from the source repository.
+
 ## 1.0.0
 
 - First port of Extra Botany to Minecraft 1.21.1 / NeoForge, compiled against Botania Revived 1.0.3.
