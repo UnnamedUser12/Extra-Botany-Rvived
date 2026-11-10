@@ -5,7 +5,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.phys.Vec3;
 
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +30,7 @@ public class StarWrathItem extends RelicSwordItem {
 	private static final double STAR_SPEED = 1.5;
 
 	public StarWrathItem(Properties props) {
-		super(Tiers.DIAMOND, props.attributes(createAttributes(Tiers.DIAMOND, 6, -1.6F)));
+		super(ToolMaterial.DIAMOND, 6, -1.6F, props);
 	}
 
 	@Override

@@ -1,0 +1,15 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "kind": "senketsu",
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "extrabotany:item/sanguine_pleiades_combat_maid_suit"
+    },
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "extrabotany:item/sanguine_pleiades_combat_maid_suit_senketsu"
+    },
+    "property": "extrabotany:flag"
+  }
+}

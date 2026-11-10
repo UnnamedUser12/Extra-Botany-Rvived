@@ -4,7 +4,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -26,18 +26,18 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  */
 public final class ExtraBotanyCreativeTabs {
 	public static final ResourceKey<CreativeModeTab> EXTRA_BOTANY_TAB_KEY = ResourceKey.create(Registries.CREATIVE_MODE_TAB,
-			ResourceLocation.tryBuild(ExtraBotanyAPI.MODID, "extrabotany"));
+			Identifier.tryBuild(ExtraBotanyAPI.MODID, "extrabotany"));
 
 	private ExtraBotanyCreativeTabs() {}
 
-	public static void registerCreativeTabs(BiConsumer<CreativeModeTab, ResourceLocation> r) {
+	public static void registerCreativeTabs(BiConsumer<CreativeModeTab, Identifier> r) {
 		r.accept(CreativeModeTab.builder()
 				.title(Component.translatable("itemGroup.extrabotany").withStyle(style -> style.withColor(ChatFormatting.WHITE)))
 				.hideTitle()
 				.icon(() -> new ItemStack(ExtraBotanyItems.zadkiel))
 				.backgroundTexture(prefix("textures/gui/container/creative_inventory/tab_extrabotany.png"))
 				.build(),
-				EXTRA_BOTANY_TAB_KEY.location());
+				EXTRA_BOTANY_TAB_KEY.identifier());
 	}
 
 	/** 把已注册的物品放进本模组的物品栏。 / Puts the registered items into the tab of this mod. */

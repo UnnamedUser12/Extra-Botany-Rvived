@@ -1,5 +1,6 @@
 package velrondevs.extrabotany.common.brew.effect;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,7 +35,7 @@ public final class IncandescenceMobEffect extends MobEffect {
 	 * @return 返回 {@code false} 时游戏移除这个效果。 When this returns {@code false}, the game removes the effect.
 	 */
 	@Override
-	public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+	public boolean applyEffectTick(ServerLevel level, LivingEntity entity, int amplifier) {
 		Vec3 motion = entity.getDeltaMovement();
 		if (motion.y < 0) {
 			entity.setDeltaMovement(motion.multiply(1.0, FALL_SPEED_FACTOR, 1.0));

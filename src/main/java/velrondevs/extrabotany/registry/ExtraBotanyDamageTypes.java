@@ -97,7 +97,7 @@ public final class ExtraBotanyDamageTypes {
 		private Sources() {}
 
 		private static Holder.Reference<DamageType> getHolder(RegistryAccess ra, ResourceKey<DamageType> key) {
-			return ra.registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key);
+			return ra.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(key);
 		}
 
 		public static DamageSource source(RegistryAccess ra, ResourceKey<DamageType> resourceKey) {

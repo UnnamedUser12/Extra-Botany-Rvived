@@ -1,7 +1,6 @@
 package velrondevs.extrabotany.common.impl;
 
-import net.minecraft.core.Holder;
-import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterial;
 
 import velrondevs.extrabotany.api.ExtraBotanyAPI;
 import velrondevs.extrabotany.api.item.CoreOfTheVoidVariant;
@@ -20,22 +19,22 @@ public class ExtraBotanyAPIImpl implements ExtraBotanyAPI {
 	private final Map<String, VoidArchivesVariant> voidArchivesVariants = new LinkedHashMap<>();
 
 	@Override
-	public Holder<ArmorMaterial> getPleiadsMaidCombatArmorMaterial() {
+	public ArmorMaterial getPleiadsMaidCombatArmorMaterial() {
 		return ExtraBotanyArmorMaterials.PLEIADS_MAID_COMBAT;
 	}
 
 	@Override
-	public Holder<ArmorMaterial> getStarryIdolArmorMaterial() {
+	public ArmorMaterial getStarryIdolArmorMaterial() {
 		return ExtraBotanyArmorMaterials.STARRY_IDOL;
 	}
 
 	@Override
-	public Holder<ArmorMaterial> getGoblinSlayerArmorMaterial() {
+	public ArmorMaterial getGoblinSlayerArmorMaterial() {
 		return ExtraBotanyArmorMaterials.GOBLIN_SLAYER;
 	}
 
 	@Override
-	public Holder<ArmorMaterial> getShadowWarriorArmorMaterial() {
+	public ArmorMaterial getShadowWarriorArmorMaterial() {
 		return ExtraBotanyArmorMaterials.SHADOW_WARRIOR;
 	}
 

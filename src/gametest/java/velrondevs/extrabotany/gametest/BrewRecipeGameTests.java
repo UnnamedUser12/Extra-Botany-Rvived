@@ -9,18 +9,16 @@ import velrondevs.extrabotany.registry.ExtraBotanyItems;
 import velrondevs.extrabotany.common.item.brew.HolyWaterGrenadeItem;
 import velrondevs.extrabotany.common.item.brew.InfiniteWineItem;
 import velrondevs.extrabotany.common.item.brew.ManaCocktailItem;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 import velrondevs.botania.api.BotaniaAPI;
 import velrondevs.botania.registry.BotaniaBrews;
 import velrondevs.botania.registry.BotaniaItems;
@@ -38,9 +36,9 @@ public final class BrewRecipeGameTests {
 		ItemStack beforeFirst = first.copy();
 		ItemStack beforeSecond = second.copy();
 		var input = CraftingInput.of(2, 1, List.of(first, second));
-		var recipe = helper.getLevel().getRecipeManager()
+		var recipe = helper.getLevel().recipeAccess()
 				.getRecipeFor(RecipeType.CRAFTING, input, helper.getLevel()).orElseThrow().value();
-		ItemStack result = recipe.assemble(input, helper.getLevel().registryAccess());
+		ItemStack result = recipe.assemble(input);
 		helper.assertTrue(!result.isEmpty() && result.getCount() == 1, "Brew recipe produced no result or duplicated its output");
 		helper.assertTrue(ItemStack.matches(first, beforeFirst) && ItemStack.matches(second, beforeSecond),
 				"Brew recipe assembly modified its input stacks");
@@ -48,8 +46,8 @@ public final class BrewRecipeGameTests {
 	}
 
 	private static ItemStack saveAndLoad(GameTestHelper helper, ItemStack stack) {
-		return ItemStack.parseOptional(helper.getLevel().registryAccess(),
-				(CompoundTag) stack.save(helper.getLevel().registryAccess()));
+		var registries = helper.getLevel().registryAccess();
+		return BlockEntityIO.parseStack(registries, BlockEntityIO.saveStack(registries, stack));
 	}
 
 	@GameTest(template = "empty", timeoutTicks = 20)
@@ -64,7 +62,7 @@ public final class BrewRecipeGameTests {
 				"Flask recipe lost the brew component or changed the full cocktail amount");
 		var player = helper.makeMockPlayer(GameType.SURVIVAL);
 		item.finishUsingItem(cocktail, helper.getLevel(), player);
-		var haste = player.getEffect(MobEffects.DIG_SPEED);
+		var haste = player.getEffect(MobEffects.HASTE);
 		helper.assertTrue(haste != null && haste.getAmplifier() == 2 && haste.getDuration() == 1800,
 				"Crafted cocktail did not apply the flask's actual effect");
 		helper.assertTrue(item.getSwigsLeft(cocktail) == 7, "Crafted cocktail did not consume exactly one swig");
@@ -83,7 +81,7 @@ public final class BrewRecipeGameTests {
 					"Wine creation/remake lost its brew or changed the full wine amount");
 			var player = helper.makeMockPlayer(GameType.SURVIVAL);
 			wine.finishUsingItem(wineStack, helper.getLevel(), player);
-			var haste = player.getEffect(MobEffects.DIG_SPEED);
+			var haste = player.getEffect(MobEffects.HASTE);
 			helper.assertTrue(haste != null && haste.getAmplifier() == 3 && haste.getDuration() == 2700,
 					"Crafted wine did not apply its copied brew with one amplification");
 			helper.assertTrue(wine.getSwigsLeft(wineStack) == 11, "Crafted wine did not consume exactly one swig");
@@ -108,7 +106,7 @@ public final class BrewRecipeGameTests {
 
 	@GameTest(template = "empty", timeoutTicks = 20)
 	public static void potionLensAcceptsModernBrewAndKeepsLensData(GameTestHelper helper) {
-		var recipe = new PotionLensChangePotionRecipe(CraftingBookCategory.MISC);
+		var recipe = new PotionLensChangePotionRecipe();
 		ItemStack cocktail = new ItemStack(ExtraBotanyItems.manaCocktail);
 		BaseBrewItem.setBrew(cocktail, ExtraBotanyBrews.revolution);
 		ItemStack lens = new ItemStack(ExtraBotanyItems.lensPotion, 3);
@@ -116,7 +114,7 @@ public final class BrewRecipeGameTests {
 		for (var ingredients : List.of(List.of(lens, cocktail), List.of(cocktail, lens))) {
 			var input = CraftingInput.of(2, 1, ingredients);
 			helper.assertTrue(recipe.matches(input, helper.getLevel()), "Potion lens rejected a full modern cocktail");
-			ItemStack result = saveAndLoad(helper, recipe.assemble(input, helper.getLevel().registryAccess()));
+			ItemStack result = saveAndLoad(helper, recipe.assemble(input));
 			helper.assertTrue(result.is(ExtraBotanyItems.lensPotion) && result.getCount() == 1
 					&& BrewUtil.getBrew(result) == ExtraBotanyBrews.revolution,
 					"Potion lens lost the modern cocktail's brew or copied the input stack count");

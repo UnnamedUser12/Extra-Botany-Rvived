@@ -1,5 +1,6 @@
 package velrondevs.extrabotany.common.item.lens;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -64,7 +65,9 @@ public class PotionLens extends Lens {
 					effect.getAmplifier(), true, true);
 
 			if (effect.getEffect().value().isInstantenous()) {
-				effect.getEffect().value().applyInstantenousEffect(null, null, entity, effect.getAmplifier(), 1F);
+				if (entity.level() instanceof ServerLevel serverLevel) {
+					effect.getEffect().value().applyInstantenousEffect(serverLevel, null, null, entity, effect.getAmplifier(), 1F);
+				}
 			} else {
 				entity.addEffect(newInstance);
 			}

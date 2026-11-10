@@ -1,20 +1,20 @@
 package velrondevs.extrabotany.gametest;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.monster.Husk;
+import net.minecraft.world.entity.monster.zombie.Husk;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import top.theillusivec4.curios.api.CuriosApi;
 
@@ -43,7 +43,7 @@ public final class HerrscherGameTests {
 
 	private static ItemStack wearGem(Player player) {
 		ItemStack gem = new ItemStack(ExtraBotanyItems.gemOfConquest);
-		var inventory = CuriosApi.getCuriosInventory(player).orElseThrow();
+		var inventory = CuriosTestHelper.inventory(player);
 		var handler = inventory.getCurios().values().stream()
 				.filter(candidate -> candidate.getStacks().getSlots() > 0)
 				.findFirst().orElseThrow();
@@ -151,7 +151,7 @@ public final class HerrscherGameTests {
 			helper.assertFalse(HerrscherHandler.useSkill(player), "A second slash was released with no energy");
 		});
 		helper.runAfterDelay(6, () ->
-				helper.assertTrue(husk.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "The slash did not slow the monster"));
+				helper.assertTrue(husk.hasEffect(MobEffects.SLOWNESS), "The slash did not slow the monster"));
 		helper.runAfterDelay(2 + ThunderSlashEntity.LIFETIME_TICKS + 3, () -> {
 			helper.assertTrue(slashes(helper).isEmpty(), "The slash did not go away after 35 ticks");
 			// 五次伤害一共 21 点，尸壳有 20 点生命值。

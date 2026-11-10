@@ -5,7 +5,7 @@ import com.google.common.collect.Multimap;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -100,7 +100,7 @@ public class SilentEternityItem extends RelicBaubleItem {
 
 	@Override
 	public Multimap<Holder<Attribute>, AttributeModifier> getEquippedAttributeModifiers(ItemStack stack) {
-		ResourceLocation slotId = getBaubleModifierId(stack);
+		Identifier slotId = getBaubleModifierId(stack);
 		Multimap<Holder<Attribute>, AttributeModifier> attributes = HashMultimap.create();
 		attributes.put(Attributes.KNOCKBACK_RESISTANCE,
 				new AttributeModifier(prefix("silent_eternity_knockback_resistance"), 1.0, AttributeModifier.Operation.ADD_VALUE));
@@ -118,7 +118,7 @@ public class SilentEternityItem extends RelicBaubleItem {
 			return;
 		}
 
-		FrostWalkerHelper.freeze(stack, serverPlayer, serverPlayer.serverLevel(), FREEZE_RADIUS);
+		FrostWalkerHelper.freeze(stack, serverPlayer, serverPlayer.level(), FREEZE_RADIUS);
 		// 结冰的逻辑只对站在地面上的生物生效。原版在调用前后临时把玩家标记为"在地面上"。
 		// The freeze logic only works for a mob that is on the ground. The original marks the player as "on the ground" for the time of the call.
 		boolean wasOnGround = player.onGround();
@@ -170,10 +170,9 @@ public class SilentEternityItem extends RelicBaubleItem {
 
 		// 这里只读取数据，所以不需要复制整个标签。
 		// This only reads the data, so a copy of the full tag is not necessary.
-		@SuppressWarnings("deprecation")
 		@Override
 		public int getMana() {
-			int mana = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe().getInt(TAG_MANA);
+			int mana = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getIntOr(TAG_MANA, 0);
 			return Math.clamp(mana, 0, MAX_MANA);
 		}
 

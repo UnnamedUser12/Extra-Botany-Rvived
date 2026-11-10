@@ -1,9 +1,9 @@
 package velrondevs.extrabotany.client.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
@@ -16,21 +16,18 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>The method is the same as for the vanilla spyglass: one square texture at the center of the view, with the size multiplied by {@code scale}.
  */
 public final class CameraOverlay {
-	private static final ResourceLocation TEXTURE = prefix("textures/gui/spyglass_scope.png");
+	private static final Identifier TEXTURE = prefix("textures/gui/spyglass_scope.png");
 
 	private CameraOverlay() {}
 
-	public static void render(GuiGraphics gui, float scale) {
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
+	public static void render(GuiGraphicsExtractor gui, float scale) {
 
 		float shortSide = (float) Math.min(gui.guiWidth(), gui.guiHeight());
 		float factor = Math.min((float) gui.guiWidth() / shortSide, (float) gui.guiHeight() / shortSide) * scale;
 		int size = Mth.floor(shortSide * factor);
 		int left = (gui.guiWidth() - size) / 2;
 		int top = (gui.guiHeight() - size) / 2;
-		gui.blit(TEXTURE, left, top, -90, 0.0F, 0.0F, size, size, size, size);
+		gui.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, left, top, 0.0F, 0.0F, size, size, size, size);
 
-		RenderSystem.disableBlend();
 	}
 }

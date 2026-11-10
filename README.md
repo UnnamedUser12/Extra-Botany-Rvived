@@ -1,6 +1,6 @@
-# ExtraBotany (NeoForge 1.21.1, Botania Revived)
+# ExtraBotany (NeoForge 26.1.2, Botania Revived)
 
-Port of the Botania addon **Extra Botany: Reburn** to **Minecraft 1.21.1 / NeoForge 21.1.x**, built against
+Port of the Botania addon **Extra Botany: Reburn** to **Minecraft 26.1.2 / NeoForge 26.1.2.x**, built against
 **Botania Revived** (modid `botania`, package `velrondevs.botania`).
 
 Mod id: `extrabotany`. Port author: UnnamedUser12.
@@ -9,22 +9,22 @@ Mod id: `extrabotany`. Port author: UnnamedUser12.
 
 | Component | Version |
 |---|---|
-| Minecraft | 1.21.1 |
-| NeoForge | 21.1.240 or later 21.1.x |
-| Botania Revived | 1.0.3 |
-| Patchouli | 1.21.1-93 |
-| Curios | 9.5.1 |
-| JEI, EMI, KubeJS | optional |
+| Minecraft | 26.1.2 |
+| NeoForge | 26.1.2.126 or later |
+| Botania Revived | 1.0.7 |
+| Patchouli | 26.1-94 |
+| Curios | 15.0.0+26.1.2 |
+| JEI, KubeJS | optional |
 
 ## Build
 
-JDK 21 is required.
+JDK 25 is required.
 
 ```bash
 ./gradlew build
 ```
 
-The jar is written to `build/libs/ExtraBotany-1.21.1-<version>-NeoForge.jar`.
+The jar is written to `build/libs/ExtraBotany-26.1.2-<version>-NeoForge.jar`.
 
 ## Credits and license
 

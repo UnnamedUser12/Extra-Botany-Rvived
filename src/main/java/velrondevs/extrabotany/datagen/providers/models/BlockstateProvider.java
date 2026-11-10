@@ -2,11 +2,12 @@ package velrondevs.extrabotany.datagen.providers.models;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.models.model.ModelTemplate;
-import net.minecraft.data.models.model.ModelTemplates;
-import net.minecraft.data.models.model.TextureMapping;
-import net.minecraft.data.models.model.TextureSlot;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.data.models.BlockModelGenerators;
+import net.minecraft.client.data.models.model.ModelTemplate;
+import net.minecraft.client.data.models.model.ModelTemplates;
+import net.minecraft.client.data.models.model.TextureMapping;
+import net.minecraft.client.data.models.model.TextureSlot;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SlabBlock;
@@ -15,7 +16,7 @@ import net.minecraft.world.level.block.StairBlock;
 import org.jetbrains.annotations.NotNull;
 
 import velrondevs.botania.common.block.decor.FloatingFlowerBlock;
-import velrondevs.botania.mixin.BlockModelGeneratorsAccessor;
+import velrondevs.botania.datagen.util.VariantBuilder;
 
 import velrondevs.extrabotany.registry.ExtraBotanyBlocks;
 import velrondevs.extrabotany.common.block.PedestalBlock;
@@ -30,8 +31,8 @@ import java.util.stream.Collectors;
 
 import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
 import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefixBotania;
-import static net.minecraft.data.models.model.ModelLocationUtils.getModelLocation;
-import static net.minecraft.data.models.model.TextureMapping.getBlockTexture;
+import static net.minecraft.client.data.models.model.ModelLocationUtils.getModelLocation;
+import static net.minecraft.client.data.models.model.TextureMapping.getBlockTexture;
 
 /**
  * 生成方块状态文件和方块模型：祭坛、石英方块、楼梯、台阶和花。其余的方块使用六面相同的方块模型。
@@ -80,34 +81,34 @@ public class BlockstateProvider extends velrondevs.botania.datagen.providers.mod
 		);
 		//Quartz
 		for (String variant : new String[] { "gaia", "elementium" }) {
-			ResourceLocation quartzId = prefix(variant + "_quartz_block");
-			Block quartz = BuiltInRegistries.BLOCK.get(quartzId);
+			Identifier quartzId = prefix(variant + "_quartz_block");
+			Block quartz = BuiltInRegistries.BLOCK.getValue(quartzId);
 			singleVariantBlockState(quartz,
 					ModelTemplates.CUBE_BOTTOM_TOP.create(quartz, TextureMapping.cubeBottomTop(quartz), this.modelOutput));
 
-			ResourceLocation pillarId = prefix(variant + "_quartz_pillar");
-			Block pillar = BuiltInRegistries.BLOCK.get(pillarId);
+			Identifier pillarId = prefix(variant + "_quartz_pillar");
+			Block pillar = BuiltInRegistries.BLOCK.getValue(pillarId);
 			var pillarModel = ModelTemplates.CUBE_COLUMN.create(pillar,
 					TextureMapping.column(getBlockTexture(pillar, ""), getBlockTexture(pillar, "_top")),
 					this.modelOutput);
-			this.blockstates.add(BlockModelGeneratorsAccessor.createAxisAlignedPillarBlock(pillar, pillarModel));
+			this.blockstates.add(BlockModelGenerators.createAxisAlignedPillarBlock(pillar, VariantBuilder.plain(pillarModel)));
 
-			ResourceLocation chiseledId = prefix("chiseled_" + variant + "_quartz_block");
-			Block chiseled = BuiltInRegistries.BLOCK.get(chiseledId);
+			Identifier chiseledId = prefix("chiseled_" + variant + "_quartz_block");
+			Block chiseled = BuiltInRegistries.BLOCK.getValue(chiseledId);
 			singleVariantBlockState(chiseled,
 					ModelTemplates.CUBE_COLUMN.create(chiseled, new TextureMapping()
 							.put(TextureSlot.SIDE, getBlockTexture(chiseled, ""))
 							.put(TextureSlot.END, getBlockTexture(chiseled, "_top")), this.modelOutput));
 
-			ResourceLocation bricksId = prefix(variant + "_quartz_bricks");
-			Block bricks = BuiltInRegistries.BLOCK.get(bricksId);
+			Identifier bricksId = prefix(variant + "_quartz_bricks");
+			Block bricks = BuiltInRegistries.BLOCK.getValue(bricksId);
 			singleVariantBlockState(bricks,
 					ModelTemplates.CUBE_ALL.create(bricks, TextureMapping.cube(bricks), this.modelOutput));
 
-			ResourceLocation smoothId = prefix("smooth_" + variant + "_quartz");
-			Block smooth = BuiltInRegistries.BLOCK.get(smoothId);
+			Identifier smoothId = prefix("smooth_" + variant + "_quartz");
+			Block smooth = BuiltInRegistries.BLOCK.getValue(smoothId);
 			singleVariantBlockState(smooth,
-					ModelTemplates.CUBE_ALL.create(smooth, TextureMapping.cube(prefix("block/" + variant + "_quartz_block_bottom")), this.modelOutput));
+					ModelTemplates.CUBE_ALL.create(smooth, TextureMapping.cube(texture(prefix("block/" + variant + "_quartz_block_bottom"))), this.modelOutput));
 
 			remainingBlocks.remove(quartz);
 			remainingBlocks.remove(pillar);
@@ -122,29 +123,29 @@ public class BlockstateProvider extends velrondevs.botania.datagen.providers.mod
 			boolean quartz = name.contains("quartz");
 			if (quartz) {
 				baseName = baseName + "_block";
-				ResourceLocation side = prefix("block/" + baseName + "_side");
-				//ResourceLocation bottom = prefix("block/" + baseName + "_bottom");
-				ResourceLocation top = prefix("block/" + baseName + "_top");
+				Identifier side = prefix("block/" + baseName + "_side");
+				//Identifier bottom = prefix("block/" + baseName + "_bottom");
+				Identifier top = prefix("block/" + baseName + "_top");
 				boolean smooth = name.contains("smooth");
 				if (!smooth) {
-					stairsBlock(new HashSet<>(), b, side, top, top);
+					stairsBlock(new HashSet<>(), b, texture(side), texture(top), texture(top));
 				} else {
-					ResourceLocation bottom = prefix("block/" + baseName.replace("smooth_", "") + "_bottom");
-					stairsBlock(new HashSet<>(), b, bottom, bottom, bottom);
+					Identifier bottom = prefix("block/" + baseName.replace("smooth_", "") + "_bottom");
+					stairsBlock(new HashSet<>(), b, texture(bottom), texture(bottom), texture(bottom));
 				}
 			} else {
 				var tex = prefix("block/" + baseName);
-				stairsBlock(new HashSet<>(), b, tex, tex, tex);
+				stairsBlock(new HashSet<>(), b, texture(tex), texture(tex), texture(tex));
 			}
 		});
 
 		takeAll(remainingBlocks, b -> b instanceof SlabBlock).forEach(slabBlock -> {
 			String name = BuiltInRegistries.BLOCK.getKey(slabBlock).getPath();
 			String baseName = name.substring(0, name.length() - velrondevs.botania.common.lib.LibBlockNames.SLAB_SUFFIX.length());
-			Block base = BuiltInRegistries.BLOCK.get(prefix(baseName));
+			Block base = BuiltInRegistries.BLOCK.getValue(prefix(baseName));
 			boolean quartz = name.contains("quartz");
 			if (quartz) {
-				base = BuiltInRegistries.BLOCK.get(prefix(baseName.replace("smooth_", "") + "_block"));
+				base = BuiltInRegistries.BLOCK.getValue(prefix(baseName.replace("smooth_", "") + "_block"));
 				var side = getBlockTexture(base, "_side");
 				var bottom = getBlockTexture(base, "_bottom");
 				var top = getBlockTexture(base, "_top");
@@ -165,7 +166,7 @@ public class BlockstateProvider extends velrondevs.botania.datagen.providers.mod
 		takeAll(remainingBlocks, b -> b instanceof WallBlock).forEach(wallBlock -> {
 			String name = BuiltInRegistries.BLOCK.getKey(wallBlock).getPath();
 			String baseName = name.substring(0, name.length() - velrondevs.botania.common.lib.LibBlockNames.WALL_SUFFIX.length());
-			Block base = BuiltInRegistries.BLOCK.get(prefix(baseName));
+			Block base = BuiltInRegistries.BLOCK.getValue(prefix(baseName));
 			var baseTexture = getBlockTexture(base);
 			wallBlock(new HashSet<>(), wallBlock, baseTexture);
 		});

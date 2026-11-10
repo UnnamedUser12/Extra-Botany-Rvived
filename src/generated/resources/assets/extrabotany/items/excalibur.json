@@ -1,0 +1,15 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "kind": "saber",
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "extrabotany:item/excalibur"
+    },
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "extrabotany:item/excalibur_saber"
+    },
+    "property": "extrabotany:flag"
+  }
+}

@@ -3,7 +3,7 @@ package velrondevs.extrabotany.datagen.providers.patchouli.page.patchouli;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.datagen.providers.patchouli.page.AbstractPage;
 
@@ -34,8 +34,8 @@ public class MultiBlockPage extends AbstractPage<MultiBlockPage> {
 	}
 
 	@Override
-	public ResourceLocation getType() {
-		return ResourceLocation.tryParse("patchouli:multiblock");
+	public Identifier getType() {
+		return Identifier.tryParse("patchouli:multiblock");
 	}
 
 	@Override

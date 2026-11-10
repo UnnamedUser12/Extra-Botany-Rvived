@@ -285,7 +285,7 @@ public class AnnoyingFlowerBlockEntity extends ExtraFunctionalFlowerBlockEntity 
 	@Override
 	public void readFromPacketNBT(CompoundTag cmp) {
 		super.readFromPacketNBT(cmp);
-		setCooldown(cmp.getInt(TAG_COOLDOWN));
-		setBoostLeft(cmp.getInt(TAG_FOOD));
+		setCooldown(cmp.getIntOr(TAG_COOLDOWN, 0));
+		setBoostLeft(cmp.getIntOr(TAG_FOOD, 0));
 	}
 }

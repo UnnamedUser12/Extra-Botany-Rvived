@@ -3,13 +3,16 @@ package velrondevs.extrabotany.client.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+
+import velrondevs.botania.client.render.entity.BotaniaPlayerLayer;
 
 import velrondevs.extrabotany.registry.ExtraBotanyItems;
 
@@ -22,24 +25,25 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>来源：ExtraMeteorP 1.16 {@code LayerFlamescion}。
  * <p>Source: ExtraMeteorP 1.16 {@code LayerFlamescion}.
  */
-public class FlamescionLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
+public class FlamescionLayer extends BotaniaPlayerLayer {
 	/**
 	 * 火环的图标模型。它必须在模型注册事件里登记。
 	 * The icon model of the fire ring. The model registration event must register it.
 	 */
-	public static final ResourceLocation RING_MODEL = prefix("icon/flamescionring");
+	public static final Identifier RING_MODEL = prefix("icon/flamescionring");
 
 	private static final float SCALE = 1.2F;
 	private static final float PULSE_PERIOD_TICKS = 20F;
 	private static final float SPIN_DEGREES_PER_TICK = 0.2F;
 
-	public FlamescionLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderer) {
+	public FlamescionLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
 	}
 
 	@Override
-	public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player,
-			float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
+	protected void render(PoseStack pose, MultiBufferSource buffers, SubmitNodeCollector collector, int light, AbstractClientPlayer player,
+			float partialTick) {
+		float ageInTicks = player.tickCount + partialTick;
 		if (player.isInvisible() || !player.getMainHandItem().is(ExtraBotanyItems.flamescionWeapon)) {
 			return;
 		}

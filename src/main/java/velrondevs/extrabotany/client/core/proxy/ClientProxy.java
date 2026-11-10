@@ -3,7 +3,7 @@ package velrondevs.extrabotany.client.core.proxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 
 import velrondevs.extrabotany.common.proxy.Proxy;
@@ -18,7 +18,11 @@ public class ClientProxy extends velrondevs.botania.client.core.proxy.ClientProx
 	@Override
 	public void displayClientMessage(Component chatComponent, boolean actionBar) {
 		if (Minecraft.getInstance().player != null) {
-			Minecraft.getInstance().player.displayClientMessage(chatComponent, actionBar);
+			if (actionBar) {
+				Minecraft.getInstance().player.sendOverlayMessage(chatComponent);
+			} else {
+				Minecraft.getInstance().player.sendSystemMessage(chatComponent);
+			}
 		}
 	}
 
@@ -27,7 +31,7 @@ public class ClientProxy extends velrondevs.botania.client.core.proxy.ClientProx
 	 * Patchouli keeps the state of the advancements: it records all advancements that the server sends, and the unlock of lexicon entries also uses it.
 	 */
 	@Override
-	public boolean hasAdvancementOnClient(ResourceLocation id) {
+	public boolean hasAdvancementOnClient(Identifier id) {
 		return ClientAdvancements.hasDone(id.toString());
 	}
 
@@ -41,7 +45,7 @@ public class ClientProxy extends velrondevs.botania.client.core.proxy.ClientProx
 		if (player.getDeltaMovement().y() > 0 && !player.onClimbable()) {
 			return;
 		}
-		if (player.input.jumping && player.horizontalCollision) {
+		if (player.input.keyPresses.jump() && player.horizontalCollision) {
 			player.jumpFromGround();
 		}
 	}

@@ -3,7 +3,7 @@ package velrondevs.extrabotany.datagen.providers.recipes;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 
@@ -29,8 +29,8 @@ public class OmnivioletProvider extends ExtraBotanyRecipeProvider {
 		consumer.accept(id("written_book"), new OmniVioletsRecipe(Ingredient.of(Items.WRITTEN_BOOK), 65), null);
 	}
 
-	private static ResourceLocation id(String id) {
-		return prefix("omniviolet/" + id);
+	private static net.minecraft.resources.ResourceKey<net.minecraft.world.item.crafting.Recipe<?>> id(String id) {
+		return key(prefix("omniviolet/" + id));
 	}
 
 	@Override

@@ -6,11 +6,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.advancements.critereon.EntityTypePredicate;
+import net.minecraft.advancements.criterion.EntityTypePredicate;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+
+import velrondevs.botania.api.recipe.BotaniaRecipe;
+import velrondevs.botania.common.crafting.BotaniaRecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 
 import velrondevs.extrabotany.api.recipe.EdelweissRecipe;
@@ -34,7 +37,7 @@ public class EdelweissRecipes implements EdelweissRecipe {
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<? extends BotaniaRecipe> getSerializer() {
 		return ExtraBotanyRecipeTypes.EDELWEISS_SERIALIZER;
 	}
 
@@ -48,7 +51,7 @@ public class EdelweissRecipes implements EdelweissRecipe {
 		return outputMana;
 	}
 
-	public static class Serializer implements RecipeSerializer<EdelweissRecipes> {
+	public static class Serializer implements BotaniaRecipeSerializer<EdelweissRecipes> {
 		private static final MapCodec<EdelweissRecipes> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 				EntityTypePredicate.CODEC.fieldOf("input").forGetter(EdelweissRecipes::getInput),
 				Codec.INT.fieldOf("outputMana").forGetter(EdelweissRecipes::getManaOutput)

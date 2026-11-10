@@ -4,12 +4,9 @@
     "type": "block",
     "block": "extrabotany:dimension_catalyst"
   },
-  "input": {
-    "item": "minecraft:iron_ore"
-  },
+  "input": "minecraft:iron_ore",
   "mana": 2000,
   "output": {
-    "count": 1,
     "id": "minecraft:nether_quartz_ore"
   }
 }

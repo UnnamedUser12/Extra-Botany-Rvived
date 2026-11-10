@@ -3,15 +3,10 @@
   "category": "misc",
   "group": "extrabotany:floating_flower",
   "ingredients": [
-    {
-      "tag": "botania:floating_flowers"
-    },
-    {
-      "item": "extrabotany:blood_enchantress"
-    }
+    "#botania:floating_flowers",
+    "extrabotany:blood_enchantress"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:floating_blood_enchantress"
   }
 }

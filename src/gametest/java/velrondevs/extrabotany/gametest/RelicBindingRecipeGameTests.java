@@ -3,15 +3,13 @@ package velrondevs.extrabotany.gametest;
 import velrondevs.extrabotany.common.crafting.recipe.DasRheingoldChangeSoulBoundRecipe;
 import velrondevs.extrabotany.common.helper.ItemNBTHelper;
 import velrondevs.extrabotany.registry.ExtraBotanyItems;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 import velrondevs.botania.api.item.Relic;
 import velrondevs.botania.registry.BotaniaItems;
 
@@ -26,7 +24,7 @@ public final class RelicBindingRecipeGameTests {
 
 	@GameTest(template = "empty", timeoutTicks = 20)
 	public static void rheingoldChangesActualRelicOwnerAndSurvivesSave(GameTestHelper helper) {
-		var recipe = new DasRheingoldChangeSoulBoundRecipe(CraftingBookCategory.EQUIPMENT);
+		var recipe = new DasRheingoldChangeSoulBoundRecipe();
 		var oldOwner = helper.makeMockPlayer(GameType.SURVIVAL);
 		oldOwner.setUUID(UUID.fromString("11111111-1111-1111-1111-111111111111"));
 		var newOwner = helper.makeMockPlayer(GameType.SURVIVAL);
@@ -44,9 +42,9 @@ public final class RelicBindingRecipeGameTests {
 				ItemStack beforeGold = gold.copy();
 				var input = CraftingInput.of(2, 1, List.of(inputRelic, gold));
 				helper.assertTrue(recipe.matches(input, helper.getLevel()), "Rheingold rejected a registered relic");
-				ItemStack result = recipe.assemble(input, helper.getLevel().registryAccess());
-				result = ItemStack.parseOptional(helper.getLevel().registryAccess(),
-						(CompoundTag) result.save(helper.getLevel().registryAccess()));
+				ItemStack result = recipe.assemble(input);
+				result = TestNbt.parseStack(helper.getLevel().registryAccess(),
+						TestNbt.saveStack(helper.getLevel().registryAccess(), result));
 				Relic actual = velrondevs.botania.xplat.XplatAbstractions.INSTANCE.findRelic(result);
 				helper.assertTrue(actual != null && !actual.isRightPlayer(oldOwner),
 						"Rheingold changed only its legacy tag and left the actual owner bound");
@@ -69,14 +67,14 @@ public final class RelicBindingRecipeGameTests {
 
 	@GameTest(template = "empty", timeoutTicks = 20)
 	public static void malformedRheingoldBindingDoesNotMutateCraftingInput(GameTestHelper helper) {
-		var recipe = new DasRheingoldChangeSoulBoundRecipe(CraftingBookCategory.EQUIPMENT);
+		var recipe = new DasRheingoldChangeSoulBoundRecipe();
 		ItemStack relic = new ItemStack(ExtraBotanyItems.excalibur);
 		velrondevs.botania.xplat.XplatAbstractions.INSTANCE.findRelic(relic).bindToUUID(UUID.fromString("11111111-1111-1111-1111-111111111111"));
 		ItemStack gold = new ItemStack(ExtraBotanyItems.dasRheingold);
 		ItemNBTHelper.setString(gold, "soulbindUUID", "invalid-legacy-owner");
 		ItemStack beforeGold = gold.copy();
 		var input = CraftingInput.of(2, 1, List.of(relic, gold));
-		ItemStack result = recipe.assemble(input, helper.getLevel().registryAccess());
+		ItemStack result = recipe.assemble(input);
 		helper.assertTrue(!result.isEmpty() && velrondevs.botania.xplat.XplatAbstractions.INSTANCE.findRelic(result).getSoulbindUUID() == null,
 				"Malformed Rheingold binding failed to produce an unbound relic");
 		helper.assertTrue(ItemStack.matches(gold, beforeGold), "Reading malformed binding changed the crafting grid");

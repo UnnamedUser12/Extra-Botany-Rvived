@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "I": {
-      "tag": "botania:elementium_ingots"
-    },
-    "S": {
-      "item": "minecraft:shield"
-    }
+    "I": "#botania:elementium_ingots",
+    "S": "minecraft:shield"
   },
   "pattern": [
     "I I",
@@ -15,7 +11,6 @@
     " I "
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:elementium_shield"
   }
 }

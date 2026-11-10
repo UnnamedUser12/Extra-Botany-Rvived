@@ -10,7 +10,8 @@ import dev.latvian.mods.kubejs.recipe.component.RecipeComponentType;
 import dev.latvian.mods.rhino.type.TypeInfo;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,18 +29,14 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>A script can give a block ID ({@code 'minecraft:obsidian'}), a block with a state ({@code 'minecraft:furnace[lit=true]'}), a block tag that starts with {@code #}, or an object that is the same as the data pack JSON.
  */
 public final class BlockStateComponent implements RecipeComponent<StateIngredient> {
-	public static final RecipeComponentType<StateIngredient> TYPE =
-			RecipeComponentType.unit(prefix("state_ingredient"), BlockStateComponent::new);
+	public static final ResourceKey<RecipeComponentType<?>> TYPE = RecipeComponentType.key(prefix("state_ingredient"));
+	public static final BlockStateComponent INSTANCE = new BlockStateComponent();
 
-	private final RecipeComponentType<StateIngredient> type;
-
-	private BlockStateComponent(RecipeComponentType<StateIngredient> type) {
-		this.type = type;
-	}
+	private BlockStateComponent() {}
 
 	@Override
-	public RecipeComponentType<?> type() {
-		return type;
+	public ResourceKey<RecipeComponentType<?>> type() {
+		return TYPE;
 	}
 
 	@Override
@@ -66,13 +63,13 @@ public final class BlockStateComponent implements RecipeComponent<StateIngredien
 		if (from instanceof CharSequence chars) {
 			String value = chars.toString();
 			if (value.startsWith("#")) {
-				ResourceLocation id = ResourceLocation.tryParse(value.substring(1));
+				Identifier id = Identifier.tryParse(value.substring(1));
 				if (id == null) {
 					throw new IllegalArgumentException("Invalid block tag: " + value);
 				}
 				return StateIngredientHelper.of(TagKey.create(Registries.BLOCK, id));
 			}
-			return StateIngredientHelper.of(BlockWrapper.parseBlockState(context.registries(), value));
+			return StateIngredientHelper.of(BlockWrapper.parseBlockState(context.cx(), value));
 		}
 		if (from instanceof JsonElement json) {
 			return StateIngredientHelper.CODEC.parse(context.ops().json(), json).getOrThrow();

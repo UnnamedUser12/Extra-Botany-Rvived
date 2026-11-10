@@ -3,5 +3,8 @@
   "flower": {
     "parent": "extrabotany:block/enchanter"
   },
-  "loader": "botania:floating_flower"
+  "loader": "botania:floating_flower",
+  "textures": {
+    "particle": "extrabotany:block/enchanter"
+  }
 }

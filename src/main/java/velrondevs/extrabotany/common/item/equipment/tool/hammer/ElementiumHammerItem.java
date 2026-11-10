@@ -3,7 +3,7 @@ package velrondevs.extrabotany.common.item.equipment.tool.hammer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ToolMaterial;
 import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 
 import velrondevs.botania.common.handler.PixieHandler;
@@ -21,7 +21,7 @@ public class ElementiumHammerItem extends ManasteelHammerItem {
 
 	private static final int MANA_PER_DAMAGE = 70;
 
-	public ElementiumHammerItem(Tier tier, int attackDamageModifier, float attackSpeedModifier, Properties properties) {
+	public ElementiumHammerItem(ToolMaterial tier, int attackDamageModifier, float attackSpeedModifier, Properties properties) {
 		super(tier, attackDamageModifier, attackSpeedModifier, properties);
 	}
 

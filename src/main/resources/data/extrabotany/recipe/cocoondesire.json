@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "A": {
-      "tag": "c:ingots/terrasteel"
-    },
-    "B": {
-      "item": "extrabotany:spirit_fuel"
-    },
-    "C": {
-      "item": "extrabotany:hero_medal"
-    }
+    "A": "#c:ingots/terrasteel",
+    "B": "extrabotany:spirit_fuel",
+    "C": "extrabotany:hero_medal"
   },
   "pattern": [
     "ABA",

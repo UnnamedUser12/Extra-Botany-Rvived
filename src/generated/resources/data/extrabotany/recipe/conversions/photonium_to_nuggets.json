@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "tag": "extrabotany:photonium_ingots"
-    }
+    "#extrabotany:photonium_ingots"
   ],
   "result": {
     "count": 9,

@@ -3,12 +3,12 @@ package velrondevs.extrabotany.gametest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Blocks;
 
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.botania.api.block_entity.GeneratingFlowerBlockEntity;
 
@@ -52,8 +52,8 @@ public final class ExtraBotanyGameTests {
 		var stack = new net.minecraft.world.item.ItemStack(
 				velrondevs.extrabotany.registry.ExtraBotanyItems.excalibur);
 		velrondevs.extrabotany.common.helper.ItemNBTHelper.setInt(stack, "audit_value", 37);
-		var restored = net.minecraft.world.item.ItemStack.parseOptional(helper.getLevel().registryAccess(),
-				(net.minecraft.nbt.CompoundTag) stack.save(helper.getLevel().registryAccess()));
+		var registries = helper.getLevel().registryAccess();
+		var restored = BlockEntityIO.parseStack(registries, BlockEntityIO.saveStack(registries, stack));
 		helper.assertTrue(velrondevs.extrabotany.common.helper.ItemNBTHelper.getInt(restored, "audit_value", -1) == 37,
 				"Legacy custom data was lost on registry-aware ItemStack save/load");
 		var copy = restored.copy();
@@ -71,18 +71,18 @@ public final class ExtraBotanyGameTests {
 		helper.setBlock(BOOSTED_FLOWER_POS, hydroangeas);
 		helper.setBlock(NORMAL_FLOWER_POS, hydroangeas);
 		for (BlockPos pos : new BlockPos[] { BOOSTED_FLOWER_POS, NORMAL_FLOWER_POS }) {
-			var flower = helper.getBlockEntity(pos);
+			var flower = helper.getBlockEntity(pos, net.minecraft.world.level.block.entity.BlockEntity.class);
 			var tag = flower.saveWithoutMetadata(helper.getLevel().registryAccess());
 			tag.putInt("passiveDecayTicks", 72000);
-			flower.loadWithComponents(tag, helper.getLevel().registryAccess());
+			BlockEntityIO.load(flower, tag);
 		}
 		helper.runAfterDelay(3, () -> {
 			helper.assertTrue(helper.getBlockState(BOOSTED_FLOWER_POS).is(hydroangeas),
 					"Enchanted soil failed to protect Hydroangeas at the decay boundary");
 			helper.assertTrue(!helper.getBlockState(NORMAL_FLOWER_POS).is(hydroangeas),
 					"Control Hydroangeas did not decay");
-			helper.assertTrue(helper.getBlockEntity(BOOSTED_FLOWER_POS)
-					.saveWithoutMetadata(helper.getLevel().registryAccess()).getInt("passiveDecayTicks") == 72000,
+			helper.assertTrue(helper.getBlockEntity(BOOSTED_FLOWER_POS, net.minecraft.world.level.block.entity.BlockEntity.class)
+					.saveWithoutMetadata(helper.getLevel().registryAccess()).getIntOr("passiveDecayTicks", 0) == 72000,
 					"Enchanted soil changed the stored decay age");
 			helper.succeed();
 		});
@@ -94,13 +94,13 @@ public final class ExtraBotanyGameTests {
 				ExtraBotanyDamageTypes.EXCALIBUR_BEAM_DAMAGE, ExtraBotanyDamageTypes.JINGWEI_PUNCH_DAMAGE,
 				ExtraBotanyDamageTypes.REVERSE_HEAL_DAMAGE, ExtraBotanyDamageTypes.BACKFIRE_DAMAGE)) {
 			helper.assertTrue(helper.getLevel().registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).get(key).isPresent(),
-					"Missing damage type: " + key.location());
+					"Missing damage type: " + key.identifier());
 		}
 		helper.assertTrue(
 				BuiltInRegistries.BLOCK.getKey(ExtraBotanyBlocks.enchantedSoil).equals(prefix("enchanted_soil")),
 				"Enchanted soil is not registered under the stable ExtraBotany id");
 		helper.assertTrue(
-				BuiltInRegistries.SOUND_EVENT.getHolder(ExtraBotanySounds.ARMOR_EQUIP_IDOL.value().getLocation()).isPresent(),
+				BuiltInRegistries.SOUND_EVENT.get(ExtraBotanySounds.ARMOR_EQUIP_IDOL.value().location()).isPresent(),
 				"ExtraBotany armor equip sound holder is not bound");
 		helper.assertTrue(
 				helper.getLevel().registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
@@ -111,15 +111,15 @@ public final class ExtraBotanyGameTests {
 
 	@GameTest(template = "empty", timeoutTicks = 20)
 	public static void enchantedSoilDoublesGroundFlowerTicks(GameTestHelper helper) {
-		helper.getLevel().setDayTime(1000);
+		helper.setTime(1000);
 		helper.setBlock(BOOSTED_SOIL_POS, ExtraBotanyBlocks.enchantedSoil);
 		helper.setBlock(NORMAL_SOIL_POS, Blocks.GRASS_BLOCK);
 		helper.setBlock(BOOSTED_FLOWER_POS, ExtraBotanyFlowerBlocks.sunshineLily);
 		helper.setBlock(NORMAL_FLOWER_POS, ExtraBotanyFlowerBlocks.sunshineLily);
 
 		helper.runAfterDelay(3, () -> {
-			GeneratingFlowerBlockEntity boosted = helper.getBlockEntity(BOOSTED_FLOWER_POS);
-			GeneratingFlowerBlockEntity normal = helper.getBlockEntity(NORMAL_FLOWER_POS);
+			GeneratingFlowerBlockEntity boosted = helper.getBlockEntity(BOOSTED_FLOWER_POS, GeneratingFlowerBlockEntity.class);
+			GeneratingFlowerBlockEntity normal = helper.getBlockEntity(NORMAL_FLOWER_POS, GeneratingFlowerBlockEntity.class);
 			helper.assertTrue(boosted.getMana() > 0,
 					"Ground flower over enchanted soil did not receive its accelerated tick");
 			helper.assertTrue(normal.getMana() == 0,

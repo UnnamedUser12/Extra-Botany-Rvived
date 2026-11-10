@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
@@ -19,8 +19,8 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 import velrondevs.botania.api.mana.BurstProperties;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +32,13 @@ public final class FullLegacyGameTests {
     public static void allLegacyEntitiesConstructAndReload(GameTestHelper helper) {
         int count = 0;
         for (var entry : BuiltInRegistries.ENTITY_TYPE.entrySet()) {
-            if (!entry.getKey().location().getNamespace().equals("extrabotany")) continue;
-            var entity = entry.getValue().create(helper.getLevel());
-            helper.assertTrue(entity != null, "Entity factory returned null: " + entry.getKey().location());
+            if (!entry.getKey().identifier().getNamespace().equals("extrabotany")) continue;
+            var entity = entry.getValue().create(helper.getLevel(), net.minecraft.world.entity.EntitySpawnReason.LOAD);
+            helper.assertTrue(entity != null, "Entity factory returned null: " + entry.getKey().identifier());
             entity.setPos(helper.absolutePos(new BlockPos(2, 5, 2)).getCenter());
-            var saved = new CompoundTag(); entity.save(saved);
-            var loaded = net.minecraft.world.entity.EntityType.loadEntityRecursive(saved, helper.getLevel(), restored -> restored);
-            helper.assertTrue(loaded != null && loaded.getType() == entity.getType() && loaded.getUUID().equals(entity.getUUID()), "Entity reload lost identity: " + entry.getKey().location());
+            var saved = TestNbt.saveEntityWithId(helper.getLevel().registryAccess(), entity);
+            var loaded = net.minecraft.world.entity.EntityType.loadEntityRecursive(saved, helper.getLevel(), net.minecraft.world.entity.EntitySpawnReason.LOAD, restored -> restored);
+            helper.assertTrue(loaded != null && loaded.getType() == entity.getType() && loaded.getUUID().equals(entity.getUUID()), "Entity reload lost identity: " + entry.getKey().identifier());
             count++;
         }
         helper.assertTrue(count >= 34, "Old saves use 34 entity types and all of them must exist, found " + count);
@@ -50,7 +50,7 @@ public final class FullLegacyGameTests {
         var flower = new ItemStack(velrondevs.extrabotany.registry.ExtraBotanyFlowerBlocks.bellflower);
         for (int i = 0; i < 20; i++) helper.assertTrue(velrondevs.extrabotany.common.item.KingGardenItem.addFlower(garden, flower), "Garden refused slot " + i);
         helper.assertTrue(!velrondevs.extrabotany.common.item.KingGardenItem.addFlower(garden, flower), "Garden exceeded twenty slots");
-        var loaded = ItemStack.parseOptional(helper.getLevel().registryAccess(), (CompoundTag) garden.save(helper.getLevel().registryAccess()));
+        var loaded = TestNbt.parseStack(helper.getLevel().registryAccess(), TestNbt.saveStack(helper.getLevel().registryAccess(), garden));
         helper.assertTrue(velrondevs.extrabotany.common.item.KingGardenItem.getTypes(loaded).length == 20
                 && java.util.Arrays.stream(velrondevs.extrabotany.common.item.KingGardenItem.getTypes(loaded)).allMatch(type -> type == 15), "Garden flower configuration changed on reload");
         helper.succeed();
@@ -67,9 +67,9 @@ public final class FullLegacyGameTests {
             var components = new CompoundTag(); var payload = new CompoundTag();
             payload.putString("legacy_marker", "opaque data survives"); payload.putIntArray("old_array", new int[] {1, -3, 99});
             components.put("minecraft:custom_data", payload); old.put("components", components);
-            var stack = ItemStack.parseOptional(helper.getLevel().registryAccess(), old);
+            var stack = TestNbt.parseStack(helper.getLevel().registryAccess(), old);
             helper.assertTrue(!stack.isEmpty() && stack.getCount() == 4 && BuiltInRegistries.ITEM.getKey(stack.getItem()).toString().equals("extrabotany:" + name), "Legacy stack lost: " + name);
-            var restored = ItemStack.parseOptional(helper.getLevel().registryAccess(), (CompoundTag) stack.save(helper.getLevel().registryAccess()));
+            var restored = TestNbt.parseStack(helper.getLevel().registryAccess(), TestNbt.saveStack(helper.getLevel().registryAccess(), stack));
             helper.assertTrue(ItemStack.matches(stack, restored) && restored.get(DataComponents.CUSTOM_DATA).copyTag().equals(payload), "Components changed: " + name);
         }
         var player = helper.makeMockPlayer(GameType.SURVIVAL);
@@ -78,10 +78,10 @@ public final class FullLegacyGameTests {
         player.setItemInHand(InteractionHand.MAIN_HAND, binder); player.setShiftKeyDown(true);
         var position = helper.absolutePos(new BlockPos(2, 1, 2));
         binder.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, new BlockHitResult(position.getCenter(), Direction.UP, position, false)));
-        var restored = ItemStack.parseOptional(helper.getLevel().registryAccess(), (CompoundTag) binder.save(helper.getLevel().registryAccess()));
+        var restored = TestNbt.parseStack(helper.getLevel().registryAccess(), TestNbt.saveStack(helper.getLevel().registryAccess(), binder));
         var tag = restored.get(DataComponents.CUSTOM_DATA).copyTag();
-        helper.assertTrue(tag.getInt("posx") == position.getX() && tag.getInt("posy") == position.getY() && tag.getInt("posz") == position.getZ()
-                && tag.getString("dim").equals(helper.getLevel().dimension().location().toString()) && tag.getString("unknown").equals("retain"), "Binder mutation/reload lost coordinates or unknown field");
+        helper.assertTrue(tag.getIntOr("posx", 0) == position.getX() && tag.getIntOr("posy", 0) == position.getY() && tag.getIntOr("posz", 0) == position.getZ()
+                && tag.getStringOr("dim", "").equals(helper.getLevel().dimension().identifier().toString()) && tag.getStringOr("unknown", "").equals("retain"), "Binder mutation/reload lost coordinates or unknown field");
         helper.succeed();
     }
 
@@ -112,7 +112,7 @@ public final class FullLegacyGameTests {
         var drink = new ItemStack(ExtraBotanyItems.manaDrink);
         var bottle = drink.finishUsingItem(helper.getLevel(), player);
         helper.assertTrue(bottle.is(ExtraBotanyItems.manaGlassBottle) && player.getHealth() == 15, "Drink lost healing or empty bottle");
-        for (var effect : List.of(MobEffects.DAMAGE_RESISTANCE, MobEffects.DAMAGE_BOOST, MobEffects.MOVEMENT_SPEED, MobEffects.JUMP))
+        for (var effect : List.of(MobEffects.RESISTANCE, MobEffects.STRENGTH, MobEffects.SPEED, MobEffects.JUMP_BOOST))
             helper.assertTrue(player.getEffect(effect) != null && player.getEffect(effect).getDuration() == 1200, "Drink effect missing");
         var burst = new BurstProperties(100, 50, 2, .5F, 2, 0);
         new SuperconductorLens().apply(new ItemStack(ExtraBotanyItems.lensSuperconductor), burst);

@@ -60,7 +60,7 @@ public class FrostStarItem extends BaubleItem implements BlockChangedListenerBau
 				// There is not sufficient mana. The remaining targets also cannot be paid for, so stop.
 				break;
 			}
-			target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, SLOW_DURATION_TICKS, SLOW_AMPLIFIER));
+			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SLOW_DURATION_TICKS, SLOW_AMPLIFIER));
 		}
 	}
 

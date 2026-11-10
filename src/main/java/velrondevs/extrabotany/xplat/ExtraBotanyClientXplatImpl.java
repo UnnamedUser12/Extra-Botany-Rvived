@@ -1,6 +1,6 @@
 package velrondevs.extrabotany.xplat;
 
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 
 import velrondevs.extrabotany.network.ExtraBotanyPacket;
@@ -13,6 +13,6 @@ import velrondevs.extrabotany.xplat.ExClientXplatAbstractions;
 public class ExtraBotanyClientXplatImpl implements ExClientXplatAbstractions {
 	@Override
 	public void sendToServer(ExtraBotanyPacket packet) {
-		PacketDistributor.sendToServer(packet);
+		ClientPacketDistributor.sendToServer(packet);
 	}
 }

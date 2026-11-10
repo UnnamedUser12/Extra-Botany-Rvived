@@ -1,5 +1,8 @@
 package velrondevs.extrabotany.common.item.equipment.armor.shadow_warrior;
 
+import net.minecraft.world.item.equipment.ArmorType;
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
@@ -16,12 +19,12 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 public class ShadowWarriorHelmetItem extends ShadowWarriorArmorItem {
 
 	public ShadowWarriorHelmetItem(Properties properties) {
-		super(Type.HELMET, properties);
+		super(ArmorType.HELMET, properties);
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
-		super.inventoryTick(stack, world, entity, slot, selected);
+	public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		super.inventoryTick(stack, world, entity, eqSlot);
 	}
 
 	public static class EventHandler {

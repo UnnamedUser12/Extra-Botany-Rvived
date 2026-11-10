@@ -2,7 +2,7 @@ package velrondevs.extrabotany.datagen.providers.patchouli.page.botania;
 
 import com.demonwav.mcdev.annotations.Translatable;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.datagen.providers.patchouli.page.AbstractPage;
 
@@ -29,7 +29,7 @@ public class TerraPlatePage extends AbstractPage<TerraPlatePage> {
 	}
 
 	@Override
-	public ResourceLocation getType() {
+	public Identifier getType() {
 		return prefixBotania("terrasteel");
 	}
 }

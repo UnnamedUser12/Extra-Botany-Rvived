@@ -1,5 +1,6 @@
 package velrondevs.extrabotany.common.bossevents;
 
+import net.minecraft.util.RandomSource;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -25,7 +26,7 @@ public class ServerColorfulBossEvent extends ColorfulBossEvent {
 	private boolean visible;
 
 	public ServerColorfulBossEvent(Component name, BossEvent.BossBarColor color, BossEvent.BossBarOverlay overlay) {
-		super(Mth.createInsecureUUID(), name, color, overlay);
+		super(Mth.createInsecureUUID(RandomSource.create()), name, color, overlay);
 		this.visible = true;
 	}
 

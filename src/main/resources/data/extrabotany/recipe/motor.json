@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "A": {
-      "tag": "extrabotany:aerialite_ingots"
-    },
-    "H": {
-      "item": "extrabotany:hero_medal"
-    },
-    "P": {
-      "tag": "extrabotany:photonium_ingots"
-    }
+    "A": "#extrabotany:aerialite_ingots",
+    "H": "extrabotany:hero_medal",
+    "P": "#extrabotany:photonium_ingots"
   },
   "pattern": [
     "PAP",

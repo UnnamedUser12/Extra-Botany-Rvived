@@ -1,19 +1,12 @@
 {
   "type": "botania:terra_plate",
   "ingredients": [
-    {
-      "item": "botania:ender_air_bottle"
-    },
-    {
-      "item": "botania:dragonstone"
-    },
-    {
-      "item": "minecraft:phantom_membrane"
-    }
+    "botania:ender_air_bottle",
+    "botania:dragonstone",
+    "minecraft:phantom_membrane"
   ],
   "mana": 500000,
   "result": {
-    "count": 1,
     "id": "extrabotany:aerialite_ingot"
   }
 }

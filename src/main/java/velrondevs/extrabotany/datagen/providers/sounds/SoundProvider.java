@@ -2,10 +2,9 @@ package velrondevs.extrabotany.datagen.providers.sounds;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.common.data.SoundDefinition;
 import net.neoforged.neoforge.common.data.SoundDefinitionsProvider;
 
@@ -31,15 +30,15 @@ import static velrondevs.extrabotany.registry.ExtraBotanySounds.*;
  */
 public class SoundProvider extends SoundDefinitionsProvider {
 
-	public SoundProvider(PackOutput output, ExistingFileHelper helper) {
-		super(output, LibMisc.MOD_ID, helper);
+	public SoundProvider(PackOutput output) {
+		super(output, LibMisc.MOD_ID);
 	}
 
 	@Override
 	public void registerSounds() {
 		Set<SoundEvent> remaining = new LinkedHashSet<>();
 		for (SoundEvent event : BuiltInRegistries.SOUND_EVENT) {
-			if (LibMisc.MOD_ID.equals(event.getLocation().getNamespace())) {
+			if (LibMisc.MOD_ID.equals(event.location().getNamespace())) {
 				remaining.add(event);
 			}
 		}
@@ -69,7 +68,7 @@ public class SoundProvider extends SoundDefinitionsProvider {
 		for (SoundEvent event : List.of(EXCALIBUR_ATTACK, FAILNAUGHT_SHOOT)) {
 			remaining.remove(event);
 			add(event, definition().subtitle(subtitle(event))
-					.with(sound(BotaniaSounds.terraBlade.getLocation()).volume(0.4F).pitch(1.4F)));
+					.with(sound(BotaniaSounds.terraBlade.location()).volume(0.4F).pitch(1.4F)));
 		}
 
 		for (SoundEvent event : remaining) {
@@ -79,7 +78,7 @@ public class SoundProvider extends SoundDefinitionsProvider {
 
 	private void borrow(Set<SoundEvent> remaining, SoundEvent event, SoundEvent source, float volume) {
 		remaining.remove(event);
-		SoundDefinition.Sound sound = sound(source.getLocation(), SoundDefinition.SoundType.EVENT);
+		SoundDefinition.Sound sound = sound(source.location(), SoundDefinition.SoundType.EVENT);
 		if (volume != 1F) {
 			sound.volume(volume);
 		}
@@ -87,15 +86,15 @@ public class SoundProvider extends SoundDefinitionsProvider {
 	}
 
 	private static String subtitle(SoundEvent event) {
-		return "subtitles." + event.getLocation();
+		return "subtitles." + event.location();
 	}
 
 	/**
 	 * 声音事件的默认文件：把名字里的点换成斜杠。
 	 * The default file of a sound event: the dots in the name become slashes.
 	 */
-	private static ResourceLocation filePath(SoundEvent event) {
-		ResourceLocation id = event.getLocation();
-		return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), id.getPath().replace('.', '/'));
+	private static Identifier filePath(SoundEvent event) {
+		Identifier id = event.location();
+		return Identifier.fromNamespaceAndPath(id.getNamespace(), id.getPath().replace('.', '/'));
 	}
 }

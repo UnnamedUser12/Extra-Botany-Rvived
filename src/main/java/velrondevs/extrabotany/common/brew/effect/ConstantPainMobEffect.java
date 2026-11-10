@@ -4,13 +4,11 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.neoforge.common.EffectCure;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import velrondevs.extrabotany.common.handler.DamageHandler;
 import velrondevs.extrabotany.registry.ExtraBotanyMobEffects;
 
-import java.util.Set;
 
 /**
  * Constant Pain. Each time the creature is hurt, it takes extra true damage equal to the level of the effect.
@@ -37,10 +35,5 @@ public class ConstantPainMobEffect extends MobEffect {
 		} finally {
 			APPLYING.set(false);
 		}
-	}
-
-	@Override
-	public void fillEffectCures(Set<EffectCure> cures, MobEffectInstance effectInstance) {
-		// No cure is added, so milk and other items cannot remove this effect.
 	}
 }

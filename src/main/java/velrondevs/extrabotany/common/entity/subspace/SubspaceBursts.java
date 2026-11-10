@@ -100,7 +100,7 @@ public final class SubspaceBursts {
 			if (living.invulnerableTime != 0 || burst.isFake()) {
 				continue;
 			}
-			boolean boss = living.getType().is(Tags.EntityTypes.BOSSES) || living instanceof Gaia;
+			boolean boss = living.getType().builtInRegistryHolder().is(Tags.EntityTypes.BOSSES) || living instanceof Gaia;
 			living.hurt(BotaniaDamageTypes.Sources.relicDamage(entity.level().registryAccess()), fromBoss ? 10F : boss ? 22F : 16F);
 			DamageHandler.INSTANCE.dealTrueDamage(owner, living, fromBoss ? 4F : boss ? 9F : 7F);
 			living.invulnerableTime = HIT_INVULNERABLE_TICKS;

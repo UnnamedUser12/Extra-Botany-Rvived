@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "S": {
-      "tag": "extrabotany:shadowium_ingots"
-    },
-    "W": {
-      "item": "botania:livingwood_twig"
-    }
+    "S": "#extrabotany:shadowium_ingots",
+    "W": "botania:livingwood_twig"
   },
   "pattern": [
     "S",

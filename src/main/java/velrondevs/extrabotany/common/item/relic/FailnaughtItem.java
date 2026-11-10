@@ -1,5 +1,9 @@
 package velrondevs.extrabotany.common.item.relic;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -9,11 +13,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.entity.monster.skeleton.Skeleton;
+import net.minecraft.world.item.BowItem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
@@ -33,7 +38,7 @@ import velrondevs.botania.api.mana.LensEffectItem;
 import velrondevs.botania.api.mana.ManaItemHandler;
 import velrondevs.botania.common.entity.ManaBurstEntity;
 import velrondevs.botania.common.helper.PlayerHelper;
-import velrondevs.botania.common.item.equipment.tool.bow.LivingwoodBowItem;
+import velrondevs.botania.common.item.equipment.CustomDamageItem;
 import velrondevs.botania.common.item.relic.RelicImpl;
 
 import velrondevs.extrabotany.common.entity.MagicArrowEntity;
@@ -50,7 +55,7 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * 百中弓。遗物。它不使用箭，而是消耗魔力射出魔力脉冲。拉弓越久，脉冲的等级越高、伤害越大、消耗的魔力越多。它支持力量、冲击、火矢、多重射击和快速装填附魔，每种附魔在生效时额外消耗魔力。
  * Failnaught. A relic. It does not use arrows. It uses mana to shoot a mana burst. A longer draw gives a higher tier of the burst, more damage and a higher mana cost. It supports the Power, Punch, Flame, Multishot and Quick Charge enchantments, and each enchantment uses more mana when it takes effect.
  */
-public class FailnaughtItem extends LivingwoodBowItem implements LensEffectItem {
+public class FailnaughtItem extends BowItem implements CustomDamageItem, LensEffectItem {
 	private static final float ADVANCEMENT_REQUIRE = 100.0F;
 	private static final float ATTACK_BOX_RADIUS = 2.0F;
 	private static final int HIT_ENTITY_COST = 50;
@@ -71,11 +76,11 @@ public class FailnaughtItem extends LivingwoodBowItem implements LensEffectItem 
 	private static final float QUICK_CHARGE_BONUS_PER_LEVEL = 0.1F;
 
 	public FailnaughtItem(Properties props) {
-		super(props);
+		super(props.enchantable(30));
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+	public InteractionResult use(Level world, Player player, InteractionHand hand) {
 		ItemStack itemstack = player.getItemInHand(hand);
 		int multiShoutLevel = getEnchantmentLevel(itemstack, world, Enchantments.MULTISHOT);
 		float chargeProgress = getChargeProcess(itemstack, player);
@@ -93,10 +98,10 @@ public class FailnaughtItem extends LivingwoodBowItem implements LensEffectItem 
 		}
 
 		if (!player.getAbilities().instabuild && !flag) {
-			return InteractionResultHolder.fail(itemstack);
+			return InteractionResult.FAIL;
 		} else {
 			player.startUsingItem(hand);
-			return InteractionResultHolder.consume(itemstack);
+			return InteractionResult.CONSUME;
 		}
 	}
 
@@ -107,9 +112,9 @@ public class FailnaughtItem extends LivingwoodBowItem implements LensEffectItem 
 	* QC3: 36tick
 	* */
 	@Override
-	public void releaseUsing(ItemStack stack, Level world, LivingEntity livingEntity, int timeLeft) {
+	public boolean releaseUsing(ItemStack stack, Level world, LivingEntity livingEntity, int timeLeft) {
 		if (world.isClientSide()) {
-			return;
+			return false;
 		}
 		if (livingEntity instanceof Player player) {
 			float chargeProgress = getChargeProcess(stack, player);
@@ -120,7 +125,7 @@ public class FailnaughtItem extends LivingwoodBowItem implements LensEffectItem 
 			}
 
 			if (chargeProgress < MINIMUM_SHOOT_PROCESS) {
-				return;
+				return false;
 			}
 
 			int multiShoutLevel = getEnchantmentLevel(stack, world, Enchantments.MULTISHOT);
@@ -149,6 +154,7 @@ public class FailnaughtItem extends LivingwoodBowItem implements LensEffectItem 
 				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), ExtraBotanySounds.FAILNAUGHT_SHOOT, SoundSource.PLAYERS, 1F, 1F);
 			}
 		}
+		return true;
 	}
 
 	public ManaBurstEntity getBurst(Player player, ItemStack stack, int mana, int tier) {
@@ -318,8 +324,8 @@ public class FailnaughtItem extends LivingwoodBowItem implements LensEffectItem 
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
-		if (!world.isClientSide && entity instanceof Player player) {
+	public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		if (!world.isClientSide() && entity instanceof Player player) {
 			var relic = velrondevs.extrabotany.xplat.EXplatAbstractions.INSTANCE.findRelic(stack);
 			if (relic != null) {
 				relic.tickBinding(player);
@@ -328,39 +334,14 @@ public class FailnaughtItem extends LivingwoodBowItem implements LensEffectItem 
 	}
 
 	@Override
-	public boolean isValidRepairItem(ItemStack bow, ItemStack material) {
-		return false;
-	}
-
-	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		tooltip.add(Component.translatable("tooltip.extrabotany.failnaught").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
-		tooltip.add(Component.literal(""));
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		tooltip.accept(Component.translatable("tooltip.extrabotany.failnaught").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
+		tooltip.accept(Component.literal(""));
 		RelicImpl.addDefaultTooltip(stack, tooltip);
 	}
 
 	public static Relic makeRelic(ItemStack stack) {
 		return new RelicImpl(stack, null);
-	}
-
-	@Override
-	public boolean isEnchantable(ItemStack pStack) {
-		return true;
-	}
-
-	@Override
-	public int getEnchantmentValue() {
-		return 30;
-	}
-
-	@Override
-	public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
-		return SUPPORT_ENCHANTMENTS.stream().anyMatch(enchantment::is);
-	}
-
-	@Override
-	public boolean isPrimaryItemFor(ItemStack stack, Holder<Enchantment> enchantment) {
-		return supportsEnchantment(stack, enchantment);
 	}
 
 	private static int getEnchantmentLevel(ItemStack stack, Level level, ResourceKey<Enchantment> enchantment) {

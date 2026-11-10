@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "A": {
-      "tag": "botania:terrasteel_ingots"
-    },
-    "P": {
-      "item": "botania:mana_pearl"
-    },
-    "S": {
-      "tag": "botania:dragonstone_gems"
-    }
+    "A": "#botania:terrasteel_ingots",
+    "P": "botania:mana_pearl",
+    "S": "#botania:dragonstone_gems"
   },
   "pattern": [
     "ASA",
@@ -18,7 +12,6 @@
     "ASA"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:nature_orb"
   }
 }

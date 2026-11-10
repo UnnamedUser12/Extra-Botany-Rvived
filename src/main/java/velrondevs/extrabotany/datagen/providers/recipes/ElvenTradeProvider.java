@@ -3,7 +3,7 @@ package velrondevs.extrabotany.datagen.providers.recipes;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 
@@ -34,8 +34,8 @@ public class ElvenTradeProvider extends ExtraBotanyRecipeProvider {
 				null);
 	}
 
-	private static ResourceLocation id(String path) {
-		return prefix("elven_trade/" + path);
+	private static net.minecraft.resources.ResourceKey<net.minecraft.world.item.crafting.Recipe<?>> id(String path) {
+		return key(prefix("elven_trade/" + path));
 	}
 
 	@Override

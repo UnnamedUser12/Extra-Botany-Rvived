@@ -6,7 +6,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import velrondevs.extrabotany.common.handler.FlamescionHandler;
 import velrondevs.extrabotany.registry.ExtraBotanyItems;
@@ -44,9 +44,9 @@ public final class FlamescionInputHandler {
 		// Only the tick in which the key goes down starts the skill.
 		if ((skillDown && !skillWasDown || sneakDown && !sneakWasDown) && FlamescionHandler.isFlamescionMode(player)) {
 			if (skillDown && !skillWasDown) {
-				PacketDistributor.sendToServer(FlamescionSkillPacket.ULTIMATE);
-			} else if (!player.getCooldowns().isOnCooldown(ExtraBotanyItems.flamescionWeapon)) {
-				PacketDistributor.sendToServer(FlamescionSkillPacket.DASH);
+				ClientPacketDistributor.sendToServer(FlamescionSkillPacket.ULTIMATE);
+			} else if (!player.getCooldowns().isOnCooldown(ExtraBotanyItems.flamescionWeapon.getDefaultInstance())) {
+				ClientPacketDistributor.sendToServer(FlamescionSkillPacket.DASH);
 			}
 		}
 		skillWasDown = skillDown;

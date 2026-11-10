@@ -10,7 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -329,7 +329,7 @@ public class GaiaArena {
 		//check arena shape
 		var invalidArenaBlocks = checkArea(world);
 		if (!invalidArenaBlocks.isEmpty()) {
-			if (world.isClientSide) {
+			if (world.isClientSide()) {
 				warnInvalidBlocks(world, invalidArenaBlocks);
 				showRadius(world);
 			} else {
@@ -368,7 +368,7 @@ public class GaiaArena {
 				if (!world.isClientSide()) {
 					List<BlockPos> invalidPylonBlocks = fail.getFailedBlocks().keySet().stream().toList();
 					warnInvalidBlocksServer((ServerPlayer) player, (ServerLevel) world, invalidPylonBlocks);
-					player.sendSystemMessage(Component.translatable("message.extrabotany.chat.bad_struct", stack.getItem().getDescription()).withStyle(ChatFormatting.RED));
+					player.sendSystemMessage(Component.translatable("message.extrabotany.chat.bad_struct", stack.getHoverName()).withStyle(ChatFormatting.RED));
 				}
 				return false;
 			}
@@ -376,7 +376,7 @@ public class GaiaArena {
 
 		var invalidArenaBlocks = checkArea(world);
 		if (!invalidArenaBlocks.isEmpty()) {
-			if (world.isClientSide) {
+			if (world.isClientSide()) {
 				warnInvalidBlocks(world, invalidArenaBlocks);
 				showRadius(world);
 			} else {
@@ -496,7 +496,7 @@ public class GaiaArena {
 	public boolean checkGuardianInventoryStrict(Level level, net.minecraft.world.item.Item bypass) {
 		return getPlayersAround(level).stream().allMatch(player -> bypass != null && playerHasItem(player, bypass) || checkGuardianInventoryPass(player));
 	}
-	public boolean checkGuardianInventoryStrict(Level level, ResourceLocation bypassAdvancement) {
+	public boolean checkGuardianInventoryStrict(Level level, Identifier bypassAdvancement) {
 		return getPlayersAround(level).stream().allMatch(player -> bypassAdvancement != null && player instanceof ServerPlayer server
 				&& PlayerHelper.hasAdvancement(server, bypassAdvancement) || checkGuardianInventoryPass(player));
 	}
@@ -548,7 +548,7 @@ public class GaiaArena {
 			updateCache(ExtraBotanyConfig.common().gaiaSpawnUnCheckList());
 		}
 
-		ResourceLocation itemLocation = RegistryHelper.getRegistryName(stack.getItem());
+		Identifier itemLocation = RegistryHelper.getRegistryName(stack.getItem());
 		String modid = itemLocation.getNamespace();
 		if (CACHED_BYPASS_MODIDS.contains(modid)) {
 			return true;
@@ -569,7 +569,7 @@ public class GaiaArena {
 			if (!s.contains(":")) {
 				CACHED_BYPASS_MODIDS.add(s);
 			} else {
-				ResourceLocation itemLocation = ResourceLocation.tryParse(s);
+				Identifier itemLocation = Identifier.tryParse(s);
 				if (itemLocation == null || !BuiltInRegistries.ITEM.containsKey(itemLocation)) {
 					continue;
 				}
@@ -637,7 +637,7 @@ public class GaiaArena {
 	public static void warnInvalidBlocksServer(ServerPlayer player, ServerLevel level, Iterable<BlockPos> invalidPositions) {
 		WispParticleData data = WispParticleData.wisp(0.5F, 1, 0.2F, 0.2F, 8, false);
 		for (BlockPos pos_ : invalidPositions) {
-			level.sendParticles(player, data, false, pos_.getX() + 0.5, pos_.getY() + 0.5, pos_.getZ() + 0.5, 1, 0, 0, 0, 0);
+			level.sendParticles(player, data, false, false, pos_.getX() + 0.5, pos_.getY() + 0.5, pos_.getZ() + 0.5, 1, 0, 0, 0, 0);
 			//level.sendParticles(player, data, false, pos_.getX() + 0.5, pos_.getY() + 0.5, pos_.getZ(), 1, 0,0,0);
 			//.addParticle(data, pos_.getX() + 0.5, pos_.getY() + 0.5, pos_.getZ() + 0.5, 0, 0, 0);
 		}

@@ -2,7 +2,7 @@ package velrondevs.extrabotany.common.item.equipment.tool;
 
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -28,12 +28,12 @@ public class PhotonShotgunItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		if (!level.isClientSide()) {
 			for (int i = 0; i < PELLET_COUNT; i++) {
-				float pitch = player.getXRot() - SPREAD_DEGREES / 2 + level.random.nextFloat() * SPREAD_DEGREES;
-				float yaw = player.getYRot() - SPREAD_DEGREES / 2 + level.random.nextFloat() * SPREAD_DEGREES;
+				float pitch = player.getXRot() - SPREAD_DEGREES / 2 + level.getRandom().nextFloat() * SPREAD_DEGREES;
+				float yaw = player.getYRot() - SPREAD_DEGREES / 2 + level.getRandom().nextFloat() * SPREAD_DEGREES;
 				PhotonProjectileEntity pellet = new PhotonProjectileEntity(level, player);
 				pellet.setPos(player.getX(), player.getEyeY() - 0.1, player.getZ());
 				pellet.setDeltaMovement(Vec3.directionFromRotation(pitch, yaw).scale(PELLET_SPEED));
@@ -43,6 +43,6 @@ public class PhotonShotgunItem extends Item {
 			}
 		}
 		player.awardStat(Stats.ITEM_USED.get(this));
-		return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 }

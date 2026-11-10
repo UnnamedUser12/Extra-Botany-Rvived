@@ -1,13 +1,14 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 
 import org.joml.Matrix4f;
@@ -24,7 +25,7 @@ import velrondevs.extrabotany.common.entity.EgoLandmineEntity;
  * <p>来源：ExtraMeteorP 1.16 {@code RenderEGOLandmine}。它和植物魔法的魔法地雷用同一种画法。
  * <p>Source: ExtraMeteorP 1.16 {@code RenderEGOLandmine}. It uses the same drawing method as the magic landmine of Botania.
  */
-public class EgoLandmineRenderer extends EntityRenderer<EgoLandmineEntity> {
+public class EgoLandmineRenderer extends ExtraEntityRenderer<EgoLandmineEntity> {
 	private static final int BASE_ALPHA = 32;
 	private static final int BASE_BRIGHTNESS = 240;
 	private static final float FADE_TICKS = 8F;
@@ -36,8 +37,7 @@ public class EgoLandmineRenderer extends EntityRenderer<EgoLandmineEntity> {
 	}
 
 	@Override
-	public void render(EgoLandmineEntity landmine, float yaw, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight) {
-		super.render(landmine, yaw, partialTick, poseStack, buffers, packedLight);
+	protected void render(EgoLandmineEntity landmine, float yaw, float partialTick, PoseStack poseStack, MultiBufferSource buffers, SubmitNodeCollector collector, int packedLight, CameraRenderState camera) {
 		// 颜色的亮度慢慢地起伏。
 		// The brightness of the color slowly goes up and down.
 		float pulse = (float) (Math.sin((ClientTickHandler.ticksInGame + partialTick) / 20) + 1) * 0.2F + 0.6F;
@@ -70,7 +70,7 @@ public class EgoLandmineRenderer extends EntityRenderer<EgoLandmineEntity> {
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(EgoLandmineEntity landmine) {
-		return InventoryMenu.BLOCK_ATLAS;
+	public Identifier getTextureLocation(EgoLandmineEntity landmine) {
+		return TextureAtlas.LOCATION_BLOCKS;
 	}
 }

@@ -2,7 +2,7 @@ package velrondevs.extrabotany.datagen.providers.patchouli.page.patchouli;
 
 import com.demonwav.mcdev.annotations.Translatable;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ItemLike;
 
 import velrondevs.extrabotany.datagen.providers.patchouli.page.AbstractPage;
@@ -44,7 +44,7 @@ public class CraftingPage extends AbstractPage<CraftingPage> {
 	}
 
 	@Override
-	public ResourceLocation getType() {
-		return ResourceLocation.tryParse("patchouli:crafting");
+	public Identifier getType() {
+		return Identifier.tryParse("patchouli:crafting");
 	}
 }

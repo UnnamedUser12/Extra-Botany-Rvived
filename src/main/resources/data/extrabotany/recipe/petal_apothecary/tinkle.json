@@ -1,39 +1,19 @@
 {
   "type": "botania:petal_apothecary",
   "ingredients": [
-    {
-      "tag": "botania:petals/yellow"
-    },
-    {
-      "tag": "botania:petals/yellow"
-    },
-    {
-      "tag": "botania:petals/green"
-    },
-    {
-      "tag": "botania:petals/lime"
-    },
-    {
-      "item": "botania:rune_water"
-    },
-    {
-      "item": "botania:rune_earth"
-    },
-    {
-      "item": "botania:mana_powder"
-    },
-    {
-      "item": "extrabotany:spirit_fragment"
-    },
-    {
-      "item": "extrabotany:spirit_fragment"
-    }
+    "#botania:petals/yellow",
+    "#botania:petals/yellow",
+    "#botania:petals/green",
+    "#botania:petals/lime",
+    "botania:rune_water",
+    "botania:rune_earth",
+    "botania:mana_powder",
+    "extrabotany:spirit_fragment",
+    "extrabotany:spirit_fragment"
   ],
   "output": {
     "count": 1,
     "id": "extrabotany:tinkle"
   },
-  "reagent": {
-    "tag": "botania:seed_apothecary_reagent"
-  }
+  "reagent": "#botania:seed_apothecary_reagent"
 }

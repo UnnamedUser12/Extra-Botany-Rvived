@@ -1,15 +1,10 @@
 {
   "type": "extrabotany:pedestal_smash",
   "exp": 5,
-  "input": {
-    "item": "extrabotany:spirit_fuel"
-  },
+  "input": "extrabotany:spirit_fuel",
   "output": {
-    "count": 1,
     "id": "extrabotany:spirit_fragment"
   },
-  "smash_tools": {
-    "tag": "extrabotany:hammers"
-  },
+  "smash_tools": "#extrabotany:hammers",
   "strike": 10
 }

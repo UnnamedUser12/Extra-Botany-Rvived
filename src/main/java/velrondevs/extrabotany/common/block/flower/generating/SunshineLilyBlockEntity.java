@@ -42,7 +42,7 @@ public class SunshineLilyBlockEntity extends ExtraGeneratingFlowerBlockEntity im
 		if (ticksExisted % COOLDOWN != 0) {
 			return;
 		}
-		if (!getLevel().isDay()) {
+		if (!getLevel().isBrightOutside()) {
 			return;
 		}
 		if (getMana() >= getMaxMana()) {
@@ -74,7 +74,7 @@ public class SunshineLilyBlockEntity extends ExtraGeneratingFlowerBlockEntity im
 	@Override
 	public void readFromPacketNBT(CompoundTag cmp) {
 		super.readFromPacketNBT(cmp);
-		setPassiveDecayTicks(cmp.getInt(TAG_PASSIVE_DECAY_TICKS));
+		setPassiveDecayTicks(cmp.getIntOr(TAG_PASSIVE_DECAY_TICKS, 0));
 	}
 
 	@Override

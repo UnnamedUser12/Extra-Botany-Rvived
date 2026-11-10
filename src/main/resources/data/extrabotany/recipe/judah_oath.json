@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "A": {
-      "item": "botania:life_essence"
-    },
-    "B": {
-      "tag": "extrabotany:orichalcos_ingots"
-    },
-    "C": {
-      "item": "extrabotany:spirit_fuel"
-    }
+    "A": "botania:life_essence",
+    "B": "#extrabotany:orichalcos_ingots",
+    "C": "extrabotany:spirit_fuel"
   },
   "pattern": [
     "ABA",

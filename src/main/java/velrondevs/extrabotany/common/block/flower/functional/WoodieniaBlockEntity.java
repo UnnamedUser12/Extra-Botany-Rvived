@@ -23,6 +23,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import velrondevs.extrabotany.common.block.flower.ExtraFunctionalFlowerBlockEntity;
+import velrondevs.botania.common.block.block_entity.BlockEntityNbt;
 import velrondevs.botania.api.block_entity.RadiusDescriptor;
 import velrondevs.botania.common.item.equipment.tool.ToolCommons;
 import velrondevs.botania.xplat.BotaniaConfig;
@@ -133,8 +134,8 @@ public class WoodieniaBlockEntity extends ExtraFunctionalFlowerBlockEntity {
 		int maxX = center.getX() + range.getX();
 		int minZ = center.getZ() - range.getZ();
 		int maxZ = center.getZ() + range.getZ();
-		int minY = Math.max(center.getY(), level.getMinBuildHeight());
-		int maxY = Math.min(center.getY() + range.getY(), level.getMaxBuildHeight() - 1);
+		int minY = Math.max(center.getY(), level.getMinY());
+		int maxY = Math.min(center.getY() + range.getY(), level.getMaxY());
 		if (minY > maxY) {
 			return null;
 		}
@@ -218,7 +219,7 @@ public class WoodieniaBlockEntity extends ExtraFunctionalFlowerBlockEntity {
 	public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
 		super.setPlacedBy(level, pos, state, placer, stack);
 		if (placer instanceof Player player) {
-			setOwnerUUID(player.getGameProfile().getId());
+			setOwnerUUID(player.getGameProfile().id());
 		}
 	}
 
@@ -265,16 +266,16 @@ public class WoodieniaBlockEntity extends ExtraFunctionalFlowerBlockEntity {
 		super.writeToPacketNBT(cmp);
 
 		cmp.putInt(TAG_COOLDOWN, getCooldown());
-		getOwnerUUID().ifPresent(uuid -> cmp.putUUID(TAG_OWNER_UUID, uuid));
+		getOwnerUUID().ifPresent(uuid -> BlockEntityNbt.putUUID(cmp, TAG_OWNER_UUID, uuid));
 	}
 
 	@Override
 	public void readFromPacketNBT(CompoundTag cmp) {
 		super.readFromPacketNBT(cmp);
 
-		cooldown = cmp.getInt(TAG_COOLDOWN);
-		if (cmp.contains(TAG_OWNER_UUID)) {
-			setOwnerUUID(cmp.getUUID(TAG_OWNER_UUID));
+		cooldown = cmp.getIntOr(TAG_COOLDOWN, 0);
+		if (BlockEntityNbt.hasUUID(cmp, TAG_OWNER_UUID)) {
+			setOwnerUUID(BlockEntityNbt.getUUID(cmp, TAG_OWNER_UUID));
 		}
 	}
 

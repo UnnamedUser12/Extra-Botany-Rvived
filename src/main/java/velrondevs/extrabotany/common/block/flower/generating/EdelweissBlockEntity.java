@@ -115,7 +115,7 @@ public class EdelweissBlockEntity extends ExtraGeneratingFlowerBlockEntity {
 
 		addMana(mana);
 		setCooldown(getAfterWorkCooldown());
-		getLevel().playSound(null, getEffectivePos(), SoundEvents.GENERIC_DRINK, SoundSource.BLOCKS, 0.01F, 0.5F + (float) Math.random() * 0.5F);
+		getLevel().playSound(null, getEffectivePos(), SoundEvents.GENERIC_DRINK.value(), SoundSource.BLOCKS, 0.01F, 0.5F + (float) Math.random() * 0.5F);
 		syncThrottled();
 	}
 
@@ -134,7 +134,7 @@ public class EdelweissBlockEntity extends ExtraGeneratingFlowerBlockEntity {
 				: ExtraBotanyRecipeTypes.getRecipeHolders(getLevel(), ExtraBotanyRecipeTypes.EDELWEISS_RECIPE_TYPE);
 		for (var holder : recipes) {
 			EdelweissRecipe recipe = holder.value();
-			if (recipe.getInput().matches(entity.getType())) {
+			if (recipe.getInput().matches(entity.typeHolder())) {
 				return recipe.getManaOutput();
 			}
 		}
@@ -172,7 +172,7 @@ public class EdelweissBlockEntity extends ExtraGeneratingFlowerBlockEntity {
 	public void readFromPacketNBT(CompoundTag cmp) {
 		super.readFromPacketNBT(cmp);
 
-		setCooldown(cmp.getInt(TAG_COOLDOWN));
+		setCooldown(cmp.getIntOr(TAG_COOLDOWN, 0));
 	}
 
 	@Override

@@ -48,7 +48,7 @@ public class PotatoChipsItem extends BaubleItem {
 			return;
 		}
 		ItemStack chips = EquipmentHandler.findOrEmpty(ExtraBotanyItems.potatoChips, player);
-		if (chips.isEmpty() || player.getCooldowns().isOnCooldown(chips.getItem())) {
+		if (chips.isEmpty() || player.getCooldowns().isOnCooldown(chips)) {
 			return;
 		}
 		if (!ManaItemHandler.instance().requestManaExactForTool(chips, player, MANA_PER_RESCUE, true)) {
@@ -63,8 +63,8 @@ public class PotatoChipsItem extends BaubleItem {
 		player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 800, 0));
 
 		Entity killer = event.getSource().getEntity();
-		boolean killedByBoss = killer != null && killer.getType().is(Tags.EntityTypes.BOSSES);
-		player.getCooldowns().addCooldown(chips.getItem(), killedByBoss ? BOSS_COOLDOWN_TICKS : COOLDOWN_TICKS);
+		boolean killedByBoss = killer != null && killer.is(Tags.EntityTypes.BOSSES);
+		player.getCooldowns().addCooldown(new ItemStack(chips.getItem()), killedByBoss ? BOSS_COOLDOWN_TICKS : COOLDOWN_TICKS);
 
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
 				SoundEvents.TOTEM_USE, player.getSoundSource(), 1.0F, 1.0F);

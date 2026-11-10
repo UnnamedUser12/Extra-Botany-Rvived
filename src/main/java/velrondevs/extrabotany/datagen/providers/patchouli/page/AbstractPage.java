@@ -3,7 +3,7 @@ package velrondevs.extrabotany.datagen.providers.patchouli.page;
 import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * 图鉴页面的基类。子类把自己的字段写进一个 JSON 对象。
@@ -13,7 +13,7 @@ public abstract class AbstractPage<T extends AbstractPage<T>> implements IPatcho
 	protected JsonObject object = new JsonObject();
 
 	@SuppressWarnings("unchecked")
-	public T withAdvancement(ResourceLocation advancement) {
+	public T withAdvancement(Identifier advancement) {
 		object.addProperty("advancement", advancement.toString());
 		return (T) this;
 	}

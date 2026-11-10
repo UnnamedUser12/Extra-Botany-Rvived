@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity.projectile;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -217,7 +219,7 @@ public class PhantomSwordEntity extends TargetedProjectileEntity {
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
+	public void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putInt(TAG_VARIETY, getVariety());
 		tag.putInt(TAG_DELAY, getDelay());
@@ -225,10 +227,10 @@ public class PhantomSwordEntity extends TargetedProjectileEntity {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
+	public void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		setVariety(tag.getInt(TAG_VARIETY));
-		setDelay(tag.getInt(TAG_DELAY));
-		entityData.set(FAKE, tag.getBoolean(TAG_FAKE));
+		setVariety(tag.getIntOr(TAG_VARIETY, 0));
+		setDelay(tag.getIntOr(TAG_DELAY, 0));
+		entityData.set(FAKE, tag.getBooleanOr(TAG_FAKE, false));
 	}
 }

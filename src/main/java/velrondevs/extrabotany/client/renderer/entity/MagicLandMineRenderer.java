@@ -1,13 +1,14 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +23,7 @@ import velrondevs.extrabotany.common.entity.MagicLandMineEntity;
  * 魔法地雷的渲染器：在地面上画出一个半透明的紫色方块区域，出现和爆炸前有淡入淡出。
  * The renderer of the magic landmine: it draws a translucent purple square on the ground, with a fade at the start and before the explosion.
  */
-public class MagicLandMineRenderer extends EntityRenderer<MagicLandMineEntity> {
+public class MagicLandMineRenderer extends ExtraEntityRenderer<MagicLandMineEntity> {
 	public static final int FADE_TICKS = 8;
 
 	public MagicLandMineRenderer(EntityRendererProvider.Context ctx) {
@@ -30,8 +31,7 @@ public class MagicLandMineRenderer extends EntityRenderer<MagicLandMineEntity> {
 	}
 
 	@Override
-	public void render(MagicLandMineEntity e, float entityYaw, float partialTicks, PoseStack ms, MultiBufferSource buffers, int light) {
-		super.render(e, entityYaw, partialTicks, ms, buffers, light);
+	protected void render(MagicLandMineEntity e, float entityYaw, float partialTicks, PoseStack ms, MultiBufferSource buffers, SubmitNodeCollector collector, int light, CameraRenderState camera) {
 
 		ms.pushPose();
 		AABB aabb = e.getBoundingBox().move(e.position().scale(-1));
@@ -65,7 +65,7 @@ public class MagicLandMineRenderer extends EntityRenderer<MagicLandMineEntity> {
 
 	@NotNull
 	@Override
-	public ResourceLocation getTextureLocation(@NotNull MagicLandMineEntity entity) {
-		return InventoryMenu.BLOCK_ATLAS;
+	public Identifier getTextureLocation(@NotNull MagicLandMineEntity entity) {
+		return TextureAtlas.LOCATION_BLOCKS;
 	}
 }

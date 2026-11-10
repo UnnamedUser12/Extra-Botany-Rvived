@@ -1,16 +1,18 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.common.entity.SubspaceLanceEntity;
 
@@ -23,8 +25,8 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>来源：ExtraMeteorP 1.12 {@code RenderSubspaceLance}。原版的矛枪朝向固定（俯仰 -90 度），所以这里不同步朝向。
  * <p>Source: ExtraMeteorP 1.12 {@code RenderSubspaceLance}. The lance of the original has a fixed direction (a pitch of -90 degrees), thus this port does not synchronize the direction.
  */
-public class SubspaceLanceRenderer extends EntityRenderer<SubspaceLanceEntity> {
-	private static final ResourceLocation TEXTURE = prefix("textures/entity/spearsubspace.png");
+public class SubspaceLanceRenderer extends ExtraEntityRenderer<SubspaceLanceEntity> {
+	private static final Identifier TEXTURE = prefix("textures/entity/spearsubspace.png");
 	/** 原版用 0.07 的单位绘制这个模型，而不是通常的 1/16。 / The original draws this model with a unit of 0.07 and not the usual 1/16. */
 	private static final float SCALE = 0.07F * 16F;
 
@@ -35,7 +37,7 @@ public class SubspaceLanceRenderer extends EntityRenderer<SubspaceLanceEntity> {
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(SubspaceLanceEntity entity) {
+	public Identifier getTextureLocation(SubspaceLanceEntity entity) {
 		return TEXTURE;
 	}
 
@@ -47,12 +49,11 @@ public class SubspaceLanceRenderer extends EntityRenderer<SubspaceLanceEntity> {
 	}
 
 	@Override
-	public void render(SubspaceLanceEntity entity, float yaw, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight) {
+	protected void render(SubspaceLanceEntity entity, float yaw, float partialTick, PoseStack poseStack, MultiBufferSource buffers, SubmitNodeCollector collector, int packedLight, CameraRenderState camera) {
 		poseStack.pushPose();
 		poseStack.translate(0.5F, 1.5F, 0.5F);
 		poseStack.scale(SCALE, -SCALE, -SCALE);
-		spear.render(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+		spear.render(poseStack, buffers.getBuffer(RenderTypes.entityCutout(TEXTURE)), LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
 		poseStack.popPose();
-		super.render(entity, yaw, partialTick, poseStack, buffers, packedLight);
 	}
 }

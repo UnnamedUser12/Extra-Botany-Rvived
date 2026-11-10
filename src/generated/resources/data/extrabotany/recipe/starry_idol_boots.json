@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "A": {
-      "item": "botania:manasteel_boots"
-    },
-    "W": {
-      "item": "botania:manaweave_cloth"
-    }
+    "A": "botania:manasteel_boots",
+    "W": "botania:manaweave_cloth"
   },
   "pattern": [
     "WWW",
@@ -15,7 +11,6 @@
     "WWW"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:starry_idol_boots"
   }
 }

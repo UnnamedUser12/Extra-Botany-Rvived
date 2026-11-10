@@ -8,7 +8,7 @@ import velrondevs.extrabotany.common.block.PedestalBlock;
 import velrondevs.extrabotany.common.block.TrophyBlock;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
@@ -136,7 +136,7 @@ public final class ExtraBotanyBlocks {
 				lightLevel > 0 ? properties.lightLevel(blockState -> lightLevel) : properties);
 	}
 
-	public static void registerBlocks(BiConsumer<Block, ResourceLocation> r) {
+	public static void registerBlocks(BiConsumer<Block, Identifier> r) {
 		r.accept(cocoonOfDesire, prefix("cocoondesire"));
 		r.accept(trophy, prefix("trophy"));
 		r.accept(livingrockBarrel, prefix("elfjar"));
@@ -179,7 +179,7 @@ public final class ExtraBotanyBlocks {
 
 	}
 
-	public static void registerItemBlocks(BiConsumer<Item, ResourceLocation> r) {
+	public static void registerItemBlocks(BiConsumer<Item, Identifier> r) {
 		r.accept(new BlockItem(cocoonOfDesire, ExtraBotanyItems.defaultBuilder()), prefix("cocoondesire"));
 		r.accept(new BlockItem(trophy, ExtraBotanyItems.defaultBuilder()), prefix("trophy"));
 		r.accept(new BlockItem(livingrockBarrel, ExtraBotanyItems.defaultBuilder()), prefix("elfjar"));
@@ -187,42 +187,41 @@ public final class ExtraBotanyBlocks {
 		r.accept(new BlockItem(quantumManaBuffer, ExtraBotanyItems.defaultBuilder()), prefix("quantummanabuffer"));
 		r.accept(new BlockItem(manaGenerator, ExtraBotanyItems.defaultBuilder()), prefix("managenerator"));
 		r.accept(new BlockItem(manaLiquefaction, ExtraBotanyItems.defaultBuilder()), prefix("manaliquefaction"));
-		Item.Properties props = ExtraBotanyItems.defaultBuilder();
 
-		r.accept(new BlockItem(gaiaQuartzBlock, props), BuiltInRegistries.BLOCK.getKey(gaiaQuartzBlock));
-		r.accept(new BlockItem(gaiaQuartzStairs, props), BuiltInRegistries.BLOCK.getKey(gaiaQuartzStairs));
-		r.accept(new BlockItem(gaiaQuartzSlab, props), BuiltInRegistries.BLOCK.getKey(gaiaQuartzSlab));
-		r.accept(new BlockItem(chiseledGaiaQuartzBlock, props), BuiltInRegistries.BLOCK.getKey(chiseledGaiaQuartzBlock));
-		r.accept(new BlockItem(gaiaQuartzBricks, props), BuiltInRegistries.BLOCK.getKey(gaiaQuartzBricks));
-		r.accept(new BlockItem(gaiaQuartzPillar, props), BuiltInRegistries.BLOCK.getKey(gaiaQuartzPillar));
-		r.accept(new BlockItem(smoothGaiaQuartz, props), BuiltInRegistries.BLOCK.getKey(smoothGaiaQuartz));
-		r.accept(new BlockItem(smoothGaiaQuartzStairs, props), BuiltInRegistries.BLOCK.getKey(smoothGaiaQuartzStairs));
-		r.accept(new BlockItem(smoothGaiaQuartzSlab, props), BuiltInRegistries.BLOCK.getKey(smoothGaiaQuartzSlab));
+		r.accept(new BlockItem(gaiaQuartzBlock, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(gaiaQuartzBlock));
+		r.accept(new BlockItem(gaiaQuartzStairs, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(gaiaQuartzStairs));
+		r.accept(new BlockItem(gaiaQuartzSlab, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(gaiaQuartzSlab));
+		r.accept(new BlockItem(chiseledGaiaQuartzBlock, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(chiseledGaiaQuartzBlock));
+		r.accept(new BlockItem(gaiaQuartzBricks, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(gaiaQuartzBricks));
+		r.accept(new BlockItem(gaiaQuartzPillar, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(gaiaQuartzPillar));
+		r.accept(new BlockItem(smoothGaiaQuartz, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(smoothGaiaQuartz));
+		r.accept(new BlockItem(smoothGaiaQuartzStairs, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(smoothGaiaQuartzStairs));
+		r.accept(new BlockItem(smoothGaiaQuartzSlab, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(smoothGaiaQuartzSlab));
 
-		r.accept(new BlockItem(elementiumQuartzBlock, props), BuiltInRegistries.BLOCK.getKey(elementiumQuartzBlock));
-		r.accept(new BlockItem(elementiumQuartzStairs, props), BuiltInRegistries.BLOCK.getKey(elementiumQuartzStairs));
-		r.accept(new BlockItem(elementiumQuartzSlab, props), BuiltInRegistries.BLOCK.getKey(elementiumQuartzSlab));
-		r.accept(new BlockItem(chiseledElementiumQuartzBlock, props), BuiltInRegistries.BLOCK.getKey(chiseledElementiumQuartzBlock));
-		r.accept(new BlockItem(elementiumQuartzBricks, props), BuiltInRegistries.BLOCK.getKey(elementiumQuartzBricks));
-		r.accept(new BlockItem(elementiumQuartzPillar, props), BuiltInRegistries.BLOCK.getKey(elementiumQuartzPillar));
-		r.accept(new BlockItem(smoothElementiumQuartz, props), BuiltInRegistries.BLOCK.getKey(smoothElementiumQuartz));
-		r.accept(new BlockItem(smoothElementiumQuartzStairs, props), BuiltInRegistries.BLOCK.getKey(smoothElementiumQuartzStairs));
-		r.accept(new BlockItem(smoothElementiumQuartzSlab, props), BuiltInRegistries.BLOCK.getKey(smoothElementiumQuartzSlab));
+		r.accept(new BlockItem(elementiumQuartzBlock, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(elementiumQuartzBlock));
+		r.accept(new BlockItem(elementiumQuartzStairs, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(elementiumQuartzStairs));
+		r.accept(new BlockItem(elementiumQuartzSlab, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(elementiumQuartzSlab));
+		r.accept(new BlockItem(chiseledElementiumQuartzBlock, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(chiseledElementiumQuartzBlock));
+		r.accept(new BlockItem(elementiumQuartzBricks, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(elementiumQuartzBricks));
+		r.accept(new BlockItem(elementiumQuartzPillar, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(elementiumQuartzPillar));
+		r.accept(new BlockItem(smoothElementiumQuartz, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(smoothElementiumQuartz));
+		r.accept(new BlockItem(smoothElementiumQuartzStairs, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(smoothElementiumQuartzStairs));
+		r.accept(new BlockItem(smoothElementiumQuartzSlab, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(smoothElementiumQuartzSlab));
 
 		r.accept(new BlockItem(orichalcosBlock, ExtraBotanyItems.defaultBuilder().rarity(Rarity.EPIC)), BuiltInRegistries.BLOCK.getKey(orichalcosBlock));
-		r.accept(new BlockItem(photoniumBlock, props), BuiltInRegistries.BLOCK.getKey(photoniumBlock));
-		r.accept(new BlockItem(shadowiumBlock, props), BuiltInRegistries.BLOCK.getKey(shadowiumBlock));
-		r.accept(new BlockItem(aerialiteBlock, props), BuiltInRegistries.BLOCK.getKey(aerialiteBlock));
-		r.accept(new BlockItem(dimensionCatalyst, props), BuiltInRegistries.BLOCK.getKey(dimensionCatalyst));
-		r.accept(new BlockItem(powerFrame, props), BuiltInRegistries.BLOCK.getKey(powerFrame));
-		r.accept(new BlockItem(livingrockPedestal, props), BuiltInRegistries.BLOCK.getKey(livingrockPedestal));
-		r.accept(new BlockItem(calcitePedestal, props), BuiltInRegistries.BLOCK.getKey(calcitePedestal));
-		r.accept(new BlockItem(manaCharger, props), BuiltInRegistries.BLOCK.getKey(manaCharger));
-		r.accept(new BlockItem(enchantedSoil, props), BuiltInRegistries.BLOCK.getKey(enchantedSoil));
+		r.accept(new BlockItem(photoniumBlock, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(photoniumBlock));
+		r.accept(new BlockItem(shadowiumBlock, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(shadowiumBlock));
+		r.accept(new BlockItem(aerialiteBlock, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(aerialiteBlock));
+		r.accept(new BlockItem(dimensionCatalyst, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(dimensionCatalyst));
+		r.accept(new BlockItem(powerFrame, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(powerFrame));
+		r.accept(new BlockItem(livingrockPedestal, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(livingrockPedestal));
+		r.accept(new BlockItem(calcitePedestal, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(calcitePedestal));
+		r.accept(new BlockItem(manaCharger, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(manaCharger));
+		r.accept(new BlockItem(enchantedSoil, ExtraBotanyItems.defaultBuilder()), BuiltInRegistries.BLOCK.getKey(enchantedSoil));
 
 	}
 
-	public static void registerFlowerPotPlants(BiConsumer<ResourceLocation, Supplier<? extends Block>> consumer) {
+	public static void registerFlowerPotPlants(BiConsumer<Identifier, Supplier<? extends Block>> consumer) {
 
 	}
 }

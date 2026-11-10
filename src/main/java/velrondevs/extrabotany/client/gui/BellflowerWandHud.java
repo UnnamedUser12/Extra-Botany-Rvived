@@ -5,9 +5,10 @@ import com.mojang.blaze3d.platform.Window;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
+import velrondevs.botania.client.core.helper.RenderHelper;
 import velrondevs.botania.api.block_entity.BindableSpecialFlowerBlockEntity;
 
 import velrondevs.extrabotany.common.block.flower.generating.BellflowerBlockEntity;
@@ -27,7 +28,7 @@ public class BellflowerWandHud extends BindableSpecialFlowerBlockEntity.Bindable
 	}
 
 	@Override
-	public void renderHUD(GuiGraphics gui, Minecraft mc) {
+	public void renderHUD(GuiGraphicsExtractor gui, Minecraft mc) {
 		Window window = mc.getWindow();
 		Font font = mc.font;
 		boolean dying = flower.isDying();
@@ -42,6 +43,6 @@ public class BellflowerWandHud extends BindableSpecialFlowerBlockEntity.Bindable
 		int centerY = window.getGuiScaledHeight() / 2;
 
 		super.renderHUD(gui, mc, halfWidth + 2, halfWidth + 2, 48);
-		gui.drawString(font, component, centerX - halfWidth + 12, centerY + 34, dying ? ChatFormatting.DARK_RED.getColor() : 0xFFFFFF);
+		RenderHelper.drawString(gui, font, component, centerX - halfWidth + 12, centerY + 34, dying ? ChatFormatting.DARK_RED.getColor() : 0xFFFFFF);
 	}
 }

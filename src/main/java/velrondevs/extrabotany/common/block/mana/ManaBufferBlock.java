@@ -1,6 +1,7 @@
 package velrondevs.extrabotany.common.block.mana;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -32,7 +33,7 @@ public class ManaBufferBlock extends ManaMachineBlock<ManaBufferBlockEntity> {
 
 	@Override
 	protected RenderShape getRenderShape(BlockState state) {
-		return tier == ManaBufferBlockEntity.Tier.QUANTUM ? RenderShape.ENTITYBLOCK_ANIMATED : RenderShape.MODEL;
+		return tier == ManaBufferBlockEntity.Tier.QUANTUM ? RenderShape.INVISIBLE : RenderShape.MODEL;
 	}
 
 	@Override
@@ -41,7 +42,7 @@ public class ManaBufferBlock extends ManaMachineBlock<ManaBufferBlockEntity> {
 	}
 
 	@Override
-	protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+	protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
 		return level.getBlockEntity(pos) instanceof ManaBufferBlockEntity buffer
 				? ManaPoolBlockEntity.calculateComparatorLevel(buffer.getCurrentMana(), buffer.getMaxMana())
 				: 0;

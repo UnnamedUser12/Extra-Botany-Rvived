@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import velrondevs.extrabotany.registry.ExtraBotanyEntities;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -227,17 +229,17 @@ public class SubspaceLanceEntity extends OwnedEntity {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag tag) {
+	protected void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putInt(TAG_LIFE, life);
 		tag.putFloat(TAG_DAMAGE, damage);
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundTag tag) {
+	protected void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		life = tag.getInt(TAG_LIFE);
-		damage = tag.getFloat(TAG_DAMAGE);
+		life = tag.getIntOr(TAG_LIFE, 0);
+		damage = tag.getFloatOr(TAG_DAMAGE, 0.0F);
 	}
 
 	@Override

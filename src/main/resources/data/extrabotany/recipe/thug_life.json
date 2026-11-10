@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "G": {
-      "item": "extrabotany:black_glasses"
-    },
-    "P": {
-      "tag": "botania:petals/black"
-    },
-    "S": {
-      "item": "minecraft:paper"
-    }
+    "G": "extrabotany:black_glasses",
+    "P": "#botania:petals/black",
+    "S": "minecraft:paper"
   },
   "pattern": [
     "P P",

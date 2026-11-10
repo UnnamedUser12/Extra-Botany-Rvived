@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "extrabotany:miku"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "extrabotany:miku"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "extrabotany:miku"
+      }
+    ]
+  }
+}

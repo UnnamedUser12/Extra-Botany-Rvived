@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.item.equipment.bauble;
 
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -86,11 +88,11 @@ public class CosmeticBaubleItem extends BaubleItem {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		super.appendHoverText(stack, context, tooltip, flags);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		super.appendHoverText(stack, context, tooltipDisplay, tooltip, flags);
 		if (variant == Variant.FOX_MASK) {
 			for (int line = 0; line < 3; line++) {
-				tooltip.add(Component.translatable("extrabotany.foxmaskinfo" + line).withStyle(ChatFormatting.ITALIC));
+				tooltip.accept(Component.translatable("extrabotany.foxmaskinfo" + line).withStyle(ChatFormatting.ITALIC));
 			}
 		}
 	}

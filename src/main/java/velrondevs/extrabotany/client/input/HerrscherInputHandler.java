@@ -2,12 +2,12 @@ package velrondevs.extrabotany.client.input;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.SwordItem;
+import net.minecraft.tags.ItemTags;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import velrondevs.extrabotany.common.handler.HerrscherHandler;
 import velrondevs.extrabotany.common.lib.LibMisc;
@@ -30,14 +30,14 @@ public final class HerrscherInputHandler {
 	@SubscribeEvent
 	public static void onLeftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
 		Player player = event.getEntity();
-		if (!(event.getItemStack().getItem() instanceof SwordItem) || !Minecraft.getInstance().options.keySprint.isDown()) {
+		if (!event.getItemStack().is(ItemTags.SWORDS) || !Minecraft.getInstance().options.keySprint.isDown()) {
 			return;
 		}
 		if (!HerrscherHandler.isHerrscherOfThunder(player)) {
 			return;
 		}
 		if (HerrscherHandler.getEnergy(player) >= HerrscherHandler.MAX_ENERGY || player.isCreative()) {
-			PacketDistributor.sendToServer(HerrscherSkillPacket.INSTANCE);
+			ClientPacketDistributor.sendToServer(HerrscherSkillPacket.INSTANCE);
 		}
 	}
 }

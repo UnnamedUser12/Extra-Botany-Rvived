@@ -4,12 +4,9 @@
     "type": "block",
     "block": "extrabotany:dimension_catalyst"
   },
-  "input": {
-    "item": "minecraft:nether_star"
-  },
+  "input": "minecraft:nether_star",
   "mana": 50000,
   "output": {
-    "count": 1,
     "id": "minecraft:totem_of_undying"
   }
 }

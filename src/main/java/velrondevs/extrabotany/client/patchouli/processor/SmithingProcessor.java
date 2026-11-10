@@ -1,7 +1,8 @@
 package velrondevs.extrabotany.client.patchouli.processor;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 
@@ -9,8 +10,6 @@ import velrondevs.botania.client.patchouli.PatchouliUtils;
 import vazkii.patchouli.api.IComponentProcessor;
 import vazkii.patchouli.api.IVariable;
 import vazkii.patchouli.api.IVariableProvider;
-import vazkii.patchouli.mixin.AccessorSmithingTransformRecipe;
-import vazkii.patchouli.mixin.AccessorSmithingTrimRecipe;
 
 import java.util.List;
 
@@ -23,7 +22,7 @@ public class SmithingProcessor implements IComponentProcessor {
 
 	@Override
 	public void setup(Level level, IVariableProvider variables) {
-		ResourceLocation id = ResourceLocation.tryParse(variables.get("recipe", level.registryAccess()).asString());
+		Identifier id = Identifier.tryParse(variables.get("recipe", level.registryAccess()).asString());
 		this.recipe = PatchouliUtils.getRecipe(level, RecipeType.SMITHING, id);
 	}
 
@@ -37,40 +36,22 @@ public class SmithingProcessor implements IComponentProcessor {
 			case "template" -> PatchouliUtils.interweaveIngredients(List.of(getTemplate(recipe)), level.registryAccess());
 			case "addition" -> PatchouliUtils.interweaveIngredients(List.of(getAddition(recipe)), level.registryAccess());
 			case "output" -> IVariable.from(getRecipeOutput(level, recipe), level.registryAccess());
-			case "symbol" -> IVariable.from(recipe.getToastSymbol(), level.registryAccess());
+			case "symbol" -> IVariable.from(new ItemStack(Items.SMITHING_TABLE), level.registryAccess());
 			case "heading" -> IVariable.from(getRecipeOutput(level, recipe).getHoverName(), level.registryAccess());
 			default -> null;
 		};
 	}
 
 	private Ingredient getBase(SmithingRecipe recipe) {
-		if (recipe instanceof SmithingTrimRecipe) {
-			return ((AccessorSmithingTrimRecipe) recipe).getBase();
-		}
-		if (recipe instanceof SmithingTransformRecipe) {
-			return ((AccessorSmithingTransformRecipe) recipe).getBase();
-		}
-		return Ingredient.EMPTY;
+		return recipe.baseIngredient();
 	}
 
 	private Ingredient getAddition(SmithingRecipe recipe) {
-		if (recipe instanceof SmithingTrimRecipe) {
-			return ((AccessorSmithingTrimRecipe) recipe).getAddition();
-		}
-		if (recipe instanceof SmithingTransformRecipe) {
-			return ((AccessorSmithingTransformRecipe) recipe).getAddition();
-		}
-		return Ingredient.EMPTY;
+		return recipe.additionIngredient().orElse(null);
 	}
 
 	private Ingredient getTemplate(SmithingRecipe recipe) {
-		if (recipe instanceof SmithingTrimRecipe) {
-			return ((AccessorSmithingTrimRecipe) recipe).getTemplate();
-		}
-		if (recipe instanceof SmithingTransformRecipe) {
-			return ((AccessorSmithingTransformRecipe) recipe).getTemplate();
-		}
-		return Ingredient.EMPTY;
+		return recipe.templateIngredient().orElse(null);
 	}
 
 	protected ItemStack getRecipeOutput(Level level, SmithingRecipe recipe) {
@@ -78,6 +59,6 @@ public class SmithingProcessor implements IComponentProcessor {
 			return ItemStack.EMPTY;
 		}
 
-		return recipe.getResultItem(level.registryAccess());
+		return PatchouliUtils.getDisplayResult(recipe, level);
 	}
 }

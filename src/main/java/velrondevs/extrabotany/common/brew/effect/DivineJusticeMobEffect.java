@@ -1,17 +1,16 @@
 package velrondevs.extrabotany.common.brew.effect;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.neoforged.neoforge.common.EffectCure;
 
 import velrondevs.extrabotany.registry.ExtraBotanyMobEffects;
 import velrondevs.extrabotany.common.handler.DamageHandler;
 
-import java.util.Set;
 
 import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
 
@@ -53,14 +52,8 @@ public final class DivineJusticeMobEffect extends MobEffect {
 	}
 
 	@Override
-	public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+	public boolean applyEffectTick(ServerLevel level, LivingEntity entity, int amplifier) {
 		DamageHandler.INSTANCE.dealTrueDamage(null, entity, amplifier * 2F);
 		return true;
-	}
-
-	@Override
-	public void fillEffectCures(Set<EffectCure> cures, MobEffectInstance effectInstance) {
-		// 不加入任何解除方式，所以牛奶和其他物品都不能解除这个效果。
-		// No cure is added, so milk and other items cannot remove this effect.
 	}
 }

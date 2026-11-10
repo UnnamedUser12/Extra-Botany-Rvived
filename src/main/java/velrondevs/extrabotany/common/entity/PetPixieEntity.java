@@ -1,10 +1,14 @@
 package velrondevs.extrabotany.common.entity;
 
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.FlyingMob;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -12,6 +16,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -31,7 +36,7 @@ import java.util.UUID;
  * <p>来源：ExtraMeteorP 1.12 {@code EntityPetPixie}。
  * <p>Source: ExtraMeteorP 1.12 {@code EntityPetPixie}.
  */
-public class PetPixieEntity extends FlyingMob {
+public class PetPixieEntity extends Mob {
 	private static final String TAG_OWNER = "Owner";
 	private static final String TAG_DAMAGE = "Damage";
 	private static final int LIFETIME_TICKS = 1000;
@@ -72,7 +77,7 @@ public class PetPixieEntity extends FlyingMob {
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel level) {
 		LivingEntity target = getTarget();
 		if (target != null) {
 			Vec3 toTarget = target.getBoundingBox().getCenter().subtract(position());
@@ -105,14 +110,14 @@ public class PetPixieEntity extends FlyingMob {
 	}
 
 	@Override
-	public boolean hurt(DamageSource source, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
 		if (source.is(DamageTypes.IN_WALL)) {
 			return false;
 		}
 		if (ownerId != null && source.getEntity() != null && ownerId.equals(source.getEntity().getUUID())) {
 			return false;
 		}
-		return super.hurt(source, amount * DAMAGE_TAKEN_FACTOR);
+		return super.hurtServer(level, source, amount * DAMAGE_TAKEN_FACTOR);
 	}
 
 	@Override
@@ -192,6 +197,20 @@ public class PetPixieEntity extends FlyingMob {
 	}
 
 	@Override
+	protected void checkFallDamage(double ya, boolean onGround, BlockState onState, BlockPos pos) {
+	}
+
+	@Override
+	public boolean onClimbable() {
+		return false;
+	}
+
+	@Override
+	public void travel(Vec3 input) {
+		travelFlying(input, 0.02F);
+	}
+
+	@Override
 	public boolean removeWhenFarAway(double distanceToClosestPlayer) {
 		return false;
 	}
@@ -202,18 +221,18 @@ public class PetPixieEntity extends FlyingMob {
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
+	public void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		if (ownerId != null) {
-			tag.putUUID(TAG_OWNER, ownerId);
+			tag.store(TAG_OWNER, UUIDUtil.CODEC, ownerId);
 		}
 		tag.putFloat(TAG_DAMAGE, damage);
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
+	public void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		ownerId = tag.hasUUID(TAG_OWNER) ? tag.getUUID(TAG_OWNER) : null;
-		damage = tag.getFloat(TAG_DAMAGE);
+		ownerId = tag.read(TAG_OWNER, UUIDUtil.CODEC).orElse(null);
+		damage = tag.getFloatOr(TAG_DAMAGE, 0.0F);
 	}
 }

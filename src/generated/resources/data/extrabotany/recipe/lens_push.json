@@ -2,18 +2,11 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "botania:lens_normal"
-    },
-    {
-      "item": "botania:rune_earth"
-    },
-    {
-      "tag": "botania:mana_dusts"
-    }
+    "botania:lens_normal",
+    "botania:rune_earth",
+    "#botania:mana_dusts"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:lens_push"
   }
 }

@@ -45,7 +45,7 @@ public interface IShadowium {
 	}
 
 	default boolean isNight(Level level) {
-		return level.isNight();
+		return level.isDarkOutside();
 	}
 
 	default boolean isInCave(Level level, BlockPos pos) {

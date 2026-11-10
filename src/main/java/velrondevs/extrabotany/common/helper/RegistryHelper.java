@@ -8,7 +8,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -32,28 +32,28 @@ import java.util.stream.Stream;
 public final class RegistryHelper {
 	private RegistryHelper() {}
 
-	public static <T> HolderProxy<T> holderProxy(ResourceKey<? extends Registry<T>> registryKey, ResourceLocation id, T value) {
+	public static <T> HolderProxy<T> holderProxy(ResourceKey<? extends Registry<T>> registryKey, Identifier id, T value) {
 		return new HolderProxy<>(ResourceKey.create(registryKey, id), () -> value);
 	}
 
 	/** 值在第一次需要时才创建。 / The value is made when it is first needed. */
-	public static <T> HolderProxy<T> lazyHolderProxy(ResourceKey<? extends Registry<T>> registryKey, ResourceLocation id, Supplier<T> value) {
+	public static <T> HolderProxy<T> lazyHolderProxy(ResourceKey<? extends Registry<T>> registryKey, Identifier id, Supplier<T> value) {
 		return new HolderProxy<>(ResourceKey.create(registryKey, id), value);
 	}
 
-	public static ResourceLocation getRegistryName(Item item) {
+	public static Identifier getRegistryName(Item item) {
 		return BuiltInRegistries.ITEM.getKey(item);
 	}
 
-	public static ResourceLocation getRegistryName(Block block) {
+	public static Identifier getRegistryName(Block block) {
 		return BuiltInRegistries.BLOCK.getKey(block);
 	}
 
-	public static ResourceLocation getRegistryName(EntityType<?> type) {
+	public static Identifier getRegistryName(EntityType<?> type) {
 		return BuiltInRegistries.ENTITY_TYPE.getKey(type);
 	}
 
-	public static ResourceLocation getRegistryName(ParticleType<?> type) {
+	public static Identifier getRegistryName(ParticleType<?> type) {
 		return BuiltInRegistries.PARTICLE_TYPE.getKey(type);
 	}
 
@@ -98,8 +98,18 @@ public final class RegistryHelper {
 		}
 
 		@Override
-		public boolean is(ResourceLocation id) {
-			return key.location().equals(id);
+		public boolean areComponentsBound() {
+			return true;
+		}
+
+		@Override
+		public net.minecraft.core.component.DataComponentMap components() {
+			return net.minecraft.core.component.DataComponentMap.EMPTY;
+		}
+
+		@Override
+		public boolean is(Identifier id) {
+			return key.identifier().equals(id);
 		}
 
 		@Override
@@ -160,7 +170,7 @@ public final class RegistryHelper {
 
 		@Override
 		public String toString() {
-			return "HolderProxy{" + key.location() + "}";
+			return "HolderProxy{" + key.identifier() + "}";
 		}
 	}
 }

@@ -99,7 +99,7 @@ public class OmnivioletBlockEntity extends ExtraGeneratingFlowerBlockEntity {
 
 	public void burnTick() {
 		if (getLevel().isClientSide()) {
-			if (getLevel().random.nextInt(10) == 0) {
+			if (getLevel().getRandom().nextInt(10) == 0) {
 				emitParticle(ParticleTypes.FLAME, 0.4 + Math.random() * 0.2, 0.7, 0.4 + Math.random() * 0.2, 0.0D, 0.0D, 0.0D);
 			}
 		} else {
@@ -160,7 +160,7 @@ public class OmnivioletBlockEntity extends ExtraGeneratingFlowerBlockEntity {
 	public void readFromPacketNBT(CompoundTag cmp) {
 		super.readFromPacketNBT(cmp);
 
-		setBurnTime(cmp.getInt(TAG_BURN_TIME));
+		setBurnTime(cmp.getIntOr(TAG_BURN_TIME, 0));
 	}
 
 	public int getBurnTime() {

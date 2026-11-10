@@ -7,7 +7,7 @@ import com.google.common.cache.LoadingCache;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -182,7 +182,7 @@ public class ResoncundBlockEntity extends ExtraGeneratingFlowerBlockEntity {
 			SoundEvent sound = entry.getKey();
 			int heards = entry.getValue();
 
-			sounds.putInt(sound.getLocation().toString(), heards);
+			sounds.putInt(sound.location().toString(), heards);
 		}
 
 		cmp.put(TAG_SOUND_HEARD, sounds);
@@ -192,15 +192,15 @@ public class ResoncundBlockEntity extends ExtraGeneratingFlowerBlockEntity {
 	public void readFromPacketNBT(CompoundTag cmp) {
 		super.readFromPacketNBT(cmp);
 
-		CompoundTag sounds = cmp.getCompound(TAG_SOUND_HEARD);
+		CompoundTag sounds = cmp.getCompoundOrEmpty(TAG_SOUND_HEARD);
 
 		Map<SoundEvent, Integer> soundHeard = new ConcurrentHashMap<>();
-		for (var key : sounds.getAllKeys()) {
+		for (var key : sounds.keySet()) {
 			if (soundHeard.size() >= getCacheSize()) {
 				break;
 			}
-			ResourceLocation res = ResourceLocation.tryParse(key);
-			int heards = sounds.getInt(key);
+			Identifier res = Identifier.tryParse(key);
+			int heards = sounds.getIntOr(key, 0);
 			if (heards < 0) {
 				continue;
 			}

@@ -1,5 +1,8 @@
 package velrondevs.extrabotany.common.entity;
 
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -188,21 +191,26 @@ public class MagicLandMineEntity extends Entity {
 	}
 
 	@Override
-	protected void readAdditionalSaveData(@NotNull CompoundTag cmp) {
-		if (cmp.hasUUID(TAG_OWNER)) {
-			this.ownerUUID = cmp.getUUID(TAG_OWNER);
+	protected void readAdditionalSaveData(ValueInput cmp) {
+		cmp.read(TAG_OWNER, UUIDUtil.CODEC).ifPresent(uuid -> {
+			this.ownerUUID = uuid;
 			this.cachedOwner = null;
-		}
-		setDamage(cmp.getFloat(TAG_DAMAGE));
-		setExplodeCountDown(cmp.getInt(TAG_EXPLODE_COUNTDOWN));
+		});
+		setDamage(cmp.getFloatOr(TAG_DAMAGE, 0.0F));
+		setExplodeCountDown(cmp.getIntOr(TAG_EXPLODE_COUNTDOWN, 0));
 	}
 
 	@Override
-	protected void addAdditionalSaveData(@NotNull CompoundTag cmp) {
+	protected void addAdditionalSaveData(ValueOutput cmp) {
 		if (this.ownerUUID != null) {
-			cmp.putUUID(TAG_OWNER, this.ownerUUID);
+			cmp.store(TAG_OWNER, UUIDUtil.CODEC, this.ownerUUID);
 		}
 		cmp.putFloat(TAG_DAMAGE, getDamage());
 		cmp.putInt(TAG_EXPLODE_COUNTDOWN, getExplodeCountDown());
+	}
+
+	@Override
+	public boolean hurtServer(net.minecraft.server.level.ServerLevel level, net.minecraft.world.damagesource.DamageSource source, float amount) {
+		return false;
 	}
 }

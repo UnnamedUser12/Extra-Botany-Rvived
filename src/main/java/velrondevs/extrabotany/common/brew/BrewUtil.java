@@ -2,7 +2,7 @@ package velrondevs.extrabotany.common.brew;
 
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -33,16 +33,16 @@ public class BrewUtil {
 		if (registry == null) {
 			return BotaniaBrews.fallbackBrew;
 		}
-		ResourceLocation location = ResourceLocation.tryParse(ItemNBTHelper.getString(stack, TAG_BREW_KEY, ""));
+		Identifier location = Identifier.tryParse(ItemNBTHelper.getString(stack, TAG_BREW_KEY, ""));
 		if (location == null) {
 			return BotaniaBrews.fallbackBrew;
 		}
-		Brew brew = registry.get(location);
+		Brew brew = registry.getValue(location);
 		return brew != null ? brew : BotaniaBrews.fallbackBrew;
 	}
 
 	public static void setBrew(ItemStack stack, Brew brew) {
-		ResourceLocation id = Objects.requireNonNull(BotaniaAPI.instance().getBrewRegistry()).getKey(brew);
+		Identifier id = Objects.requireNonNull(BotaniaAPI.instance().getBrewRegistry()).getKey(brew);
 		ItemNBTHelper.setString(stack, TAG_BREW_KEY, id.toString());
 	}
 

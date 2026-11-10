@@ -7,11 +7,11 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -50,7 +50,7 @@ public class Failnaught implements VoidArchivesVariant {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack itemstack = player.getItemInHand(hand);
 		int multiShoutLevel = getEnchantmentLevel(itemstack, level, Enchantments.MULTISHOT);
 		float chargeProgress = getChargeProcess(itemstack, player);
@@ -68,17 +68,17 @@ public class Failnaught implements VoidArchivesVariant {
 		}
 
 		if (!player.getAbilities().instabuild && !flag) {
-			return InteractionResultHolder.fail(itemstack);
+			return InteractionResult.FAIL;
 		} else {
 			player.startUsingItem(hand);
-			return InteractionResultHolder.consume(itemstack);
+			return InteractionResult.CONSUME;
 		}
 	}
 
 	@Override
-	public void releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int timeCharged) {
+	public boolean releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int timeCharged) {
 		if (level.isClientSide()) {
-			return;
+			return false;
 		}
 		if (livingEntity instanceof Player player) {
 			float chargeProgress = getChargeProcess(stack, player);
@@ -89,7 +89,7 @@ public class Failnaught implements VoidArchivesVariant {
 			}
 
 			if (chargeProgress < MINIMUM_SHOOT_PROCESS) {
-				return;
+				return false;
 			}
 
 			int multiShoutLevel = getEnchantmentLevel(stack, level, Enchantments.MULTISHOT);
@@ -118,6 +118,7 @@ public class Failnaught implements VoidArchivesVariant {
 				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), ExtraBotanySounds.FAILNAUGHT_SHOOT, SoundSource.PLAYERS, 1F, 1F);
 			}
 		}
+		return true;
 	}
 
 	public ManaBurstEntity getBurst(Player player, ItemStack stack, int mana, int tier) {
@@ -212,8 +213,8 @@ public class Failnaught implements VoidArchivesVariant {
 	}
 
 	@Override
-	public UseAnim getUseAnimation(ItemStack stack) {
-		return UseAnim.BOW;
+	public ItemUseAnimation getUseAnimation(ItemStack stack) {
+		return ItemUseAnimation.BOW;
 	}
 
 	private static int getEnchantmentLevel(ItemStack stack, Level level, ResourceKey<Enchantment> enchantment) {

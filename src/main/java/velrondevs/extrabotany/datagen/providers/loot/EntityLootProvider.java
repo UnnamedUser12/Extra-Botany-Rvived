@@ -32,8 +32,8 @@ public class EntityLootProvider extends EntityLootSubProviderFix {
 
 	@Override
 	protected Stream<EntityType<?>> getKnownEntityTypes() {
-		return BuiltInRegistries.ENTITY_TYPE.stream()
-				.filter(e -> LibMisc.MOD_ID.equals(BuiltInRegistries.ENTITY_TYPE.getKey(e).getNamespace()));
+		return Stream.of(ExtraBotanyEntities.GAIA_LEGACY, ExtraBotanyEntities.EGO_MINION, ExtraBotanyEntities.GAIA_III,
+				ExtraBotanyEntities.EGO, ExtraBotanyEntities.VOID_HERRSCHER);
 	}
 
 	@Override

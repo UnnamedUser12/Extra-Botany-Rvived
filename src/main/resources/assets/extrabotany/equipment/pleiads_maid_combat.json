@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "extrabotany:pleiads_maid_combat"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "extrabotany:pleiads_maid_combat"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "extrabotany:pleiads_maid_combat"
+      }
+    ]
+  }
+}

@@ -47,11 +47,14 @@ public class StonesiaRecipeCategory implements IRecipeCategory<StonesiaRecipe> {
 		return localizedName;
 	}
 
-	@NotNull
 	@Override
-	@SuppressWarnings("removal")
-	public IDrawable getBackground() {
-		return background;
+	public int getWidth() {
+		return 96;
+	}
+
+	@Override
+	public int getHeight() {
+		return 44;
 	}
 
 	@NotNull

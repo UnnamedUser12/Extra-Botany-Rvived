@@ -3,11 +3,11 @@ package velrondevs.extrabotany.common.helper;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -43,7 +43,7 @@ public class AttributeUtil {
 				modifiers.withModifierAdded(attribute, modifier, slotGroup));
 	}
 
-	public static void removeAttributeModifier(ItemStack stack, ResourceLocation modifierId) {
+	public static void removeAttributeModifier(ItemStack stack, Identifier modifierId) {
 		ItemAttributeModifiers modifiers = stack.get(DataComponents.ATTRIBUTE_MODIFIERS);
 		if (modifiers == null) {
 			return;
@@ -52,7 +52,7 @@ public class AttributeUtil {
 				.filter(entry -> !entry.modifier().is(modifierId))
 				.toList();
 		stack.set(DataComponents.ATTRIBUTE_MODIFIERS,
-				new ItemAttributeModifiers(filtered, modifiers.showInTooltip()));
+				new ItemAttributeModifiers(filtered));
 	}
 
 	public static List<Component> getTooltips(Multimap<Holder<Attribute>, AttributeModifier> multimap) {

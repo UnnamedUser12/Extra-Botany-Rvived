@@ -46,8 +46,8 @@ public class ManaReaderItem extends Item {
 		if (!canReadMana(tile)) {
 			return InteractionResult.PASS;
 		}
-		if (world.isClientSide) {
-			player.playSound(BotaniaSounds.ding, 0.6F, 0.1F + world.random.nextFloat() * 0.5F);
+		if (world.isClientSide()) {
+			player.playSound(BotaniaSounds.ding, 0.6F, 0.1F + world.getRandom().nextFloat() * 0.5F);
 			return InteractionResult.SUCCESS;
 		}
 

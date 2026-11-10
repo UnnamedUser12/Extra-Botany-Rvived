@@ -1,6 +1,9 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import com.mojang.math.Axis;
 
 import net.minecraft.client.model.geom.ModelPart;
@@ -10,11 +13,10 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.common.entity.subspace.SubspaceSpearEntity;
 
@@ -30,8 +32,8 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>和原版的差异：原版的渲染器把模型平移了 (0.5, 1.5, 0.5)，这是方块实体渲染器的写法。在 1.21.1 上这会让整个模型偏离实体的碰撞箱。这里把模型的中心对准碰撞箱的中心。
  * <p>Difference from the original: the renderer of the original moves the model by (0.5, 1.5, 0.5), which is how a block entity renderer is written. On 1.21.1 this puts the full model away from the collision box of the entity. This port puts the center of the model at the center of the collision box.
  */
-public class SubspaceSpearRenderer extends EntityRenderer<SubspaceSpearEntity> {
-	private static final ResourceLocation TEXTURE = prefix("textures/entity/spearsubspace.png");
+public class SubspaceSpearRenderer extends ExtraEntityRenderer<SubspaceSpearEntity> {
+	private static final Identifier TEXTURE = prefix("textures/entity/spearsubspace.png");
 	// 原版用 0.07 的缩放渲染模型，而模型部件自己按 1/16 缩放。0.07 × 16 = 1.12。
 	// The original draws the model with a scale of 0.07, and a model part has its own scale of 1/16. 0.07 × 16 = 1.12.
 	private static final float SCALE = 1.12F;
@@ -90,7 +92,7 @@ public class SubspaceSpearRenderer extends EntityRenderer<SubspaceSpearEntity> {
 	}
 
 	@Override
-	public void render(SubspaceSpearEntity spear, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
+	protected void render(SubspaceSpearEntity spear, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, SubmitNodeCollector collector, int light, CameraRenderState camera) {
 		pose.pushPose();
 		pose.translate(0F, spear.getBbHeight() * 0.5F, 0F);
 		pose.mulPose(Axis.YP.rotationDegrees(180F + spear.getYRot()));
@@ -98,13 +100,12 @@ public class SubspaceSpearRenderer extends EntityRenderer<SubspaceSpearEntity> {
 		pose.mulPose(Axis.XP.rotationDegrees(spear.getXRot()));
 		pose.scale(SCALE, -SCALE, -SCALE);
 		pose.translate(-MODEL_CENTER_X, -MODEL_CENTER_Y, -MODEL_CENTER_Z);
-		model.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), light, OverlayTexture.NO_OVERLAY);
+		model.render(pose, buffers.getBuffer(RenderTypes.entityCutout(TEXTURE)), light, OverlayTexture.NO_OVERLAY);
 		pose.popPose();
-		super.render(spear, yaw, partialTick, pose, buffers, light);
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(SubspaceSpearEntity spear) {
+	public Identifier getTextureLocation(SubspaceSpearEntity spear) {
 		return TEXTURE;
 	}
 }

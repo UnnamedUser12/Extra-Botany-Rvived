@@ -1,5 +1,8 @@
 package velrondevs.extrabotany.common.item.equipment.armor.goblin_slayer;
 
+import velrondevs.extrabotany.registry.ExtraBotanyArmorMaterials;
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.server.level.ServerLevel;
 import com.google.common.base.Suppliers;
 
 import net.minecraft.ChatFormatting;
@@ -13,7 +16,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -42,18 +46,18 @@ public class GoblinSlayerArmorItem extends StarryIdolArmorItem implements IPhoto
 			new ItemStack(ExtraBotanyItems.goblinSlayerBoots)
 	});
 
-	public GoblinSlayerArmorItem(Type type, Properties properties) {
-		this(ExtraBotanyAPI.instance().getGoblinSlayerArmorMaterial(), type, properties);
+	public GoblinSlayerArmorItem(ArmorType type, Properties properties) {
+		this(ExtraBotanyArmorMaterials.GOBLIN_SLAYER, type, properties);
 	}
 
-	public GoblinSlayerArmorItem(Holder<ArmorMaterial> material, Type type, Properties properties) {
+	public GoblinSlayerArmorItem(ArmorMaterial material, ArmorType type, Properties properties) {
 		super(material, type, properties);
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
-		super.inventoryTick(stack, world, entity, slot, selected);
-		photoniumTick(stack, world, entity, slot, selected);
+	public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		super.inventoryTick(stack, world, entity, eqSlot);
+		photoniumTick(stack, world, entity, 0, false);
 	}
 
 	@Override
@@ -74,7 +78,7 @@ public class GoblinSlayerArmorItem extends StarryIdolArmorItem implements IPhoto
 		}
 
 		if (isDay(level) && isOutCave(level, entity.blockPosition())) {
-			living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 5 * 20, 1));
+			living.addEffect(new MobEffectInstance(MobEffects.SPEED, 5 * 20, 1));
 		}
 	}
 
@@ -101,7 +105,7 @@ public class GoblinSlayerArmorItem extends StarryIdolArmorItem implements IPhoto
 
 	@Override
 	public boolean hasArmorSetItem(Player player, EquipmentSlot slot) {
-		if (player == null || player.getInventory() == null || player.getInventory().armor == null) {
+		if (player == null || player.getInventory() == null) {
 			return false;
 		}
 
@@ -125,6 +129,6 @@ public class GoblinSlayerArmorItem extends StarryIdolArmorItem implements IPhoto
 	}
 
 	public static boolean isGoblin(Entity entity) {
-		return entity.getType().is(ExtraBotanyTags.Entities.GOBLINS);
+		return entity.is(ExtraBotanyTags.Entities.GOBLINS);
 	}
 }

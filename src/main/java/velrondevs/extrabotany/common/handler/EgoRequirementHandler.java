@@ -2,7 +2,7 @@ package velrondevs.extrabotany.common.handler;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
@@ -49,7 +49,7 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>Differences from the original: in the original the rule is always on, because the nine relics can only be obtained after the Ego is defeated. In Reburn some of them can be crafted earlier, thus the rule is an option that is off by default here. The original marks the restricted items with an interface on the item class, and this port uses a tag. The client of the original always cancels the interaction; here the client decides with the advancements that it knows.
  */
 public final class EgoRequirementHandler {
-	public static final ResourceLocation ADVANCEMENT = prefix("main/" + LibAdvancementNames.EGO_DEFEAT);
+	public static final Identifier ADVANCEMENT = prefix("main/" + LibAdvancementNames.EGO_DEFEAT);
 	public static final String MESSAGE = "extrabotany.message.needs_advancement";
 
 	private static final EquipmentSlot[] SLOTS = { EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND,
@@ -104,7 +104,7 @@ public final class EgoRequirementHandler {
 		if (isForbidden(player, event.getItemStack())) {
 			event.setCanceled(true);
 			if (!player.level().isClientSide()) {
-				player.displayClientMessage(message(), true);
+				player.sendOverlayMessage(message());
 			}
 		}
 	}
@@ -158,6 +158,6 @@ public final class EgoRequirementHandler {
 
 	private static void drop(Player player, ItemStack stack) {
 		player.drop(stack, false);
-		player.displayClientMessage(message(), true);
+		player.sendOverlayMessage(message());
 	}
 }

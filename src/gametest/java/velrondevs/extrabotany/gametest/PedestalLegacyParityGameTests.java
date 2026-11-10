@@ -5,12 +5,12 @@ import velrondevs.extrabotany.common.block.block_entity.PedestalBlockEntity;
 import velrondevs.extrabotany.registry.ExtraBotanyItems;
 import velrondevs.extrabotany.xplat.EXplatAbstractions;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 import velrondevs.botania.registry.BotaniaBlocks;
 import velrondevs.botania.common.block.block_entity.mana.ManaPoolBlockEntity;
 
@@ -22,7 +22,7 @@ import java.util.List;
 public final class PedestalLegacyParityGameTests {
     @GameTest(template = "empty", timeoutTicks = 20)
     public static void nightmareFuelConvertsAfterSixThousandDayTicksWithoutIdleUpdates(GameTestHelper h) {
-        long previousTime = h.getLevel().getDayTime();
+        long previousTime = h.getLevel().getDefaultClockTime();
         try {
             daytime(h, 1000);
             var pedestal = create(h);
@@ -38,7 +38,7 @@ public final class PedestalLegacyParityGameTests {
                     "The 6000th daytime tick must turn nightmare fuel into one spirit fuel");
             var tag = pedestal.getUpdateTag(h.getLevel().registryAccess());
             var restored = create(h);
-            restored.loadWithComponents(tag, h.getLevel().registryAccess());
+            restored.loadWithComponents(TestNbt.input(h.getLevel().registryAccess(), tag));
             h.assertTrue(restored.getItem().is(ExtraBotanyItems.spiritFuel), "Converted fuel was missing from the client/save snapshot");
             int changed = pedestal.dirtyCalls;
             ticks(pedestal, 40);
@@ -51,7 +51,7 @@ public final class PedestalLegacyParityGameTests {
 
     @GameTest(template = "empty", timeoutTicks = 20)
     public static void nightPausesFuelProgressAndRemovalOrReloadResetsIt(GameTestHelper h) {
-        long previousTime = h.getLevel().getDayTime();
+        long previousTime = h.getLevel().getDefaultClockTime();
         try {
             daytime(h, 1000);
             var pedestal = create(h);
@@ -73,7 +73,7 @@ public final class PedestalLegacyParityGameTests {
             h.assertTrue(pedestal.getItem().is(ExtraBotanyItems.nightmareFuel), "Removed fuel leaked its progress into a later item");
             ticks(pedestal, 5998);
             var saved = pedestal.saveWithoutMetadata(h.getLevel().registryAccess());
-            pedestal.loadWithComponents(saved, h.getLevel().registryAccess());
+            pedestal.loadWithComponents(TestNbt.input(h.getLevel().registryAccess(), saved));
             ticks(pedestal, 1);
             h.assertTrue(pedestal.getItem().is(ExtraBotanyItems.nightmareFuel), "Transient 1.12.2 daylight timer survived reload");
             ticks(pedestal, 5999);
@@ -92,7 +92,7 @@ public final class PedestalLegacyParityGameTests {
         for (var offset : PedestalBlockEntity.POOL_LOCATIONS) {
             BlockPos relative = new BlockPos(4, 3, 4).offset(offset);
             h.setBlock(relative, BotaniaBlocks.manaPool);
-            ManaPoolBlockEntity pool = PoolTestHelper.ready(h.getBlockEntity(relative));
+            ManaPoolBlockEntity pool = PoolTestHelper.ready(h.getBlockEntity(relative, ManaPoolBlockEntity.class));
             pool.receiveMana(1000);
             pools.add(pool);
         }
@@ -113,7 +113,8 @@ public final class PedestalLegacyParityGameTests {
     }
 
     private static void daytime(GameTestHelper h, long time) {
-        h.getLevel().setDayTime(time);
+        h.setTime(time);
+        h.getLevel().environmentAttributes().invalidateTickCache();
         h.getLevel().updateSkyBrightness();
     }
 

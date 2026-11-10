@@ -2,7 +2,7 @@ package velrondevs.extrabotany.gametest;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
@@ -12,15 +12,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Blaze;
-import net.minecraft.world.entity.monster.Husk;
+import net.minecraft.world.entity.monster.zombie.Husk;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.extrabotany.api.item.LeftClickItem;
 import velrondevs.extrabotany.common.attachment.FlamescionState;
@@ -52,6 +52,8 @@ public final class FlamescionGameTests {
 	private static Player player(GameTestHelper helper) {
 		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
 		player.setPos(helper.absoluteVec(new Vec3(2.5, 3, 2.5)));
+		player.setYRot(0F);
+		player.setXRot(0F);
 		player.setNoGravity(true);
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ExtraBotanyItems.flamescionWeapon));
 		chargeAttack(player);
@@ -121,7 +123,7 @@ public final class FlamescionGameTests {
 		helper.assertTrue(FlamescionHandler.isOverloaded(player), "A different weapon removed the overload");
 
 		Player restored = helper.makeMockPlayer(GameType.SURVIVAL);
-		restored.load(player.saveWithoutId(new CompoundTag()));
+		BlockEntityIO.loadEntity(restored, BlockEntityIO.saveEntity(player));
 		helper.assertTrue(FlamescionHandler.isOverloaded(restored) && FlamescionHandler.getEnergy(restored) == 600,
 				"The Flamescion state was lost on a save and a load");
 
@@ -154,11 +156,11 @@ public final class FlamescionGameTests {
 			tag.putBoolean("flamescion_overloaded", true);
 			tag.putInt("other", 1);
 		});
-		stack.getItem().inventoryTick(stack, helper.getLevel(), player, 0, true);
+		stack.getItem().inventoryTick(stack, helper.getLevel(), player, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
 		CompoundTag remaining = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
 		helper.assertTrue(!remaining.contains("flamescion_energy") && !remaining.contains("flamescion_overloaded"),
 				"The old item state was not removed");
-		helper.assertTrue(remaining.getInt("other") == 1, "The cleanup removed custom data that does not belong to the Flamescion");
+		helper.assertTrue(remaining.getIntOr("other", 0) == 1, "The cleanup removed custom data that does not belong to the Flamescion");
 		helper.succeed();
 	}
 
@@ -170,7 +172,7 @@ public final class FlamescionGameTests {
 		player.setShiftKeyDown(true);
 		ItemStack stack = player.getMainHandItem();
 
-		helper.assertTrue(stack.use(helper.getLevel(), player, InteractionHand.MAIN_HAND).getResult().consumesAction(),
+		helper.assertTrue(stack.use(helper.getLevel(), player, InteractionHand.MAIN_HAND).consumesAction(),
 				"The sneak-use did not start the ignition");
 		helper.assertTrue(player.getDeltaMovement().y == 1.0 && !player.onGround(), "The ignition did not throw the player");
 		helper.assertTrue(player.hasEffect(ExtraBotanyMobEffects.INCANDESCENCE), "The ignition did not give Incandescence");
@@ -182,11 +184,11 @@ public final class FlamescionGameTests {
 		// 灼热模式效果让下落速度减到 5%，并且在落地后消失。
 		// Incandescence Mode decreases the fall speed to 5%, and goes away after a landing.
 		player.setDeltaMovement(0.4, -1.0, 0.2);
-		helper.assertTrue(ExtraBotanyMobEffects.INCANDESCENCE.value().applyEffectTick(player, 0), "Incandescence ended in the air");
+		helper.assertTrue(ExtraBotanyMobEffects.INCANDESCENCE.value().applyEffectTick(helper.getLevel(), player, 0), "Incandescence ended in the air");
 		Vec3 motion = player.getDeltaMovement();
 		helper.assertTrue(Math.abs(motion.y + 0.05) < 1.0E-8 && motion.x == 0.4, "Incandescence did not slow the fall: " + motion);
 		player.setOnGround(true);
-		helper.assertFalse(ExtraBotanyMobEffects.INCANDESCENCE.value().applyEffectTick(player, 0), "Incandescence continued on the ground");
+		helper.assertFalse(ExtraBotanyMobEffects.INCANDESCENCE.value().applyEffectTick(helper.getLevel(), player, 0), "Incandescence continued on the ground");
 		helper.succeed();
 	}
 
@@ -226,7 +228,7 @@ public final class FlamescionGameTests {
 		enterMode(player);
 		stack.use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
 		helper.assertTrue(find(helper, FlamescionVoidEntity.class).size() == 1, "Expected 1 Flamescion Void");
-		helper.assertTrue(player.getCooldowns().isOnCooldown(stack.getItem()), "The void did not start the cooldown");
+		helper.assertTrue(player.getCooldowns().isOnCooldown(stack), "The void did not start the cooldown");
 		stack.use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
 		helper.assertTrue(find(helper, FlamescionVoidEntity.class).size() == 1, "A second void appeared during the cooldown");
 
@@ -245,7 +247,7 @@ public final class FlamescionGameTests {
 		Husk husk = husk(helper, 3.5, 3, 2.5);
 		husk.getAttribute(Attributes.ARMOR).setBaseValue(30);
 		husk.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 1000));
-		husk.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 1000, 3));
+		husk.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 1000, 3));
 		DamageHandler.INSTANCE.flameAttack(husk, player, 12F);
 		float lost = husk.getMaxHealth() - husk.getHealth();
 		helper.assertTrue(Math.abs(lost - 12F) < 1.0E-4F, "Armor or an effect decreased the flame damage: " + lost);

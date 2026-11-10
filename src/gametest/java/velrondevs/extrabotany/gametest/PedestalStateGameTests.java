@@ -9,17 +9,17 @@ import velrondevs.extrabotany.common.lib.LibMisc;
 import velrondevs.extrabotany.xplat.EXplatAbstractions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,11 +62,11 @@ public final class PedestalStateGameTests {
 
     @GameTest(template = "empty", timeoutTicks = 20)
     public static void manualPartialStrikePersistsAndFlushesWithoutEnergy(GameTestHelper h) {
-        var manager = h.getLevel().getRecipeManager();
-        var original = new ArrayList<>(manager.getRecipes());
+        var manager = h.getLevel().getServer().getRecipeManager();
+        var original = TestRecipes.snapshot(manager);
         var player = FakePlayerFactory.get(h.getLevel(), new GameProfile(UUID.randomUUID(), "[PedestalTest]"));
         try {
-            manager.replaceRecipes(List.of(recipe(3)));
+            TestRecipes.replace(manager, List.of(recipe(3)));
             var pedestal = create(h);
             pedestal.setItem(new ItemStack(Items.COBBLESTONE));
             pedestal.dirtyCalls = 0;
@@ -90,17 +90,17 @@ public final class PedestalStateGameTests {
             h.assertTrue(pedestal.dirtyCalls == 2, "Completed strike update kept broadcasting while idle");
         } finally {
             player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-            manager.replaceRecipes(original);
+            TestRecipes.restore(manager, original);
         }
         h.succeed();
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
     public static void automaticStrikeAndCompletionSurviveSaveReload(GameTestHelper h) {
-        var manager = h.getLevel().getRecipeManager();
-        var original = new ArrayList<>(manager.getRecipes());
+        var manager = h.getLevel().getServer().getRecipeManager();
+        var original = TestRecipes.snapshot(manager);
         try {
-            manager.replaceRecipes(List.of(recipe(2)));
+            TestRecipes.replace(manager, List.of(recipe(2)));
             var pedestal = create(h);
             pedestal.setItem(new ItemStack(Items.COBBLESTONE));
             pedestal.dirtyCalls = 0;
@@ -122,13 +122,13 @@ public final class PedestalStateGameTests {
             h.assertTrue(completed.getStrikes() == -1 && completed.getItem().is(Items.GRANITE),
                     "Finished automatic recipe lost output or completion flag on reload");
         } finally {
-            manager.replaceRecipes(original);
+            TestRecipes.restore(manager, original);
         }
         h.succeed();
     }
 
     private static RecipeHolder<PedestalsRecipe> recipe(int strikes) {
-        return new RecipeHolder<>(ResourceLocation.fromNamespaceAndPath(LibMisc.MOD_ID, "test/pedestal_state"),
+        return TestRecipes.holder(Identifier.fromNamespaceAndPath(LibMisc.MOD_ID, "test/pedestal_state"),
                 new PedestalsRecipe(new ItemStack(Items.GRANITE), Ingredient.of(Items.STICK),
                         Ingredient.of(Items.COBBLESTONE), strikes, 0));
     }
@@ -145,7 +145,7 @@ public final class PedestalStateGameTests {
     private static CountingPedestal restore(GameTestHelper h, CountingPedestal original) {
         var restored = new CountingPedestal(original.getBlockPos());
         restored.setLevel(h.getLevel());
-        restored.loadWithComponents(original.saveWithoutMetadata(h.getLevel().registryAccess()), h.getLevel().registryAccess());
+        restored.loadWithComponents(TestNbt.input(h.getLevel().registryAccess(), original.saveWithoutMetadata(h.getLevel().registryAccess())));
         return restored;
     }
 

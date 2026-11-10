@@ -1,25 +1,14 @@
 {
   "type": "botania:runic_altar",
   "ingredients": [
-    {
-      "item": "extrabotany:orichalcos_ingot"
-    },
-    {
-      "item": "extrabotany:gilded_potato_mashed"
-    },
-    {
-      "item": "extrabotany:the_chaos"
-    },
-    {
-      "item": "extrabotany:the_origin"
-    },
-    {
-      "item": "extrabotany:the_end"
-    }
+    "extrabotany:orichalcos_ingot",
+    "extrabotany:gilded_potato_mashed",
+    "extrabotany:the_chaos",
+    "extrabotany:the_origin",
+    "extrabotany:the_end"
   ],
   "mana": 1000000,
   "output": {
-    "count": 1,
     "id": "extrabotany:orichalcos_hammer"
   }
 }

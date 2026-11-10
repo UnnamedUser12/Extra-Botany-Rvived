@@ -3,7 +3,7 @@ package velrondevs.extrabotany.datagen.providers.patchouli.page.patchouli;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.datagen.providers.patchouli.page.AbstractPage;
 
@@ -19,7 +19,7 @@ public class ImagePage extends AbstractPage<ImagePage> {
 
 	public ImagePage() {}
 
-	public ImagePage withEntry(ResourceLocation file) {
+	public ImagePage withEntry(Identifier file) {
 		images.add(file.toString());
 		return this;
 	}
@@ -50,7 +50,7 @@ public class ImagePage extends AbstractPage<ImagePage> {
 	}
 
 	@Override
-	public ResourceLocation getType() {
-		return ResourceLocation.tryParse("patchouli:image");
+	public Identifier getType() {
+		return Identifier.tryParse("patchouli:image");
 	}
 }

@@ -1,10 +1,12 @@
 package velrondevs.extrabotany.common.item.relic;
 
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -94,39 +96,39 @@ public class JudahOathItem extends RelicItem {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
-		if (player.getCooldowns().isOnCooldown(this)) {
-			return InteractionResultHolder.fail(stack);
+		if (player.getCooldowns().isOnCooldown(new ItemStack(this))) {
+			return InteractionResult.FAIL;
 		}
 		if (level.isClientSide()) {
-			return InteractionResultHolder.success(stack);
+			return InteractionResult.SUCCESS;
 		}
 		Relic relic = velrondevs.botania.xplat.XplatAbstractions.INSTANCE.findRelic(stack);
 		if (relic == null) {
-			return InteractionResultHolder.fail(stack);
+			return InteractionResult.FAIL;
 		}
 		// 先绑定，这样刚拿到的誓约可以立刻使用。
 		// Bind first, so that a new oath can be used immediately.
 		relic.tickBinding(player);
 		if (!relic.isRightPlayer(player) || !ManaItemHandler.instance().requestManaExactForTool(stack, player, MANA_COST, true)) {
-			return InteractionResultHolder.fail(stack);
+			return InteractionResult.FAIL;
 		}
 		for (Variant other : Variant.values()) {
-			player.getCooldowns().addCooldown(itemFor(other), COOLDOWN_TICKS);
+			player.getCooldowns().addCooldown(new ItemStack(itemFor(other)), COOLDOWN_TICKS);
 		}
 
 		JudahOathEntity oath = new JudahOathEntity(level, player, variant, OATH_DAMAGE, Mth.wrapDegrees(-player.getYRot() + 180F));
 		oath.setPos(player.getX(), player.getY() + 1.0, player.getZ());
 		oath.shootFromRotation(player, player.getXRot(), player.getYRot(), 0F, THROW_SPEED, 0F);
 		level.addFreshEntity(oath);
-		return InteractionResultHolder.consume(stack);
+		return InteractionResult.CONSUME;
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		tooltip.add(Component.translatable("tooltip.extrabotany.judah_oath").withStyle(ChatFormatting.GRAY));
-		tooltip.add(Component.empty());
-		super.appendHoverText(stack, context, tooltip, flags);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		tooltip.accept(Component.translatable("tooltip.extrabotany.judah_oath").withStyle(ChatFormatting.GRAY));
+		tooltip.accept(Component.empty());
+		super.appendHoverText(stack, context, tooltipDisplay, tooltip, flags);
 	}
 }

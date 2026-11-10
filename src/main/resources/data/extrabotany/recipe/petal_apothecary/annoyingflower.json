@@ -1,33 +1,17 @@
 {
   "type": "botania:petal_apothecary",
   "ingredients": [
-    {
-      "tag": "botania:petals/white"
-    },
-    {
-      "tag": "botania:petals/white"
-    },
-    {
-      "tag": "botania:petals/pink"
-    },
-    {
-      "tag": "botania:petals/pink"
-    },
-    {
-      "tag": "botania:petals/green"
-    },
-    {
-      "item": "botania:rune_mana"
-    },
-    {
-      "item": "extrabotany:spirit_fragment"
-    }
+    "#botania:petals/white",
+    "#botania:petals/white",
+    "#botania:petals/pink",
+    "#botania:petals/pink",
+    "#botania:petals/green",
+    "botania:rune_mana",
+    "extrabotany:spirit_fragment"
   ],
   "output": {
     "count": 1,
     "id": "extrabotany:annoyingflower"
   },
-  "reagent": {
-    "tag": "botania:seed_apothecary_reagent"
-  }
+  "reagent": "#botania:seed_apothecary_reagent"
 }

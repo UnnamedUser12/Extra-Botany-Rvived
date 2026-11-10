@@ -1,6 +1,9 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 
@@ -11,11 +14,10 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -32,10 +34,10 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>来源：ExtraMeteorP 1.16 {@code RenderKeyOfTruth} 和 {@code ModelKeyOfTruth}。光束的画法和守卫者的光束相同。
  * <p>Source: ExtraMeteorP 1.16 {@code RenderKeyOfTruth} and {@code ModelKeyOfTruth}. The beam is drawn in the same way as the beam of a guardian.
  */
-public class KeyOfTruthRenderer extends EntityRenderer<KeyOfTruthEntity> {
-	private static final ResourceLocation TEXTURE = prefix("textures/entity/keyoftruth.png");
-	private static final ResourceLocation BEAM_TEXTURE = prefix("textures/entity/energybeam.png");
-	private static final RenderType BEAM_RENDER_TYPE = RenderType.entityCutoutNoCull(BEAM_TEXTURE);
+public class KeyOfTruthRenderer extends ExtraEntityRenderer<KeyOfTruthEntity> {
+	private static final Identifier TEXTURE = prefix("textures/entity/keyoftruth.png");
+	private static final Identifier BEAM_TEXTURE = prefix("textures/entity/energybeam.png");
+	private static final RenderType BEAM_RENDER_TYPE = RenderTypes.entityCutout(BEAM_TEXTURE);
 
 	private static final int BEAM_RED = 10;
 	private static final int BEAM_GREEN = 229;
@@ -92,19 +94,18 @@ public class KeyOfTruthRenderer extends EntityRenderer<KeyOfTruthEntity> {
 	}
 
 	@Override
-	public void render(KeyOfTruthEntity key, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
+	protected void render(KeyOfTruthEntity key, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, SubmitNodeCollector collector, int light, CameraRenderState camera) {
 		pose.pushPose();
 		pose.translate(0.0, 1.375, 0.0);
 		pose.mulPose(Axis.YP.rotationDegrees(key.getRotation()));
 		pose.mulPose(Axis.XP.rotationDegrees(key.getPitch()));
 		pose.scale(1F, -1F, -1F);
-		model.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), light, OverlayTexture.NO_OVERLAY);
+		model.render(pose, buffers.getBuffer(RenderTypes.entityCutout(TEXTURE)), light, OverlayTexture.NO_OVERLAY);
 		pose.popPose();
 
 		if (key.isShooting() && key.level().getEntity(key.getTargetId()) instanceof LivingEntity target) {
 			renderBeam(key, target, partialTick, pose, buffers);
 		}
-		super.render(key, yaw, partialTick, pose, buffers, light);
 	}
 
 	private void renderBeam(KeyOfTruthEntity key, LivingEntity target, float partialTick, PoseStack pose, MultiBufferSource buffers) {
@@ -173,7 +174,7 @@ public class KeyOfTruthRenderer extends EntityRenderer<KeyOfTruthEntity> {
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(KeyOfTruthEntity key) {
+	public Identifier getTextureLocation(KeyOfTruthEntity key) {
 		return TEXTURE;
 	}
 }

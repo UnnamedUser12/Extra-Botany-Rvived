@@ -2,8 +2,11 @@ package velrondevs.extrabotany.common.block.flower.functional;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -80,9 +83,9 @@ public class SerenitianBlockEntity extends ExtraFunctionalFlowerBlockEntity {
 		// A passive flower of a different mod: the counter can only be set to zero through its save data.
 		HolderLookup.Provider registries = getLevel().registryAccess();
 		CompoundTag tag = flower.saveCustomOnly(registries);
-		if (tag.getInt(PassiveFlower.TAG_PASSIVE_DECAY_TICKS) != 0) {
+		if (tag.getIntOr(PassiveFlower.TAG_PASSIVE_DECAY_TICKS, 0) != 0) {
 			tag.putInt(PassiveFlower.TAG_PASSIVE_DECAY_TICKS, 0);
-			flower.loadCustomOnly(tag, registries);
+			flower.loadCustomOnly(TagValueInput.create(ProblemReporter.DISCARDING, registries, tag));
 			flower.setChanged();
 		}
 	}
@@ -92,7 +95,7 @@ public class SerenitianBlockEntity extends ExtraFunctionalFlowerBlockEntity {
 	 * Tells if this flower type is from Botania or from this mod. The passive flowers of these two mods are already processed before this check.
 	 */
 	private static boolean isKnownMod(BlockEntityType<?> type) {
-		ResourceLocation id = BlockEntityType.getKey(type);
+		Identifier id = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(type);
 		return id == null || BotaniaAPI.MODID.equals(id.getNamespace()) || LibMisc.MOD_ID.equals(id.getNamespace());
 	}
 

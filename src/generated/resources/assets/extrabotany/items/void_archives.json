@@ -1,0 +1,132 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "entries": [
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "extrabotany:item/void_archives_fruit_of_grisaia",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            },
+            {
+              "type": "extrabotany:tint",
+              "kind": "brew"
+            }
+          ]
+        },
+        "threshold": 1.0
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "extrabotany:item/void_archives_infinite_wine",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            },
+            {
+              "type": "extrabotany:tint",
+              "kind": "brew"
+            }
+          ]
+        },
+        "threshold": 2.0
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "extrabotany:item/void_archives_excalibur",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            },
+            {
+              "type": "extrabotany:tint",
+              "kind": "brew"
+            }
+          ]
+        },
+        "threshold": 3.0
+      },
+      {
+        "model": {
+          "type": "minecraft:condition",
+          "on_false": {
+            "type": "minecraft:model",
+            "model": "extrabotany:item/failnaught"
+          },
+          "on_true": {
+            "type": "minecraft:range_dispatch",
+            "entries": [
+              {
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "extrabotany:item/failnaught_pulling_2"
+                },
+                "threshold": 0.35
+              },
+              {
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "extrabotany:item/failnaught_pulling_3"
+                },
+                "threshold": 0.7
+              },
+              {
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "extrabotany:item/failnaught_pulling_4"
+                },
+                "threshold": 0.9
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "extrabotany:item/failnaught_pulling_1"
+            },
+            "property": "extrabotany:bow_pull"
+          },
+          "property": "minecraft:using_item"
+        },
+        "threshold": 4.0
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "extrabotany:item/void_archives_camera",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            },
+            {
+              "type": "extrabotany:tint",
+              "kind": "brew"
+            }
+          ]
+        },
+        "threshold": 5.0
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "extrabotany:item/void_archives",
+      "tints": [
+        {
+          "type": "minecraft:constant",
+          "value": -1
+        },
+        {
+          "type": "extrabotany:tint",
+          "kind": "brew"
+        }
+      ]
+    },
+    "property": "extrabotany:void_variant"
+  }
+}

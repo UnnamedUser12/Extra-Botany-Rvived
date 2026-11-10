@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "B": {
-      "item": "minecraft:blaze_powder"
-    },
-    "F": {
-      "item": "minecraft:feather"
-    },
-    "H": {
-      "item": "extrabotany:hero_medal"
-    },
-    "L": {
-      "item": "minecraft:lava_bucket"
-    }
+    "B": "minecraft:blaze_powder",
+    "F": "minecraft:feather",
+    "H": "extrabotany:hero_medal",
+    "L": "minecraft:lava_bucket"
   },
   "pattern": [
     "BLB",
@@ -21,7 +13,6 @@
     "BHB"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:feather_of_jingwei"
   }
 }

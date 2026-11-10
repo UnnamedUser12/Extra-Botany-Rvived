@@ -1,6 +1,6 @@
 package velrondevs.extrabotany.common.helper;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 /**
@@ -10,7 +10,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 public final class PixieModifiers {
 	private PixieModifiers() {}
 
-	public static AttributeModifier makeModifier(ResourceLocation id, double amount) {
+	public static AttributeModifier makeModifier(Identifier id, double amount) {
 		return new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_VALUE);
 	}
 }

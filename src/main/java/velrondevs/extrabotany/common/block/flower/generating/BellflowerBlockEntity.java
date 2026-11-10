@@ -227,9 +227,9 @@ public class BellflowerBlockEntity extends ExtraGeneratingFlowerBlockEntity impl
 	@Override
 	public void readFromPacketNBT(CompoundTag cmp) {
 		super.readFromPacketNBT(cmp);
-		setPassiveDecayTicks(cmp.getInt(TAG_PASSIVE_DECAY_TICKS));
-		dying = cmp.getBoolean(TAG_DYING);
-		windLevel = cmp.getDouble(TAG_WIND_LEVEL);
+		setPassiveDecayTicks(cmp.getIntOr(TAG_PASSIVE_DECAY_TICKS, 0));
+		dying = cmp.getBooleanOr(TAG_DYING, false);
+		windLevel = cmp.getDoubleOr(TAG_WIND_LEVEL, 0.0D);
 	}
 
 	@Override

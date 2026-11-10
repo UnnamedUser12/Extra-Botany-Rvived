@@ -61,7 +61,7 @@ public class StonesiaBlockEntity extends ExtraGeneratingFlowerBlockEntity {
 			getLevel().destroyBlock(eatPos, false);
 			addMana(mana);
 			syncThrottled();
-			getLevel().playSound(null, getEffectivePos(), SoundEvents.GENERIC_DRINK, SoundSource.BLOCKS, 0.01F, 0.5F + (float) Math.random() * 0.5F);
+			getLevel().playSound(null, getEffectivePos(), SoundEvents.GENERIC_DRINK.value(), SoundSource.BLOCKS, 0.01F, 0.5F + (float) Math.random() * 0.5F);
 		}
 	}
 
@@ -130,7 +130,7 @@ public class StonesiaBlockEntity extends ExtraGeneratingFlowerBlockEntity {
 	public void readFromPacketNBT(CompoundTag cmp) {
 		super.readFromPacketNBT(cmp);
 
-		setCooldown(cmp.getInt(TAG_COOLDOWN));
+		setCooldown(cmp.getIntOr(TAG_COOLDOWN, 0));
 	}
 
 	@Override

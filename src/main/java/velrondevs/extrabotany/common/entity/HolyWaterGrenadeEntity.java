@@ -8,7 +8,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.AbstractThrownPotion;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -31,7 +33,7 @@ import java.util.List;
  * 飞行中的圣水手雷。效果的规则见 {@link #applySplash}。
  * A Holy Water Grenade in flight. See {@link #applySplash} for the rule of the effects.
  */
-public class HolyWaterGrenadeEntity extends ThrownPotion {
+public class HolyWaterGrenadeEntity extends AbstractThrownPotion {
 
 	public static final double SPLASH_RANGE = 4.0D;
 	private static final double SPLASH_RANGE_SQ = 16.0D;
@@ -74,11 +76,11 @@ public class HolyWaterGrenadeEntity extends ThrownPotion {
 			this.level().gameEvent(GameEvent.PROJECTILE_LAND, blockpos, GameEvent.Context.of(this, this.level().getBlockState(blockpos)));
 		}
 
-		if (!this.level().isClientSide) {
+		if (this.level() instanceof ServerLevel serverLevel) {
 			Brew brew = getBrew();
 
 			List<MobEffectInstance> list = BrewUtil.getPotionEffects(brew);
-			this.applySplash(list, result.getType() == HitResult.Type.ENTITY ? ((EntityHitResult) result).getEntity() : null);
+			this.applySplash(serverLevel, list, result.getType() == HitResult.Type.ENTITY ? ((EntityHitResult) result).getEntity() : null);
 
 			int i = BrewUtil.hasInstantEffects(brew) ? 2007 : 2002;
 			this.level().levelEvent(i, this.blockPosition(), BrewUtil.getColor(brew));
@@ -86,7 +88,7 @@ public class HolyWaterGrenadeEntity extends ThrownPotion {
 		}
 	}
 
-	public void applySplash(List<MobEffectInstance> effectInstances, @Nullable Entity target) {
+	public void applySplash(ServerLevel serverLevel, List<MobEffectInstance> effectInstances, @Nullable Entity target) {
 		AABB effectAura = this.getBoundingBox().inflate(SPLASH_RANGE, 2.0D, SPLASH_RANGE);
 
 		List<LivingEntity> nearby = this.level().getEntitiesOfClass(LivingEntity.class, effectAura);
@@ -118,7 +120,7 @@ public class HolyWaterGrenadeEntity extends ThrownPotion {
 				}
 
 				if (mobeffect.value().isInstantenous()) {
-					mobeffect.value().applyInstantenousEffect(this, this.getOwner(), victim, tmpInstance.getAmplifier(), d1);
+					mobeffect.value().applyInstantenousEffect(serverLevel, this, this.getOwner(), victim, tmpInstance.getAmplifier(), d1);
 					continue;
 				}
 
@@ -131,6 +133,10 @@ public class HolyWaterGrenadeEntity extends ThrownPotion {
 				}
 			}
 		}
+	}
+
+	@Override
+	protected void onHitAsPotion(ServerLevel level, ItemStack potionItem, HitResult hitResult) {
 	}
 
 	public Brew getBrew() {

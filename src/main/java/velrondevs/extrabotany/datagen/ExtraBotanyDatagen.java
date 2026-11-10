@@ -60,11 +60,9 @@ public final class ExtraBotanyDatagen {
 	private ExtraBotanyDatagen() {}
 
 	@SubscribeEvent
-	public static void configureForgeDatagen(GatherDataEvent evt) {
+	public static void gatherServerData(GatherDataEvent.Server evt) {
 		DataGenerator generator = evt.getGenerator();
 		PackOutput output = generator.getPackOutput();
-		boolean server = evt.includeServer();
-		boolean client = evt.includeClient();
 
 		evt.createDatapackRegistryObjects(new RegistrySetBuilder().add(Registries.DAMAGE_TYPE, context -> {
 			context.register(ExtraBotanyDamageTypes.LINK_DAMAGE, ExtraBotanyDamageTypes.LINK);
@@ -80,17 +78,18 @@ public final class ExtraBotanyDatagen {
 			context.register(ExtraBotanyDamageTypes.PIERCING_FIRE_DAMAGE, ExtraBotanyDamageTypes.PIERCING_FIRE);
 		}));
 		var lookupProvider = evt.getLookupProvider();
+		add(generator, new velrondevs.botania.datagen.providers.ComponentBindingProvider(lookupProvider));
 
 		// 标签。 / Tags.
 		BlockTagProvider commonBlockTags = new BlockTagProvider(output, lookupProvider);
-		add(generator, server, commonBlockTags);
-		add(generator, server, new ItemTagProvider(output, lookupProvider, commonBlockTags.contentsGetter()));
-		add(generator, server, new EntityTypeTagProvider(output, lookupProvider));
-		add(generator, server, new DamageTypeTagProvider(output, lookupProvider));
+		add(generator, commonBlockTags);
+		add(generator, new ItemTagProvider(output, lookupProvider, commonBlockTags.contentsGetter()));
+		add(generator, new EntityTypeTagProvider(output, lookupProvider));
+		add(generator, new DamageTypeTagProvider(output, lookupProvider));
 
 
 		// 战利品表。 / Loot tables.
-		add(generator, server, new LootTableProvider(output, Set.of(), List.of(
+		add(generator, new LootTableProvider(output, Set.of(), List.of(
 				new LootTableProvider.SubProviderEntry(BlockLootProvider::new, LootContextParamSets.BLOCK),
 				new LootTableProvider.SubProviderEntry(EntityLootProvider::new, LootContextParamSets.ENTITY),
 				new LootTableProvider.SubProviderEntry(ignored -> new RewardBagLootProvider(), LootContextParamSets.EMPTY),
@@ -98,31 +97,38 @@ public final class ExtraBotanyDatagen {
 		), lookupProvider));
 
 		// 配方和进度。 / Recipes and advancements.
-		add(generator, server, new PedestalRecipeProvider(output, lookupProvider));
-		add(generator, server, new CraftingRecipeProvider(output, lookupProvider));
-		add(generator, server, new SmeltingProvider(output, lookupProvider));
-		add(generator, server, new SmithingRecipeProvider(output, lookupProvider));
-		add(generator, server, new ElvenTradeProvider(output, lookupProvider));
-		add(generator, server, new ManaInfusionProvider(output, lookupProvider));
-		add(generator, server, new BrewProvider(output, lookupProvider));
-		add(generator, server, new PetalApothecaryProvider(output, lookupProvider));
-		add(generator, server, new RunicAltarProvider(output, lookupProvider));
-		add(generator, server, new TerrestrialAgglomerationProvider(output, lookupProvider));
-		add(generator, server, new StonesiaProvider(output, lookupProvider));
-		add(generator, server, new EdelweissRecipeProvider(output, lookupProvider));
-		add(generator, server, new OmnivioletProvider(output, lookupProvider));
-		add(generator, server, AdvancementProvider.create(output, lookupProvider, evt.getExistingFileHelper()));
+		add(generator, new PedestalRecipeProvider(output, lookupProvider));
+		add(generator, new CraftingRecipeProvider(output, lookupProvider));
+		add(generator, new SmeltingProvider(output, lookupProvider));
+		add(generator, new SmithingRecipeProvider(output, lookupProvider));
+		add(generator, new ElvenTradeProvider(output, lookupProvider));
+		add(generator, new ManaInfusionProvider(output, lookupProvider));
+		add(generator, new BrewProvider(output, lookupProvider));
+		add(generator, new PetalApothecaryProvider(output, lookupProvider));
+		add(generator, new RunicAltarProvider(output, lookupProvider));
+		add(generator, new TerrestrialAgglomerationProvider(output, lookupProvider));
+		add(generator, new StonesiaProvider(output, lookupProvider));
+		add(generator, new EdelweissRecipeProvider(output, lookupProvider));
+		add(generator, new OmnivioletProvider(output, lookupProvider));
+		add(generator, AdvancementProvider.create(output, lookupProvider));
 
-		// 客户端资源。 / Client assets.
-		add(generator, client, new BlockstateProvider(output));
-		add(generator, client, new FloatingFlowerModelProvider(output));
-		add(generator, client, new ItemModelProvider(output));
-		add(generator, client, new PottedPlantModelProvider(output));
-		add(generator, client, new SoundProvider(output, evt.getExistingFileHelper()));
-		add(generator, client, new PatchouliBookProvider(output));
 	}
 
-	private static void add(DataGenerator generator, boolean run, DataProvider provider) {
-		generator.addProvider(run, new HandWrittenFilter(provider, generator.getPackOutput().getOutputFolder()));
+	@SubscribeEvent
+	public static void gatherClientData(GatherDataEvent.Client evt) {
+		DataGenerator generator = evt.getGenerator();
+		PackOutput output = generator.getPackOutput();
+
+		// 客户端资源。 / Client assets.
+		add(generator, new BlockstateProvider(output));
+		add(generator, new FloatingFlowerModelProvider(output));
+		add(generator, new ItemModelProvider(output));
+		add(generator, new PottedPlantModelProvider(output));
+		add(generator, new SoundProvider(output));
+		add(generator, new PatchouliBookProvider(output));
+	}
+
+	private static void add(DataGenerator generator, DataProvider provider) {
+		generator.addProvider(true, new HandWrittenFilter(provider, generator.getPackOutput().getOutputFolder()));
 	}
 }

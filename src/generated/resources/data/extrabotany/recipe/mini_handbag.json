@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "A": {
-      "item": "minecraft:leather"
-    },
-    "B": {
-      "item": "extrabotany:spirit_fragment"
-    },
-    "C": {
-      "item": "minecraft:chest"
-    }
+    "A": "minecraft:leather",
+    "B": "extrabotany:spirit_fragment",
+    "C": "minecraft:chest"
   },
   "pattern": [
     "ABA",
@@ -18,7 +12,6 @@
     "AAA"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:mini_handbag"
   }
 }

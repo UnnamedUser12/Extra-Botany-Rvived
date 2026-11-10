@@ -4,20 +4,20 @@ import velrondevs.extrabotany.registry.ExtraBotanyItems;
 import velrondevs.extrabotany.common.item.SeasonalItemHelper;
 import velrondevs.extrabotany.common.lib.LibMisc;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.core.BlockPos;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -39,14 +39,14 @@ public final class LegacyCandyGameTests {
 			CompoundTag oldStack = new CompoundTag();
 			oldStack.putString("id", "extrabotany:" + id);
 			oldStack.putInt("count", 4);
-			ItemStack loaded = ItemStack.parseOptional(helper.getLevel().registryAccess(), oldStack);
+			ItemStack loaded = TestNbt.parseStack(helper.getLevel().registryAccess(), oldStack);
 			helper.assertTrue(!loaded.isEmpty() && loaded.getCount() == 4, "Legacy stack lost: " + id);
 			helper.assertTrue(BuiltInRegistries.ITEM.getKey(loaded.getItem()).toString().equals("extrabotany:" + id), "Legacy id changed");
-			CompoundTag saved = (CompoundTag) loaded.save(helper.getLevel().registryAccess());
+			CompoundTag saved = TestNbt.saveStack(helper.getLevel().registryAccess(), loaded);
 			ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 			NbtIo.write(saved, new DataOutputStream(bytes));
 			CompoundTag disk = NbtIo.read(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())), NbtAccounter.unlimitedHeap());
-			ItemStack restored = ItemStack.parseOptional(helper.getLevel().registryAccess(), disk);
+			ItemStack restored = TestNbt.parseStack(helper.getLevel().registryAccess(), disk);
 			helper.assertTrue(ItemStack.matches(loaded, restored), "Legacy NBT round trip changed stack: " + id);
 			if (id.equals("candy_bag")) {
 				legacyBag = restored;
@@ -55,8 +55,7 @@ public final class LegacyCandyGameTests {
 			custom.putString("LootTable", "extrabotany:candy");
 			custom.putString("legacy_marker", "preserve opaque fields");
 			net.minecraft.world.item.component.CustomData.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, loaded, custom);
-			ItemStack withData = ItemStack.parseOptional(helper.getLevel().registryAccess(),
-					(CompoundTag) loaded.save(helper.getLevel().registryAccess()));
+			ItemStack withData = TestNbt.parseStack(helper.getLevel().registryAccess(), TestNbt.saveStack(helper.getLevel().registryAccess(), loaded));
 			helper.assertTrue(ItemStack.matches(loaded, withData), "Legacy custom components changed: " + id);
 		}
 		var player = helper.makeMockPlayer(GameType.SURVIVAL);
@@ -64,7 +63,7 @@ public final class LegacyCandyGameTests {
 		player.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
 		player.setItemInHand(InteractionHand.MAIN_HAND, legacyBag);
 		var result = ExtraBotanyItems.candyBag.use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
-		helper.assertTrue(result.getResult().consumesAction() && player.getMainHandItem().getCount() == 3,
+		helper.assertTrue(result.consumesAction() && player.getMainHandItem().getCount() == 3,
 				"Opening a candy bag did not consume exactly one");
 		var drops = helper.getLevel().getEntitiesOfClass(ItemEntity.class, player.getBoundingBox().inflate(2));
 		int count = drops.stream().mapToInt(e -> e.getItem().getCount()).sum();
@@ -73,14 +72,14 @@ public final class LegacyCandyGameTests {
 				ExtraBotanyItems.candyDrei).contains(e.getItem().getItem())), "Candy bag produced an invalid item");
 		velrondevs.extrabotany.common.helper.ItemNBTHelper.setString(legacyBag, "LootTable", "invalid loot id!");
 		helper.assertTrue(velrondevs.extrabotany.common.item.RewardBagItem.getLoot(legacyBag)
-				.equals(ResourceLocation.parse("extrabotany:reward_bags/candy")), "Malformed legacy override must retain default candy loot");
+				.equals(Identifier.parse("extrabotany:reward_bags/candy")), "Malformed legacy override must retain default candy loot");
 		helper.succeed();
 	}
 
 	@GameTest(template = "empty", timeoutTicks = 20)
 	public static void deployedCandyFoodAndSeasonalContract(GameTestHelper helper) {
 		var candies = List.of(ExtraBotanyItems.candyEins, ExtraBotanyItems.candyZwei, ExtraBotanyItems.candyDrei);
-		var effects = List.of(MobEffects.MOVEMENT_SPEED, MobEffects.JUMP, MobEffects.DIG_SPEED);
+		var effects = List.of(MobEffects.SPEED, MobEffects.JUMP_BOOST, MobEffects.HASTE);
 		for (int i = 0; i < candies.size(); i++) {
 			var player = helper.makeMockPlayer(GameType.SURVIVAL);
 			player.setHealth(10);

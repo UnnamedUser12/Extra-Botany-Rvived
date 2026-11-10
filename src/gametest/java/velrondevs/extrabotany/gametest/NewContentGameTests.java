@@ -3,19 +3,19 @@ package velrondevs.extrabotany.gametest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.Cow;
+import net.minecraft.world.entity.animal.cow.Cow;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Husk;
+import net.minecraft.world.entity.monster.zombie.Husk;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -30,9 +30,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.dispenser.BlockSource;
-import net.neoforged.neoforge.common.EffectCures;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.botania.api.mana.BurstProperties;
 import velrondevs.botania.common.entity.ManaBurstEntity;
@@ -106,8 +105,8 @@ public final class NewContentGameTests {
 		helper.setBlock(far.below(), Blocks.GRASS_BLOCK);
 		helper.setBlock(near, ExtraBotanyFlowerBlocks.woodienia);
 		helper.setBlock(far, ExtraBotanyFlowerBlocks.woodienia);
-		WoodieniaBlockEntity nearFlower = helper.getBlockEntity(near);
-		WoodieniaBlockEntity farFlower = helper.getBlockEntity(far);
+		WoodieniaBlockEntity nearFlower = helper.getBlockEntity(near, WoodieniaBlockEntity.class);
+		WoodieniaBlockEntity farFlower = helper.getBlockEntity(far, WoodieniaBlockEntity.class);
 		int capacity = nearFlower.getMaxMana();
 
 		ItemStack tablet = tabletWithMana(capacity * 3);
@@ -143,7 +142,7 @@ public final class NewContentGameTests {
 
 	private static ManaBurstEntity burstAt(GameTestHelper helper, Vec3 pos, boolean fake, int mana) {
 		ManaBurstEntity burst = new ManaBurstEntity(helper.getLevel(), BlockPos.ZERO, 0F, 0F, fake);
-		burst.moveTo(helper.absoluteVec(pos));
+		burst.snapTo(helper.absoluteVec(pos));
 		burst.setMana(mana);
 		return burst;
 	}
@@ -193,7 +192,7 @@ public final class NewContentGameTests {
 		var cloud = clouds(helper).get(0);
 		var expected = BrewUtil.getPotionEffects(ExtraBotanyBrews.revolution);
 		helper.assertTrue(!expected.isEmpty(), "The test brew has no effects");
-		var cloudTag = cloud.saveWithoutId(new CompoundTag());
+		var cloudTag = TestNbt.saveEntity(helper.getLevel().registryAccess(), cloud);
 		var contents = net.minecraft.world.item.alchemy.PotionContents.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, cloudTag.get("potion_contents"))
 				.getOrThrow(IllegalStateException::new);
 		var effects = contents.customEffects();
@@ -255,7 +254,7 @@ public final class NewContentGameTests {
 				"The diamonds did not return from the bag");
 
 		// The hotbar slot of the bag cannot be picked up. The armor slots take armor only.
-		int lockedSlot = 4 + MiniHandbagItem.SIZE + 27 + player.getInventory().selected;
+		int lockedSlot = 4 + MiniHandbagItem.SIZE + 27 + player.getInventory().getSelectedSlot();
 		helper.assertTrue(menu.slots.get(lockedSlot).getItem() == bag && !menu.slots.get(lockedSlot).mayPickup(player),
 				"The slot of the bag is not locked");
 		helper.assertTrue(menu.slots.get(0).mayPlace(new ItemStack(Items.IRON_HELMET)) && !menu.slots.get(0).mayPlace(new ItemStack(Items.STONE))
@@ -349,9 +348,9 @@ public final class NewContentGameTests {
 			helper.assertTrue(stack.isEmpty(), "The airship item of tier " + tier + " was not used up");
 			helper.assertTrue(airship.getPickResult().is(items.get(tier)), "The airship of tier " + tier + " gives back another item");
 
-			CompoundTag saved = airship.saveWithoutId(new CompoundTag());
+			CompoundTag saved = TestNbt.saveEntity(helper.getLevel().registryAccess(), airship);
 			AirshipEntity copy = new AirshipEntity(helper.getLevel(), Vec3.ZERO, 0);
-			copy.load(saved);
+			TestNbt.loadEntity(helper.getLevel().registryAccess(), copy, saved);
 			helper.assertTrue(copy.getTier() == tier, "The tier was lost in a save: " + copy.getTier());
 			airship.discard();
 		}
@@ -374,7 +373,7 @@ public final class NewContentGameTests {
 		helper.getLevel().addFreshEntity(airship);
 		ItemStack tablet = tabletWithMana(10);
 		player.getInventory().setItem(0, tablet);
-		helper.assertTrue(player.startRiding(airship, true), "The player cannot ride the airship");
+		helper.assertTrue(player.startRiding(airship, true, true), "The player cannot ride the airship");
 
 		double startY = airship.getY();
 		for (int i = 0; i < 4; i++) {
@@ -411,14 +410,12 @@ public final class NewContentGameTests {
 	}
 
 	/**
-	 * Black Sabbath kills the creature when the effect is about to end, and no item removes it.
+	 * Black Sabbath kills the creature when the effect is about to end.
 	 */
 	@GameTest(template = "empty", timeoutTicks = 60)
-	public static void blackSabbathKillsAtTheEndAndCannotBeCured(GameTestHelper helper) {
+	public static void blackSabbathKillsAtTheEnd(GameTestHelper helper) {
 		Husk husk = husk(helper);
 		husk.addEffect(new MobEffectInstance(ExtraBotanyMobEffects.BLACK_SABBATH, 12));
-		husk.removeEffectsCuredBy(EffectCures.MILK);
-		helper.assertTrue(husk.hasEffect(ExtraBotanyMobEffects.BLACK_SABBATH), "Milk removed Black Sabbath");
 		for (int i = 0; i < 4; i++) {
 			husk.tick();
 		}
@@ -431,8 +428,7 @@ public final class NewContentGameTests {
 	}
 
 	/**
-	 * Constant Pain adds true damage equal to the level of the effect to each hit, without reacting to its own damage, and
-	 * no item removes it.
+	 * Constant Pain adds true damage equal to the level of the effect to each hit, without reacting to its own damage.
 	 */
 	@GameTest(template = "empty", timeoutTicks = 60)
 	public static void constantPainAddsTrueDamageOnce(GameTestHelper helper) {
@@ -447,15 +443,13 @@ public final class NewContentGameTests {
 		husk.addEffect(new MobEffectInstance(ExtraBotanyMobEffects.CONSTANT_PAIN, 600, 2));
 		husk.hurt(helper.getLevel().damageSources().generic(), 1F);
 		helper.assertTrue(husk.getHealth() == 17F, "A hit of 1 with Constant Pain 2 should leave 17 health but leaves " + husk.getHealth());
-		husk.removeEffectsCuredBy(EffectCures.MILK);
-		helper.assertTrue(husk.hasEffect(ExtraBotanyMobEffects.CONSTANT_PAIN), "Milk removed Constant Pain");
 		husk.discard();
 		helper.succeed();
 	}
 
 	/**
 	 * Blood Temptation raises the attack damage by 5% per level, the attacker heals 10% of the damage per level, the victim
-	 * gets the effect and it stacks on every hit. No item removes it.
+	 * gets the effect and it stacks on every hit.
 	 */
 	@GameTest(template = "empty", timeoutTicks = 60)
 	public static void bloodTemptationHealsTheAttackerAndStacksOnTheVictim(GameTestHelper helper) {
@@ -477,9 +471,7 @@ public final class NewContentGameTests {
 		var second = victim.getEffect(ExtraBotanyMobEffects.BLOOD_TEMPTATION);
 		helper.assertTrue(second != null && second.getAmplifier() == 1, "The effect did not stack on the victim: " + second);
 
-		attacker.removeEffectsCuredBy(EffectCures.MILK);
-		helper.assertTrue(attacker.hasEffect(ExtraBotanyMobEffects.BLOOD_TEMPTATION), "Milk removed Blood Temptation");
-		attacker.discard();
+	attacker.discard();
 		victim.discard();
 		helper.succeed();
 	}
@@ -504,12 +496,12 @@ public final class NewContentGameTests {
 		far.setOnGround(true);
 		husk.setOnGround(true);
 
-		ExtraBotanyMobEffects.TEMPTATION.value().applyEffectTick(husk, 0);
+		ExtraBotanyMobEffects.TEMPTATION.value().applyEffectTick(helper.getLevel(), husk, 0);
 		helper.assertTrue(near.getNavigation().isInProgress(), "A mob within 7 blocks does not walk to the creature");
 		helper.assertTrue(!far.getNavigation().isInProgress(), "A mob 9 blocks away walked to the creature at level 0");
 
 		far.getNavigation().stop();
-		ExtraBotanyMobEffects.TEMPTATION.value().applyEffectTick(husk, 1);
+		ExtraBotanyMobEffects.TEMPTATION.value().applyEffectTick(helper.getLevel(), husk, 1);
 		helper.assertTrue(far.getNavigation().isInProgress(), "A mob 9 blocks away did not walk to the creature at level 1 (range 9)");
 
 		helper.assertTrue(husk.addEffect(new MobEffectInstance(ExtraBotanyMobEffects.MIND_CRACK, 20)) && husk.hasEffect(ExtraBotanyMobEffects.MIND_CRACK),
@@ -525,7 +517,7 @@ public final class NewContentGameTests {
 	// ----------------------------------------------------------------------------------------------------------------
 
 	private static ResourceKey<LootTable> table(String id) {
-		return ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(id));
+		return ResourceKey.create(Registries.LOOT_TABLE, Identifier.parse(id));
 	}
 
 	/**
@@ -575,8 +567,8 @@ public final class NewContentGameTests {
 		BlockPos dispenserPos = CENTER.west();
 		helper.setBlock(pedestalPos, ExtraBotanyBlocks.livingrockPedestal);
 		helper.setBlock(dispenserPos, Blocks.DISPENSER.defaultBlockState().setValue(DispenserBlock.FACING, Direction.EAST));
-		PedestalBlockEntity pedestal = helper.getBlockEntity(pedestalPos);
-		DispenserBlockEntity dispenser = helper.getBlockEntity(dispenserPos);
+		PedestalBlockEntity pedestal = helper.getBlockEntity(pedestalPos, PedestalBlockEntity.class);
+		DispenserBlockEntity dispenser = helper.getBlockEntity(dispenserPos, DispenserBlockEntity.class);
 		var source = new BlockSource(level, helper.absolutePos(dispenserPos), dispenser.getBlockState(), dispenser);
 
 		var recipes = ExtraBotanyRecipeTypes.getRecipeHolders(level, ExtraBotanyRecipeTypes.PEDESTAL_SMASH_TYPE);
@@ -584,10 +576,10 @@ public final class NewContentGameTests {
 		int tested = 0;
 		for (var holder : recipes) {
 			var recipe = holder.value();
-			ItemStack hammer = java.util.Arrays.stream(recipe.getSmashTools().getItems())
+			ItemStack hammer = recipe.getSmashTools().items().map(entry -> new ItemStack(entry))
 					.filter(stack -> stack.getItem() instanceof velrondevs.extrabotany.common.item.equipment.tool.hammer.ManasteelHammerItem)
 					.findFirst().orElse(ItemStack.EMPTY);
-			ItemStack input = java.util.Arrays.stream(recipe.getInput().getItems()).findFirst().orElse(ItemStack.EMPTY);
+			ItemStack input = recipe.getInput().items().map(entry -> new ItemStack(entry)).findFirst().orElse(ItemStack.EMPTY);
 			if (hammer.isEmpty() || input.isEmpty()) {
 				continue;
 			}

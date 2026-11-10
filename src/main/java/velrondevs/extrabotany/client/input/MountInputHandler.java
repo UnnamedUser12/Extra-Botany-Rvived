@@ -6,7 +6,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import velrondevs.extrabotany.common.entity.mount.MountEntity;
 import velrondevs.extrabotany.common.handler.FlamescionHandler;
@@ -50,7 +50,7 @@ public final class MountInputHandler {
 		// In the Flamescion mode, this key starts the ultimate.
 		while (ExtraBotanyKeyMappings.SKILL.consumeClick()) {
 			if (inGame && !FlamescionHandler.isFlamescionMode(minecraft.player)) {
-				PacketDistributor.sendToServer(MountSkillPacket.INSTANCE);
+				ClientPacketDistributor.sendToServer(MountSkillPacket.INSTANCE);
 			}
 		}
 
@@ -61,7 +61,7 @@ public final class MountInputHandler {
 		int input = inGame ? readInput(minecraft.options) : 0;
 		mount.setInput(input);
 		if (input != lastSentInput) {
-			PacketDistributor.sendToServer(new MountInputPacket(input));
+			ClientPacketDistributor.sendToServer(new MountInputPacket(input));
 			lastSentInput = input;
 		}
 	}

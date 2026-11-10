@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "P": {
-      "tag": "botania:petals/pink"
-    },
-    "S": {
-      "item": "extrabotany:spirit_fragment"
-    }
+    "P": "#botania:petals/pink",
+    "S": "extrabotany:spirit_fragment"
   },
   "pattern": [
     "PPP",

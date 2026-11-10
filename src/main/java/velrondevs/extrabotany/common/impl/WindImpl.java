@@ -40,13 +40,13 @@ public class WindImpl implements Wind {
 
 		public LevelWind(Level level) {
 			this.level = level;
-			this.baseStrength = 5 + level.random.nextInt(10);
+			this.baseStrength = 5 + level.getRandom().nextInt(10);
 			this.updatePeakHeight();
 		}
 
 		public void tick() {
 			if (ticksExisted % UPDATE_STRENGTH_INTERVAL == 0) {
-				int delta = level.random.nextInt(3) - 1; // -1, 0, 1
+				int delta = level.getRandom().nextInt(3) - 1; // -1, 0, 1
 				baseStrength = Math.max(1, Math.min(20, baseStrength + delta));
 			}
 
@@ -59,17 +59,17 @@ public class WindImpl implements Wind {
 
 		private void updatePeakHeight() {
 			double seaLevel = level.getSeaLevel();
-			double maxHeight = level.getMaxBuildHeight();
+			double maxHeight = level.getMaxY();
 			double center = (seaLevel + maxHeight) / 2.0;
 
-			peakHeight = center + (level.random.nextDouble() * 2.0 - 1.0) * CENTER_OFFSET_RANGE;
+			peakHeight = center + (level.getRandom().nextDouble() * 2.0 - 1.0) * CENTER_OFFSET_RANGE;
 		}
 
 		public double getWindLevel(Vec3 position) {
 			double height = position.y();
 
 			double seaLevel = level.getSeaLevel();
-			double maxHeight = level.getMaxBuildHeight();
+			double maxHeight = level.getMaxY();
 			double range = maxHeight - seaLevel;
 
 			double delta = height - peakHeight;

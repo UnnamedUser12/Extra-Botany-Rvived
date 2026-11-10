@@ -116,7 +116,7 @@ public class TwinstarBlockEntity extends ExtraGeneratingFlowerBlockEntity implem
 	@Override
 	public void readFromPacketNBT(CompoundTag cmp) {
 		super.readFromPacketNBT(cmp);
-		setPassiveDecayTicks(cmp.getInt(TAG_PASSIVE_DECAY_TICKS));
+		setPassiveDecayTicks(cmp.getIntOr(TAG_PASSIVE_DECAY_TICKS, 0));
 	}
 
 	@Override

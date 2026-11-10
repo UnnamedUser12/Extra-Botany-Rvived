@@ -1,24 +1,27 @@
 package velrondevs.extrabotany.common.item.equipment.tool;
 
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
@@ -61,25 +64,24 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * The pixie of the original is dark. This port uses the usual pixie of Botania.</li>
  * </ul>
  */
-public class ShadowKatanaItem extends SwordItem implements LeftClickItem {
+public class ShadowKatanaItem extends Item implements LeftClickItem {
 	private static final int MANA_PER_REPAIR = 120;
 	private static final int MANA_PER_PIXIE = 100;
 	private static final double PIXIE_RANGE = 8;
 	private static final float PIXIE_DAMAGE = 4F;
 	private static final int PIXIE_EFFECT_DURATION_TICKS = 40;
 	private static final float NIGHT_HEAL = 2F;
-	private static final ResourceLocation NIGHT_DAMAGE_ID = prefix("shadow_katana_night_damage");
-	private static final ResourceLocation NIGHT_SPEED_ID = prefix("shadow_katana_night_attack_speed");
+	private static final Identifier NIGHT_DAMAGE_ID = prefix("shadow_katana_night_damage");
+	private static final Identifier NIGHT_SPEED_ID = prefix("shadow_katana_night_attack_speed");
 	private static final AttributeModifier NIGHT_DAMAGE =
 			new AttributeModifier(NIGHT_DAMAGE_ID, 10, AttributeModifier.Operation.ADD_VALUE);
 	private static final AttributeModifier NIGHT_SPEED =
 			new AttributeModifier(NIGHT_SPEED_ID, 0.15, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 	private static final List<Holder<MobEffect>> PIXIE_EFFECTS = List.of(
-			MobEffects.BLINDNESS, MobEffects.WITHER, MobEffects.MOVEMENT_SLOWDOWN, MobEffects.WEAKNESS, MobEffects.HUNGER);
+			MobEffects.BLINDNESS, MobEffects.WITHER, MobEffects.SLOWNESS, MobEffects.WEAKNESS, MobEffects.HUNGER);
 
 	public ShadowKatanaItem(Properties props) {
-		super(BotaniaAPI.instance().getElementiumItemTier(),
-				props.attributes(createAttributes(BotaniaAPI.instance().getElementiumItemTier(), 3, -2.4F)));
+		super(props.sword(BotaniaAPI.instance().getElementiumItemTier(), 3, -2.4F));
 	}
 
 	/**
@@ -93,7 +95,7 @@ public class ShadowKatanaItem extends SwordItem implements LeftClickItem {
 		if (player.level().isClientSide()) {
 			return;
 		}
-		boolean active = player.getMainHandItem().getItem() instanceof ShadowKatanaItem && !player.level().isDay();
+		boolean active = player.getMainHandItem().getItem() instanceof ShadowKatanaItem && !player.level().isBrightOutside();
 		setModifier(player.getAttribute(Attributes.ATTACK_DAMAGE), NIGHT_DAMAGE, active);
 		setModifier(player.getAttribute(Attributes.ATTACK_SPEED), NIGHT_SPEED, active);
 	}
@@ -110,8 +112,8 @@ public class ShadowKatanaItem extends SwordItem implements LeftClickItem {
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
-		super.inventoryTick(stack, level, entity, slot, selected);
+	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		super.inventoryTick(stack, level, entity, eqSlot);
 		if (level.isClientSide() || !(entity instanceof Player player)) {
 			return;
 		}
@@ -126,7 +128,7 @@ public class ShadowKatanaItem extends SwordItem implements LeftClickItem {
 	 * Removes the night bonus that old versions wrote on the item. Old versions kept the bonus in the attribute modifier component of the item.
 	 */
 	private static void removeLegacyNightModifiers(ItemStack stack) {
-		if (stack.getComponentsPatch().get(DataComponents.ATTRIBUTE_MODIFIERS) == null) {
+		if (stack.getComponentsPatch().entrySet().stream().noneMatch(entry -> entry.getKey() == DataComponents.ATTRIBUTE_MODIFIERS)) {
 			return;
 		}
 		ItemAttributeModifiers modifiers = stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
@@ -138,11 +140,11 @@ public class ShadowKatanaItem extends SwordItem implements LeftClickItem {
 	}
 
 	@Override
-	public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-		if (!attacker.level().isClientSide() && !attacker.level().isDay()) {
+	public void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+		if (!attacker.level().isClientSide() && !attacker.level().isBrightOutside()) {
 			attacker.heal(NIGHT_HEAL);
 		}
-		return super.hurtEnemy(stack, target, attacker);
+		super.hurtEnemy(stack, target, attacker);
 	}
 
 	@Override
@@ -201,15 +203,15 @@ public class ShadowKatanaItem extends SwordItem implements LeftClickItem {
 			Holder<MobEffect> effect = PIXIE_EFFECTS.get(player.getRandom().nextInt(PIXIE_EFFECTS.size()));
 			pixie.setApplyPotionEffect(new MobEffectInstance(effect, PIXIE_EFFECT_DURATION_TICKS, 0));
 		}
-		float damage = level.isDay() ? PIXIE_DAMAGE : PIXIE_DAMAGE * 2;
+		float damage = level.isBrightOutside() ? PIXIE_DAMAGE : PIXIE_DAMAGE * 2;
 		pixie.setProps(target, player, 0, damage);
-		EventHooks.finalizeMobSpawn(pixie, level, level.getCurrentDifficultyAt(pixie.blockPosition()), MobSpawnType.EVENT, null);
+		EventHooks.finalizeMobSpawn(pixie, level, level.getCurrentDifficultyAt(pixie.blockPosition()), EntitySpawnReason.EVENT, null);
 		level.addFreshEntity(pixie);
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		super.appendHoverText(stack, context, tooltip, flags);
-		tooltip.add(Component.translatable("tooltip.extrabotany.shadow_katana").withStyle(ChatFormatting.GRAY));
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		super.appendHoverText(stack, context, tooltipDisplay, tooltip, flags);
+		tooltip.accept(Component.translatable("tooltip.extrabotany.shadow_katana").withStyle(ChatFormatting.GRAY));
 	}
 }

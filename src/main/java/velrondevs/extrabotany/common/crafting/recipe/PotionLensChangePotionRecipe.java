@@ -1,9 +1,10 @@
 package velrondevs.extrabotany.common.crafting.recipe;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
+
+import velrondevs.botania.common.crafting.recipe.RecipeUtils;
 
 import velrondevs.botania.api.brew.Brew;
 import velrondevs.botania.registry.BotaniaBrews;
@@ -20,11 +21,9 @@ import velrondevs.extrabotany.common.item.lens.PotionLens;
 public final class PotionLensChangePotionRecipe extends CustomRecipe {
 
 	public static final RecipeSerializer<PotionLensChangePotionRecipe> SERIALIZER =
-			new SimpleCraftingRecipeSerializer<>(PotionLensChangePotionRecipe::new);
+			RecipeUtils.simpleSerializer(PotionLensChangePotionRecipe::new);
 
-	public PotionLensChangePotionRecipe(CraftingBookCategory category) {
-		super(category);
-	}
+	public PotionLensChangePotionRecipe() {}
 
 	@Override
 	public boolean matches(CraftingInput inv, Level level) {
@@ -56,7 +55,7 @@ public final class PotionLensChangePotionRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(CraftingInput inv, HolderLookup.Provider registries) {
+	public ItemStack assemble(CraftingInput inv) {
 		ItemStack lensItem = ItemStack.EMPTY;
 		ItemStack cocktailItem = ItemStack.EMPTY;
 
@@ -93,12 +92,7 @@ public final class PotionLensChangePotionRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public boolean canCraftInDimensions(int width, int height) {
-		return width > 1 || height > 1;
-	}
-
-	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<? extends CustomRecipe> getSerializer() {
 		return SERIALIZER;
 	}
 }

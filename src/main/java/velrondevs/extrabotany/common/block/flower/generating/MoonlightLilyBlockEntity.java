@@ -42,7 +42,7 @@ public class MoonlightLilyBlockEntity extends ExtraGeneratingFlowerBlockEntity i
 		if (ticksExisted % COOLDOWN != 0) {
 			return;
 		}
-		if (!getLevel().isNight()) {
+		if (!getLevel().isDarkOutside()) {
 			return;
 		}
 		if (getMana() >= getMaxMana()) {
@@ -74,7 +74,7 @@ public class MoonlightLilyBlockEntity extends ExtraGeneratingFlowerBlockEntity i
 	@Override
 	public void readFromPacketNBT(CompoundTag cmp) {
 		super.readFromPacketNBT(cmp);
-		setPassiveDecayTicks(cmp.getInt(TAG_PASSIVE_DECAY_TICKS));
+		setPassiveDecayTicks(cmp.getIntOr(TAG_PASSIVE_DECAY_TICKS, 0));
 	}
 
 	@Override

@@ -67,7 +67,7 @@ public class TinkleBlockEntity extends ExtraGeneratingFlowerBlockEntity {
 
 			double vel = Math.max(player.getDeltaMovement().lengthSqr(), Math.sqrt(vx * vx + vy * vy + vz * vz));
 
-			if (player.hasEffect(MobEffects.MOVEMENT_SPEED)) {
+			if (player.hasEffect(MobEffects.SPEED)) {
 				vel *= 1.2F;
 			}
 

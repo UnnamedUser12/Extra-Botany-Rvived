@@ -12,8 +12,11 @@ import mezz.jei.api.registration.*;
 import mezz.jei.api.runtime.IJeiRuntime;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.ItemStackTemplate;
+import java.util.List;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.*;
@@ -26,6 +29,7 @@ import velrondevs.botania.api.recipe.StateIngredient;
 import velrondevs.botania.client.integration.jei.ManaPoolRecipeCategory;
 import velrondevs.botania.client.integration.jei.PureDaisyRecipeCategory;
 import velrondevs.botania.registry.BotaniaBrews;
+import velrondevs.botania.registry.BotaniaRecipeTypes;
 import velrondevs.botania.registry.BotaniaItems;
 import velrondevs.botania.common.item.brew.BaseBrewItem;
 
@@ -52,7 +56,7 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  */
 @JeiPlugin
 public class JEIExtraBotanyPlugin implements IModPlugin {
-	private static final ResourceLocation ID = prefix("main");
+	private static final Identifier ID = prefix("main");
 
 	@Override
 	public void registerItemSubtypes(@NotNull ISubtypeRegistration registry) {
@@ -101,7 +105,7 @@ public class JEIExtraBotanyPlugin implements IModPlugin {
 	}
 
 	@Override
-	public ResourceLocation getPluginUid() {
+	public Identifier getPluginUid() {
 		return ID;
 	}
 
@@ -128,10 +132,10 @@ public class JEIExtraBotanyPlugin implements IModPlugin {
 	@Override
 	public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
 		IRecipeManager manager = jeiRuntime.getRecipeManager();
-		ResourceLocation recipeId = prefix("das_rheingold_change_bind");
+		Identifier recipeId = prefix("das_rheingold_change_bind");
 
 		List<RecipeHolder<CraftingRecipe>> toHide = manager.createRecipeLookup(RecipeTypes.CRAFTING).get()
-				.filter(r -> r.id().equals(recipeId))
+				.filter(r -> r.id().identifier().equals(recipeId))
 				.collect(Collectors.toList());
 
 		if (!toHide.isEmpty()) {
@@ -139,8 +143,8 @@ public class JEIExtraBotanyPlugin implements IModPlugin {
 		}
 	}
 
-	private static final Comparator<RecipeHolder<? extends Recipe<?>>> BY_ID = Comparator.comparing(RecipeHolder::id);
-	private static final Comparator<RecipeHolder<? extends Recipe<?>>> BY_GROUP = Comparator.comparing(holder -> holder.value().getGroup());
+	private static final Comparator<RecipeHolder<? extends Recipe<?>>> BY_ID = Comparator.comparing(holder -> holder.id().identifier());
+	private static final Comparator<RecipeHolder<? extends Recipe<?>>> BY_GROUP = Comparator.comparing(holder -> holder.value().group());
 	private static final Comparator<RecipeHolder<PedestalRecipe>> BY_SMASH_TOOLS = (l, r) -> {
 		Ingredient left = l.value().getSmashTools();
 		Ingredient right = r.value().getSmashTools();
@@ -148,7 +152,7 @@ public class JEIExtraBotanyPlugin implements IModPlugin {
 	};
 
 	private static <T extends Recipe<C>, C extends RecipeInput> List<T> sortRecipes(RecipeType<T> type, Comparator<? super RecipeHolder<T>> comparator) {
-		return Minecraft.getInstance().level.getRecipeManager().getAllRecipesFor(type)
+		return BotaniaRecipeTypes.getAllRecipesFor(Minecraft.getInstance().level, type)
 				.stream().sorted(comparator).map(RecipeHolder::value).toList();
 	}
 
@@ -158,11 +162,6 @@ public class JEIExtraBotanyPlugin implements IModPlugin {
 			public Object getSubtypeData(ItemStack stack, UidContext context) {
 				return context == UidContext.Recipe ? "" : extractor.apply(stack);
 			}
-
-			@Override
-			public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext context) {
-				return context == UidContext.Recipe ? "" : extractor.apply(stack);
-			}
 		};
 	}
 
@@ -170,12 +169,6 @@ public class JEIExtraBotanyPlugin implements IModPlugin {
 		return new ISubtypeInterpreter<>() {
 			@Override
 			public Object getSubtypeData(ItemStack stack, UidContext context) {
-				return extractor.apply(stack);
-			}
-
-			@Override
-			@SuppressWarnings({ "deprecation", "removal" })
-			public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext context) {
 				return extractor.apply(stack);
 			}
 		};
@@ -195,17 +188,17 @@ public class JEIExtraBotanyPlugin implements IModPlugin {
 			ItemStack flask = BotaniaItems.brewFlask.getDefaultInstance();
 			BrewUtil.setBrew(flask, brew);
 
-			ResourceLocation brewId = BotaniaAPI.instance().getBrewRegistry().getKey(brew);
-			ResourceLocation id = prefix("jei/mana_cocktail_change_brew/" + brewId.getNamespace() + "/" + brewId.getPath());
-			var ingredients = NonNullList.of(Ingredient.EMPTY,
-					Ingredient.of(cocktail),
-					Ingredient.of(flask)
+			Identifier brewId = BotaniaAPI.instance().getBrewRegistry().getKey(brew);
+			Identifier id = prefix("jei/mana_cocktail_change_brew/" + brewId.getNamespace() + "/" + brewId.getPath());
+			List<Ingredient> ingredients = List.of(
+					Ingredient.of(cocktail.getItem()),
+					Ingredient.of(flask.getItem())
 			);
 			ItemStack result = ExtraBotanyItems.manaCocktail.getDefaultInstance();
 			BrewUtil.setBrew(result, brew);
 
-			ShapelessRecipe compose = new ShapelessRecipe("mana_cocktail_change_brew", CraftingBookCategory.MISC, result, ingredients);
-			recipes.add(new RecipeHolder<>(id, compose));
+			ShapelessRecipe compose = new ShapelessRecipe(new Recipe.CommonInfo(false), new CraftingRecipe.CraftingBookInfo(CraftingBookCategory.MISC, "mana_cocktail_change_brew"), ItemStackTemplate.fromNonEmptyStack(result), ingredients);
+			recipes.add(new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, id), compose));
 		}
 		registry.addRecipes(RecipeTypes.CRAFTING, recipes);
 	}
@@ -224,17 +217,17 @@ public class JEIExtraBotanyPlugin implements IModPlugin {
 			}
 			ItemStack medal = ExtraBotanyItems.heroMedal.getDefaultInstance();
 
-			ResourceLocation brewId = BotaniaAPI.instance().getBrewRegistry().getKey(brew);
-			ResourceLocation id = prefix("jei/infinite_wine/" + brewId.getNamespace() + "/" + brewId.getPath());
-			var ingredients = NonNullList.of(Ingredient.EMPTY,
-					Ingredient.of(cocktail),
-					Ingredient.of(medal)
+			Identifier brewId = BotaniaAPI.instance().getBrewRegistry().getKey(brew);
+			Identifier id = prefix("jei/infinite_wine/" + brewId.getNamespace() + "/" + brewId.getPath());
+			List<Ingredient> ingredients = List.of(
+					Ingredient.of(cocktail.getItem()),
+					Ingredient.of(medal.getItem())
 			);
 			ItemStack result = ExtraBotanyItems.infiniteWine.getDefaultInstance();
 			BrewUtil.setBrew(result, brew);
 
-			ShapelessRecipe compose = new ShapelessRecipe("infinite_wine", CraftingBookCategory.MISC, result, ingredients);
-			recipes.add(new RecipeHolder<>(id, compose));
+			ShapelessRecipe compose = new ShapelessRecipe(new Recipe.CommonInfo(false), new CraftingRecipe.CraftingBookInfo(CraftingBookCategory.MISC, "infinite_wine"), ItemStackTemplate.fromNonEmptyStack(result), ingredients);
+			recipes.add(new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, id), compose));
 		}
 		registry.addRecipes(RecipeTypes.CRAFTING, recipes);
 	}
@@ -253,17 +246,17 @@ public class JEIExtraBotanyPlugin implements IModPlugin {
 			}
 			ItemStack fruit = Items.POPPED_CHORUS_FRUIT.getDefaultInstance();
 
-			ResourceLocation brewId = BotaniaAPI.instance().getBrewRegistry().getKey(brew);
-			ResourceLocation id = prefix("jei/holy_water_grenade/" + brewId.getNamespace() + "/" + brewId.getPath());
-			var ingredients = NonNullList.of(Ingredient.EMPTY,
-					Ingredient.of(cocktail),
-					Ingredient.of(fruit)
+			Identifier brewId = BotaniaAPI.instance().getBrewRegistry().getKey(brew);
+			Identifier id = prefix("jei/holy_water_grenade/" + brewId.getNamespace() + "/" + brewId.getPath());
+			List<Ingredient> ingredients = List.of(
+					Ingredient.of(cocktail.getItem()),
+					Ingredient.of(fruit.getItem())
 			);
 			ItemStack result = ExtraBotanyItems.holyWaterGrenade.getDefaultInstance();
 			BrewUtil.setBrew(result, brew);
 
-			ShapelessRecipe compose = new ShapelessRecipe("holy_water_grenade", CraftingBookCategory.MISC, result, ingredients);
-			recipes.add(new RecipeHolder<>(id, compose));
+			ShapelessRecipe compose = new ShapelessRecipe(new Recipe.CommonInfo(false), new CraftingRecipe.CraftingBookInfo(CraftingBookCategory.MISC, "holy_water_grenade"), ItemStackTemplate.fromNonEmptyStack(result), ingredients);
+			recipes.add(new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, id), compose));
 		}
 		registry.addRecipes(RecipeTypes.CRAFTING, recipes);
 	}

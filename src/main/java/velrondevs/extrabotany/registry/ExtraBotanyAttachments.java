@@ -3,7 +3,7 @@ package velrondevs.extrabotany.registry;
 import velrondevs.extrabotany.common.attachment.FlamescionState;
 import velrondevs.extrabotany.common.attachment.HerrscherEnergy;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.attachment.AttachmentType;
 
 import java.util.function.BiConsumer;
@@ -20,7 +20,7 @@ public final class ExtraBotanyAttachments {
 	 * The energy of the Herrscher of Thunder. It is saved with the player, is only synchronized to that player, and goes back to zero after the player dies.
 	 */
 	public static final AttachmentType<HerrscherEnergy> HERRSCHER_ENERGY = AttachmentType.builder(() -> new HerrscherEnergy())
-			.serialize(HerrscherEnergy.CODEC)
+			.serialize(HerrscherEnergy.CODEC.fieldOf("energy"))
 			.sync((holder, receiver) -> holder == receiver, HerrscherEnergy.STREAM_CODEC)
 			.build();
 
@@ -29,13 +29,13 @@ public final class ExtraBotanyAttachments {
 	 * The player state of the Flamescion. It is saved with the player, is only synchronized to that player, and is reset after the player dies.
 	 */
 	public static final AttachmentType<FlamescionState> FLAMESCION_STATE = AttachmentType.builder(() -> new FlamescionState())
-			.serialize(FlamescionState.CODEC)
+			.serialize(FlamescionState.CODEC.fieldOf("state"))
 			.sync((holder, receiver) -> holder == receiver, FlamescionState.STREAM_CODEC)
 			.build();
 
 	private ExtraBotanyAttachments() {}
 
-	public static void register(BiConsumer<AttachmentType<?>, ResourceLocation> r) {
+	public static void register(BiConsumer<AttachmentType<?>, Identifier> r) {
 		r.accept(HERRSCHER_ENERGY, prefix("herrscher_energy"));
 		r.accept(FLAMESCION_STATE, prefix("flamescion_state"));
 	}

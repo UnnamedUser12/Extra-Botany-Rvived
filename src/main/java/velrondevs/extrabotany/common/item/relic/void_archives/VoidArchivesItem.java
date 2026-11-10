@@ -1,10 +1,16 @@
 package velrondevs.extrabotany.common.item.relic.void_archives;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -62,7 +68,7 @@ public class VoidArchivesItem extends Item implements CustomCreativeTabContents 
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand usedHand) {
 		ItemStack stack = player.getItemInHand(usedHand);
 
 		if (player.isShiftKeyDown()) {
@@ -74,15 +80,15 @@ public class VoidArchivesItem extends Item implements CustomCreativeTabContents 
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
-		super.appendHoverText(stack, context, tooltipComponents, isAdvanced);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipComponents, TooltipFlag isAdvanced) {
+		super.appendHoverText(stack, context, tooltipDisplay, tooltipComponents, isAdvanced);
 		RelicImpl.addDefaultTooltip(stack, tooltipComponents);
-		getVariant(stack).appendHoverText(stack, context, tooltipComponents, isAdvanced);
+		getVariant(stack).appendHoverText(stack, context, tooltipDisplay, tooltipComponents, isAdvanced);
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
-		if (!level.isClientSide && entity instanceof Player player) {
+	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		if (!level.isClientSide() && entity instanceof Player player) {
 			var relic = velrondevs.extrabotany.xplat.EXplatAbstractions.INSTANCE.findRelic(stack);
 			if (relic != null) {
 				relic.tickBinding(player);
@@ -93,8 +99,8 @@ public class VoidArchivesItem extends Item implements CustomCreativeTabContents 
 				setVariant(stack, VoidArchivesVariant.DEFAULT);
 			}
 		}
-		super.inventoryTick(stack, level, entity, slotId, isSelected);
-		getVariant(stack).inventoryTick(stack, level, entity, slotId, isSelected);
+		super.inventoryTick(stack, level, entity, eqSlot);
+		getVariant(stack).inventoryTick(stack, level, entity, eqSlot);
 	}
 
 	public static void switchVariant(ItemStack stack) {
@@ -172,7 +178,7 @@ public class VoidArchivesItem extends Item implements CustomCreativeTabContents 
 	}
 
 	@Override
-	public void onDestroyed(ItemEntity itemEntity, DamageSource damageSource) {
+	public void onDestroyed(ItemEntity itemEntity) {
 		getVariant(itemEntity.getItem()).onDestroyed(itemEntity);
 	}
 
@@ -202,8 +208,8 @@ public class VoidArchivesItem extends Item implements CustomCreativeTabContents 
 	}
 
 	@Override
-	public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-		return getVariant(stack).hurtEnemy(stack, target, attacker);
+	public void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+		getVariant(stack).hurtEnemy(stack, target, attacker);
 	}
 
 	@Override
@@ -217,13 +223,13 @@ public class VoidArchivesItem extends Item implements CustomCreativeTabContents 
 	}
 
 	@Override
-	public UseAnim getUseAnimation(ItemStack stack) {
+	public ItemUseAnimation getUseAnimation(ItemStack stack) {
 		return getVariant(stack).getUseAnimation(stack);
 	}
 
 	@Override
-	public void releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int timeCharged) {
-		getVariant(stack).releaseUsing(stack, level, livingEntity, timeCharged);
+	public boolean releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int timeCharged) {
+		return getVariant(stack).releaseUsing(stack, level, livingEntity, timeCharged);
 	}
 
 	@Override

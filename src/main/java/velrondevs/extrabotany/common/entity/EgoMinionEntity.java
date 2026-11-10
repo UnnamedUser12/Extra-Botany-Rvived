@@ -1,5 +1,8 @@
 package velrondevs.extrabotany.common.entity;
 
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import velrondevs.extrabotany.registry.ExtraBotanyEntities;
 
 import net.minecraft.core.BlockPos;
@@ -19,7 +22,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -126,7 +129,7 @@ public class EgoMinionEntity extends Monster {
 			minion.getAttribute(Attributes.ARMOR).setBaseValue(SUMMONED_ARMOR);
 			minion.setHealth(health);
 			minion.setPos(home.getX() + SPAWN_OFFSETS[type][0] + 0.5, home.getY() + 1, home.getZ() + SPAWN_OFFSETS[type][1] + 0.5);
-			EventHooks.finalizeMobSpawn(minion, level, level.getCurrentDifficultyAt(minion.blockPosition()), MobSpawnType.MOB_SUMMONED, null);
+			EventHooks.finalizeMobSpawn(minion, level, level.getCurrentDifficultyAt(minion.blockPosition()), EntitySpawnReason.MOB_SUMMONED, null);
 			level.addFreshEntity(minion);
 		}
 	}
@@ -244,14 +247,14 @@ public class EgoMinionEntity extends Monster {
 	}
 
 	@Override
-	public boolean hurt(DamageSource source, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
 		Entity attacker = source.getEntity();
 		if (!(attacker instanceof Player) || !PlayerHelper.isTruePlayer(attacker) || !Float.isFinite(amount)) {
 			return false;
 		}
-		int allies = level().getEntitiesOfClass(EgoMinionEntity.class, getBoundingBox().inflate(ALLY_RANGE), Entity::isAlive).size();
+		int allies = level.getEntitiesOfClass(EgoMinionEntity.class, getBoundingBox().inflate(ALLY_RANGE), Entity::isAlive).size();
 		float resistance = Math.min(0.6F, allies * 0.15F);
-		return super.hurt(source, Math.min(HIT_CAP, amount * (1F - resistance)));
+		return super.hurtServer(level, source, Math.min(HIT_CAP, amount * (1F - resistance)));
 	}
 
 	@Override
@@ -270,18 +273,18 @@ public class EgoMinionEntity extends Monster {
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
+	public void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putInt(TAG_TYPE, getMinionType());
 		if (summoner != null) {
-			tag.putUUID(TAG_SUMMONER, summoner);
+			tag.store(TAG_SUMMONER, UUIDUtil.CODEC, summoner);
 		}
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
+	public void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		setMinionType(tag.getInt(TAG_TYPE));
-		summoner = tag.hasUUID(TAG_SUMMONER) ? tag.getUUID(TAG_SUMMONER) : null;
+		setMinionType(tag.getIntOr(TAG_TYPE, 0));
+		summoner = tag.read(TAG_SUMMONER, UUIDUtil.CODEC).orElse(null);
 	}
 }

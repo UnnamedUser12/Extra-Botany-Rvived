@@ -7,7 +7,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.botania.common.entity.ManaBurstEntity;
 
@@ -36,7 +36,7 @@ public class Excalibur implements VoidArchivesVariant {
 	private static final String ID = "excalibur";
 
 	private static final int MANA_PER_DAMAGE = 200;
-	private static final ResourceLocation MODIFIER_ID = prefix("excalibur_modifier");
+	private static final Identifier MODIFIER_ID = prefix("excalibur_modifier");
 	private static final Map<Player, Long> LAST_BURST_TICK = new WeakHashMap<>();
 
 	@Override
@@ -53,7 +53,7 @@ public class Excalibur implements VoidArchivesVariant {
 
 	public static void attackEntity(AttackEntityEvent event) {
 		Player player = event.getEntity();
-		if (!player.level().isClientSide && player.getMainHandItem().getItem() instanceof VoidArchivesItem) {
+		if (!player.level().isClientSide() && player.getMainHandItem().getItem() instanceof VoidArchivesItem) {
 			INSTANCE.trySpawnBurst(player, player.getAttackStrengthScale(0F));
 		}
 	}

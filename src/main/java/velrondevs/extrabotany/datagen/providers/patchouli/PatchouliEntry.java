@@ -4,7 +4,7 @@ import com.demonwav.mcdev.annotations.Translatable;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 
 import org.jetbrains.annotations.Nullable;
@@ -22,16 +22,16 @@ import static velrondevs.extrabotany.common.helper.RegistryHelper.getRegistryNam
  */
 public class PatchouliEntry {
 	JsonObject object = new JsonObject();
-	private ResourceLocation id;
+	private Identifier id;
 
-	public PatchouliEntry(ResourceLocation category,
+	public PatchouliEntry(Identifier category,
 			@Translatable String name,
 			Item icon,
 			List<IPatchouliPage> pages,
-			ResourceLocation id,
+			Identifier id,
 			int sortNum,
-			ResourceLocation advancement,
-			Map<ResourceLocation, Integer> extraRecipeMappings,
+			Identifier advancement,
+			Map<Identifier, Integer> extraRecipeMappings,
 			boolean priority,
 			boolean secret,
 			boolean read,
@@ -83,7 +83,7 @@ public class PatchouliEntry {
 		this.id = id;
 	}
 
-	public ResourceLocation getID() {
+	public Identifier getID() {
 		return this.id;
 	}
 

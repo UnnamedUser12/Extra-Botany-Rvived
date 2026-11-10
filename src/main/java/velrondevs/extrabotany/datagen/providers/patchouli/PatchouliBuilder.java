@@ -3,7 +3,7 @@ package velrondevs.extrabotany.datagen.providers.patchouli;
 import com.demonwav.mcdev.annotations.Translatable;
 
 import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
@@ -27,13 +27,13 @@ import java.util.function.Consumer;
  * The builder of a lexicon entry: the category, the name, the icon, the advancement that unlocks it, and the pages.
  */
 public class PatchouliBuilder {
-	private final ResourceLocation category;
+	private final Identifier category;
 	private String name;
 	private Item icon;
 	private int sortNum;
-	private ResourceLocation advancement;
+	private Identifier advancement;
 	private final List<IPatchouliPage> pages = new ArrayList<>();
-	private final Map<ResourceLocation, Integer> extraRecipeMappings = new HashMap<>();
+	private final Map<Identifier, Integer> extraRecipeMappings = new HashMap<>();
 	private boolean priority;
 	private boolean secret;
 	private boolean read;
@@ -41,14 +41,14 @@ public class PatchouliBuilder {
 	@Nullable
 	private Integer color;
 
-	public PatchouliBuilder(ResourceLocation category, @Translatable String name, ItemLike icon, int sortNum) {
+	public PatchouliBuilder(Identifier category, @Translatable String name, ItemLike icon, int sortNum) {
 		this.category = category;
 		this.name = name;
 		this.icon = icon.asItem();
 		this.sortNum = sortNum;
 	}
 
-	public static PatchouliBuilder entry(ResourceLocation category) {
+	public static PatchouliBuilder entry(Identifier category) {
 		return new PatchouliBuilder(category, "null", Items.PAPER, 0);
 	}
 
@@ -72,7 +72,7 @@ public class PatchouliBuilder {
 		return this;
 	}
 
-	public PatchouliBuilder withAdvancement(ResourceLocation advancement) {
+	public PatchouliBuilder withAdvancement(Identifier advancement) {
 		this.advancement = advancement;
 		return this;
 	}
@@ -82,8 +82,8 @@ public class PatchouliBuilder {
 		return this;
 	}
 
-	public void save(Consumer<PatchouliEntry> consumer, ResourceLocation id) {
-		consumer.accept(new PatchouliEntry(category, name, icon, pages, ResourceLocation.tryBuild(category.getPath(), id.getPath()),
+	public void save(Consumer<PatchouliEntry> consumer, Identifier id) {
+		consumer.accept(new PatchouliEntry(category, name, icon, pages, Identifier.tryBuild(category.getPath(), id.getPath()),
 				sortNum, advancement, extraRecipeMappings, priority, secret, read, color));
 	}
 
@@ -92,7 +92,7 @@ public class PatchouliBuilder {
 			return this;
 		}
 
-		ResourceLocation location = RegistryHelper.getRegistryName(item);
+		Identifier location = RegistryHelper.getRegistryName(item);
 		this.extraRecipeMappings.put(location, pageNum);
 		return this;
 	}
@@ -101,7 +101,7 @@ public class PatchouliBuilder {
 		if (block == Blocks.AIR) {
 			return this;
 		}
-		ResourceLocation location = RegistryHelper.getRegistryName(block);
+		Identifier location = RegistryHelper.getRegistryName(block);
 		this.extraRecipeMappings.put(location, pageNum);
 		return this;
 	}

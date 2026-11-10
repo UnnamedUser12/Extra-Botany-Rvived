@@ -1,7 +1,7 @@
 package velrondevs.extrabotany.common.item;
 
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -23,7 +23,7 @@ public class CosmicCarKeyItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		return MountItems.place(level, player, hand, getPlayerPOVHitResult(level, player, ClipContext.Fluid.ANY),
 				(mountLevel, pos, placer, stack) -> new UfoEntity(mountLevel, pos));
 	}

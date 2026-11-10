@@ -2,7 +2,7 @@ package velrondevs.extrabotany.client.patchouli;
 
 import com.google.gson.JsonElement;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -26,9 +26,9 @@ public class PatchouliUtil {
 	private PatchouliUtil() {}
 
 	public static PatchouliUtil INSTANCE;
-	private final Map<ResourceLocation, Supplier<BookTemplate>> templatesPool = new HashMap<>();
+	private final Map<Identifier, Supplier<BookTemplate>> templatesPool = new HashMap<>();
 
-	public static void onPatchouliReload(Map<ResourceLocation, Book> books) {
+	public static void onPatchouliReload(Map<Identifier, Book> books) {
 		//Read and save template
 		if (INSTANCE == null) {
 			INSTANCE = new PatchouliUtil();
@@ -39,11 +39,11 @@ public class PatchouliUtil {
 		}
 	}
 
-	public @Nullable Supplier<BookTemplate> getTemplate(ResourceLocation id) {
+	public @Nullable Supplier<BookTemplate> getTemplate(Identifier id) {
 		return this.templatesPool.get(id);
 	}
 
-	private static Supplier<BookTemplate> loadTemplate(Book book, BookContentLoader loader, ResourceLocation key, ResourceLocation res) {
+	private static Supplier<BookTemplate> loadTemplate(Book book, BookContentLoader loader, Identifier key, Identifier res) {
 		JsonElement json = loadLocalizedJson(book, loader, res).json();
 		Supplier<BookTemplate> supplier = () -> ClientBookRegistry.INSTANCE.gson.fromJson(json, BookTemplate.class);
 		BookTemplate template = supplier.get();
@@ -54,8 +54,8 @@ public class PatchouliUtil {
 		}
 	}
 
-	private static BookContentLoader.LoadResult loadLocalizedJson(Book book, BookContentLoader loader, ResourceLocation file) {
-		ResourceLocation localizedFile = ResourceLocation.tryBuild(file.getNamespace(), file.getPath().replaceAll("en_us", ClientBookRegistry.INSTANCE.currentLang));
+	private static BookContentLoader.LoadResult loadLocalizedJson(Book book, BookContentLoader loader, Identifier file) {
+		Identifier localizedFile = Identifier.tryBuild(file.getNamespace(), file.getPath().replaceAll("en_us", ClientBookRegistry.INSTANCE.currentLang));
 		BookContentLoader.LoadResult input = loader.loadJson(book, localizedFile);
 		if (input == null) {
 			input = loader.loadJson(book, file);
@@ -67,14 +67,14 @@ public class PatchouliUtil {
 		return input;
 	}
 
-	private <T> void load(Book book, String thing, LoadFunc<T> loader, Map<ResourceLocation, T> builder) {
+	private <T> void load(Book book, String thing, LoadFunc<T> loader, Map<Identifier, T> builder) {
 		BookContentLoader contentLoader = BookContentResourceDirectLoader.INSTANCE;
-		List<ResourceLocation> foundIds = new ArrayList<>();
+		List<Identifier> foundIds = new ArrayList<>();
 		contentLoader.findFiles(book, thing, foundIds);
 
-		for (ResourceLocation id : foundIds) {
+		for (Identifier id : foundIds) {
 			String filePath = String.format("%s/%s/%s/%s/%s.json", "patchouli_books", book.id.getPath(), "en_us", thing, id.getPath());
-			T value = loader.load(book, contentLoader, id, ResourceLocation.tryBuild(id.getNamespace(), filePath));
+			T value = loader.load(book, contentLoader, id, Identifier.tryBuild(id.getNamespace(), filePath));
 			if (value != null) {
 				builder.put(id, value);
 			}
@@ -84,7 +84,7 @@ public class PatchouliUtil {
 
 	private interface LoadFunc<T> {
 		@Nullable
-		T load(Book var1, BookContentLoader var2, ResourceLocation var3, ResourceLocation var4);
+		T load(Book var1, BookContentLoader var2, Identifier var3, Identifier var4);
 	}
 
 }

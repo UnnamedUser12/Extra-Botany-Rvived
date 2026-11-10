@@ -1,5 +1,6 @@
 package velrondevs.extrabotany.common.item.equipment.armor.miku;
 
+import net.minecraft.server.level.ServerLevel;
 import com.google.common.base.Suppliers;
 
 import net.minecraft.ChatFormatting;
@@ -9,7 +10,8 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -24,6 +26,8 @@ import velrondevs.extrabotany.registry.ExtraBotanyArmorMaterials;
 import velrondevs.extrabotany.common.lib.LibMisc;
 
 import java.util.List;
+import java.util.function.UnaryOperator;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import java.util.function.Supplier;
 
 /**
@@ -50,12 +54,16 @@ public class MikuArmorItem extends StarryIdolArmorItem implements ManaDiscountAr
 			new ItemStack(ExtraBotanyItems.mikuBoots)
 	});
 
-	public MikuArmorItem(Type type, Properties props) {
+	public MikuArmorItem(ArmorType type, Properties props) {
 		this(ExtraBotanyArmorMaterials.MIKU, type, props);
 	}
 
-	protected MikuArmorItem(Holder<ArmorMaterial> material, Type type, Properties props) {
+	protected MikuArmorItem(ArmorMaterial material, ArmorType type, Properties props) {
 		super(material, type, props);
+	}
+
+	protected MikuArmorItem(ArmorMaterial material, ArmorType type, Properties props, UnaryOperator<ItemAttributeModifiers> attributeTransform) {
+		super(material, type, props, attributeTransform);
 	}
 
 	@Override
@@ -69,7 +77,7 @@ public class MikuArmorItem extends StarryIdolArmorItem implements ManaDiscountAr
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
+	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot eqSlot) {
 		triggerAdvancement(entity);
 		if (level.isClientSide() || !(entity instanceof Player player) || !stack.isDamaged()) {
 			return;

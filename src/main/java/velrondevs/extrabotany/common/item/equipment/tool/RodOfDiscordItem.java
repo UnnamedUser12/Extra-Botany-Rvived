@@ -1,9 +1,12 @@
 package velrondevs.extrabotany.common.item.equipment.tool;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -41,33 +44,33 @@ public class RodOfDiscordItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		HitResult hit = player.pick(RANGE, 1F, false);
 		if (hit.getType() != HitResult.Type.BLOCK || !(hit instanceof BlockHitResult)) {
-			return InteractionResultHolder.pass(stack);
+			return InteractionResult.PASS;
 		}
 		if (level.isClientSide()) {
-			return InteractionResultHolder.success(stack);
+			return InteractionResult.SUCCESS;
 		}
 		if (!ManaItemHandler.instance().requestManaExactForTool(stack, player, MANA_PER_USE, true)) {
-			return InteractionResultHolder.fail(stack);
+			return InteractionResult.FAIL;
 		}
 
 		Vec3 destination = hit.getLocation();
 		player.teleportTo(destination.x, destination.y + 1, destination.z);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(),
 				SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1F, 3F);
-		player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, NAUSEA_DURATION_TICKS));
+		player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, NAUSEA_DURATION_TICKS));
 		if (stack.getDamageValue() > 0) {
 			player.setHealth(Math.max(1F, player.getHealth() - player.getMaxHealth() / 6F));
 		}
 		stack.setDamageValue(stack.getMaxDamage() - 1);
-		return InteractionResultHolder.success(stack);
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
+	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot eqSlot) {
 		if (!level.isClientSide() && stack.getDamageValue() > 0) {
 			stack.setDamageValue(stack.getDamageValue() - 1);
 		}

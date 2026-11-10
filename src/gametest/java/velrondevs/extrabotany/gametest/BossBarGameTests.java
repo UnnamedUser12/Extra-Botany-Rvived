@@ -1,14 +1,14 @@
 package velrondevs.extrabotany.gametest;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.monster.Husk;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.world.entity.monster.zombie.Husk;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.extrabotany.common.bossevents.GaiaBossEvent;
 import velrondevs.extrabotany.common.bossevents.ServerGaiaBossEvent;

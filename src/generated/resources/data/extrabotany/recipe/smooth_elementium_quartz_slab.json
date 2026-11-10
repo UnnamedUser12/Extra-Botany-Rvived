@@ -3,9 +3,7 @@
   "category": "building",
   "group": "extrabotany:quartz_slab",
   "key": {
-    "Q": {
-      "item": "extrabotany:smooth_elementium_quartz"
-    }
+    "Q": "extrabotany:smooth_elementium_quartz"
   },
   "pattern": [
     "QQQ"

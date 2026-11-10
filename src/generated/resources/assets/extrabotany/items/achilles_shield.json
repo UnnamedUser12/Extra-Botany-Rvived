@@ -1,0 +1,23 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "kind": "achilles_released",
+    "on_false": {
+      "type": "minecraft:condition",
+      "on_false": {
+        "type": "minecraft:model",
+        "model": "extrabotany:item/achilles_shield"
+      },
+      "on_true": {
+        "type": "minecraft:model",
+        "model": "extrabotany:item/achilles_shield_blocking"
+      },
+      "property": "minecraft:using_item"
+    },
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "extrabotany:item/achilles_shield_released"
+    },
+    "property": "extrabotany:flag"
+  }
+}

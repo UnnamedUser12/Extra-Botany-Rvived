@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity.subspace;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -211,7 +213,7 @@ public class SubspaceEntity extends OwnedEntity {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag tag) {
+	protected void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putInt(TAG_LIVE_TICKS, getLiveTicks());
 		tag.putInt(TAG_DELAY, getDelay());
@@ -223,11 +225,11 @@ public class SubspaceEntity extends OwnedEntity {
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundTag tag) {
+	protected void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		configure(Mode.byId(tag.getInt(TAG_MODE)), tag.getInt(TAG_LIVE_TICKS), tag.getInt(TAG_DELAY),
-				tag.getInt(TAG_INTERVAL), tag.getFloat(TAG_SIZE), tag.getFloat(TAG_ROTATION));
-		shots = tag.getInt(TAG_COUNT);
+		configure(Mode.byId(tag.getIntOr(TAG_MODE, 0)), tag.getIntOr(TAG_LIVE_TICKS, 0), tag.getIntOr(TAG_DELAY, 0),
+				tag.getIntOr(TAG_INTERVAL, 0), tag.getFloatOr(TAG_SIZE, 0.0F), tag.getFloatOr(TAG_ROTATION, 0.0F));
+		shots = tag.getIntOr(TAG_COUNT, 0);
 	}
 
 	@Override

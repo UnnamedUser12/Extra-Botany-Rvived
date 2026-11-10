@@ -3,7 +3,7 @@ package velrondevs.extrabotany.common.block.flower.functional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.block.state.BlockState;
 
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +43,7 @@ public class TradeOrchidBlockEntity extends ExtraFunctionalFlowerBlockEntity {
 	@Override
 	public void tickFlower() {
 		super.tickFlower();
-		if (getLevel().isClientSide) {
+		if (getLevel().isClientSide()) {
 			return;
 		}
 		// 这朵花没有自己的数据。魔力变化时，植物魔法的基类会保存并同步它。

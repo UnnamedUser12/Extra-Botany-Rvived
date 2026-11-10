@@ -25,7 +25,7 @@ public class ExtraBotanyKubeJSPlugin implements KubeJSPlugin {
 
 	@Override
 	public void registerRecipeComponents(RecipeComponentTypeRegistry registry) {
-		registry.register(BlockStateComponent.TYPE);
+		registry.unit(BlockStateComponent.INSTANCE);
 	}
 
 	@Override

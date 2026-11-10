@@ -4,9 +4,7 @@
     "type": "block",
     "block": "extrabotany:dimension_catalyst"
   },
-  "input": {
-    "item": "minecraft:blaze_rod"
-  },
+  "input": "minecraft:blaze_rod",
   "mana": 2000,
   "output": {
     "count": 2,

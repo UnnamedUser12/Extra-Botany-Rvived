@@ -10,7 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -27,14 +27,15 @@ public class GaiaHammerItem extends ManasteelHammerItem {
 	public static final float KNOCKBACK_RANGE = 3.5F;
 	private static final float KNOCKBACK_POWER = 1.3F;
 
-	public GaiaHammerItem(Tier tier, int attackDamageModifier, float attackSpeedModifier, Properties properties) {
+	public GaiaHammerItem(ToolMaterial tier, int attackDamageModifier, float attackSpeedModifier, Properties properties) {
 		super(tier, attackDamageModifier, attackSpeedModifier, properties);
 	}
 
 	@Override
-	public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+	public void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+		super.hurtEnemy(stack, target, attacker);
 		if (!shouldDealAdditionalDamage(attacker)) {
-			return super.hurtEnemy(stack, target, attacker);
+			return;
 		}
 
 		Level level = attacker.level();
@@ -51,7 +52,6 @@ public class GaiaHammerItem extends ManasteelHammerItem {
 
 		}
 		knockbackNearbyEntities(level, attacker, target);
-		return super.hurtEnemy(stack, target, attacker);
 	}
 
 	private void knockbackNearbyEntities(Level level, Entity attacker, Entity attacked) {

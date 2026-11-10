@@ -1,11 +1,13 @@
 package velrondevs.extrabotany.common.item;
 
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -57,24 +59,24 @@ public class DasRheingoldItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand usedHand) {
 		ItemStack stack = player.getItemInHand(usedHand);
 		if (getSoulbindUUID(stack) == null) {
-			return InteractionResultHolder.pass(stack);
+			return InteractionResult.PASS;
 		}
 		if (player.isSecondaryUseActive()) {
 			stack.remove(DataComponents.CUSTOM_NAME);
 			ItemNBTHelper.removeEntry(stack, TAG_SOULBIND_UUID);
-			return InteractionResultHolder.success(stack);
+			return InteractionResult.SUCCESS;
 		}
-		return InteractionResultHolder.pass(stack);
+		return InteractionResult.PASS;
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
-		super.appendHoverText(stack, context, tooltipComponents, isAdvanced);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipComponents, TooltipFlag isAdvanced) {
+		super.appendHoverText(stack, context, tooltipDisplay, tooltipComponents, isAdvanced);
 		if (getSoulbindUUID(stack) != null) {
-			tooltipComponents.add(Component.translatable("tooltip.extrabotany.bind", getSoulbindUUID(stack)).withStyle(ChatFormatting.GRAY));
+			tooltipComponents.accept(Component.translatable("tooltip.extrabotany.bind", getSoulbindUUID(stack)).withStyle(ChatFormatting.GRAY));
 		}
 	}
 

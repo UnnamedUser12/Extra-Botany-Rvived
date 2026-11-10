@@ -8,16 +8,23 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.AdvancementType;
-import net.minecraft.advancements.critereon.*;
+import net.minecraft.advancements.criterion.*;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.ClientAsset;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 import velrondevs.botania.common.advancements.RelicBindTrigger;
 import velrondevs.botania.common.advancements.UseItemSuccessTrigger;
@@ -57,21 +64,20 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>从原版恢复的几个进度是 {@code src/main/resources} 里的手写文件。
  * <p>Some advancements that were restored from the original are hand-written files in {@code src/main/resources}.
  */
-public class AdvancementProvider extends velrondevs.botania.datagen.providers.advancements.AdvancementProvider {
+public class AdvancementProvider {
+	private static HolderLookup.Provider registries;
 
 	public static String CODE_TRIGGE = "code_triggered";
 
-	public static net.neoforged.neoforge.common.data.AdvancementProvider create(
-			PackOutput packOutput, CompletableFuture<HolderLookup.Provider> lookupProvider,
-			ExistingFileHelper existingFileHelper) {
-		return new net.neoforged.neoforge.common.data.AdvancementProvider(
-				packOutput, lookupProvider, existingFileHelper, List.of(new ExtrabotanyAdvancements()));
+	public static DataProvider create(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+		return new net.minecraft.data.advancements.AdvancementProvider(
+				packOutput, lookupProvider, List.of(new ExtrabotanyAdvancements()));
 	}
 
-	public static class ExtrabotanyAdvancements implements net.neoforged.neoforge.common.data.AdvancementProvider.AdvancementGenerator {
+	public static class ExtrabotanyAdvancements implements AdvancementSubProvider {
 		@Override
-		public void generate(HolderLookup.Provider lookup, Consumer<AdvancementHolder> consumer,
-				ExistingFileHelper existingFileHelper) {
+		public void generate(HolderLookup.Provider lookup, Consumer<AdvancementHolder> consumer) {
+			registries = lookup;
 			AdvancementHolder root = Advancement.Builder.advancement()
 					.display(rootDisplay(ExtraBotanyItems.zadkiel, "itemGroup.extrabotany", "extrabotany.desc", prefix("textures/block/photonium_block.png")))
 					.addCriterion("use_lexicon", UseItemSuccessTrigger.Instance.useItem(matchItems(BotaniaItems.lexicon)))
@@ -115,7 +121,7 @@ public class AdvancementProvider extends velrondevs.botania.datagen.providers.ad
 					.addCriterion("kill_gaia_3rd",
 							KilledTrigger.TriggerInstance.playerKilledEntity(
 									EntityPredicate.Builder.entity()
-										.of(ExtraBotanyEntities.GAIA_III)
+										.of(entityTypes(), ExtraBotanyEntities.GAIA_III)
 							)
 					)
 					.save(consumer, mainId(LibAdvancementNames.GAIA_TRIAL));
@@ -127,7 +133,7 @@ public class AdvancementProvider extends velrondevs.botania.datagen.providers.ad
 					.addCriterion("kill_ego",
 							KilledTrigger.TriggerInstance.playerKilledEntity(
 									EntityPredicate.Builder.entity()
-										.of(ExtraBotanyEntities.EGO)
+										.of(entityTypes(), ExtraBotanyEntities.EGO)
 							)
 					)
 					.save(consumer, mainId(LibAdvancementNames.EGO_DEFEAT));
@@ -165,7 +171,7 @@ public class AdvancementProvider extends velrondevs.botania.datagen.providers.ad
 					.display(simple(ExtraBotanyItems.manaRingMaster, LibAdvancementNames.OVERLOAD, AdvancementType.CHALLENGE))
 					.parent(craftRing)
 					.addCriterion("mana_charge", ManaChargeTrigger.TriggerInstance.manaCharged(
-							ItemPredicate.Builder.item().of(ExtraBotanyItems.manaRingMaster).build(),
+							matchItems(ExtraBotanyItems.manaRingMaster),
 							MinMaxBoundsExtension.Longs.atLeast(MasterBandOfManaItem.ADVANCEMENT_PHASE1_REQUIRE)
 					))
 					.save(consumer, mainId(LibAdvancementNames.OVERLOAD));
@@ -173,7 +179,7 @@ public class AdvancementProvider extends velrondevs.botania.datagen.providers.ad
 					.display(hidden(ExtraBotanyItems.manaRingMaster, LibAdvancementNames.LOAD_OF_RING, AdvancementType.CHALLENGE))
 					.parent(overlord)
 					.addCriterion("mana_charge", ManaChargeTrigger.TriggerInstance.manaCharged(
-							ItemPredicate.Builder.item().of(ExtraBotanyItems.manaRingMaster).build(),
+							matchItems(ExtraBotanyItems.manaRingMaster),
 							MinMaxBoundsExtension.Longs.atLeast(MasterBandOfManaItem.ADVANCEMENT_PHASE2_REQUIRE)
 					))
 					.save(consumer, mainId(LibAdvancementNames.LOAD_OF_RING));
@@ -289,6 +295,33 @@ public class AdvancementProvider extends velrondevs.botania.datagen.providers.ad
 		return HasArmorSetTrigger.TriggerInstance.forArmorSet(armorSet.get());
 	}
 
+	private static HolderGetter<Item> items() {
+		return registries.lookupOrThrow(Registries.ITEM);
+	}
+
+	private static HolderGetter<EntityType<?>> entityTypes() {
+		return registries.lookupOrThrow(Registries.ENTITY_TYPE);
+	}
+
+	protected static ItemPredicate matchItems(ItemLike... items) {
+		return ItemPredicate.Builder.item().of(items(), items).build();
+	}
+
+	protected static Criterion<InventoryChangeTrigger.TriggerInstance> onPickup(TagKey<Item> tag) {
+		return InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(items(), tag).build());
+	}
+
+	protected static Criterion<InventoryChangeTrigger.TriggerInstance> onPickup(ItemLike... items) {
+		return InventoryChangeTrigger.TriggerInstance.hasItems(matchItems(items));
+	}
+
+	protected static DisplayInfo rootDisplay(ItemLike icon, String titleKey, String descKey, Identifier background) {
+		return new DisplayInfo(new ItemStackTemplate(icon.asItem()),
+				Component.translatable(titleKey),
+				Component.translatable(descKey),
+				Optional.of(new ClientAsset.ResourceTexture(background)), AdvancementType.TASK, false, false, false);
+	}
+
 	protected static Criterion<ImpossibleTrigger.TriggerInstance> impossible() {
 		return CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance());
 	}
@@ -302,7 +335,7 @@ public class AdvancementProvider extends velrondevs.botania.datagen.providers.ad
 
 	protected static DisplayInfo simple(ItemLike icon, String name, AdvancementType frameType) {
 		String expandedName = "advancement.extrabotany:" + name;
-		return new DisplayInfo(new ItemStack(icon.asItem()),
+		return new DisplayInfo(new ItemStackTemplate(icon.asItem()),
 				Component.translatable(expandedName),
 				Component.translatable(expandedName + ".desc"),
 				Optional.empty(), frameType, true, true, false);
@@ -310,7 +343,7 @@ public class AdvancementProvider extends velrondevs.botania.datagen.providers.ad
 
 	protected static DisplayInfo hidden(ItemLike icon, String name, AdvancementType frameType) {
 		String expandedName = "advancement.extrabotany:" + name;
-		return new DisplayInfo(new ItemStack(icon.asItem()),
+		return new DisplayInfo(new ItemStackTemplate(icon.asItem()),
 				Component.translatable(expandedName),
 				Component.translatable(expandedName + ".desc"),
 				Optional.empty(), frameType, true, true, true);

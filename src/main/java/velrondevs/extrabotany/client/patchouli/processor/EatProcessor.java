@@ -3,7 +3,7 @@ package velrondevs.extrabotany.client.patchouli.processor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 
@@ -21,7 +21,7 @@ public class EatProcessor implements IComponentProcessor {
 	@Override
 	public void setup(Level level, IVariableProvider variables) {
 		String itemId = variables.get("output", level.registryAccess()).asString();
-		output = BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(itemId));
+		output = BuiltInRegistries.ITEM.getValue(Identifier.tryParse(itemId));
 	}
 
 	@Override

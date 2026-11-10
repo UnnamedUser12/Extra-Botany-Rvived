@@ -51,7 +51,7 @@ public abstract class FlamescionAreaEntity extends PlayerOwnedEntity {
 	protected static void slowMonsters(List<LivingEntity> entities) {
 		for (LivingEntity living : entities) {
 			if (living instanceof Enemy) {
-				living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, SLOWNESS_TICKS, SLOWNESS_LEVEL));
+				living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SLOWNESS_TICKS, SLOWNESS_LEVEL));
 			}
 		}
 	}

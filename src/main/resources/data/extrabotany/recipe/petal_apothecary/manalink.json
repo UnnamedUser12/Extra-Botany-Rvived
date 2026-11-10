@@ -1,36 +1,18 @@
 {
   "type": "botania:petal_apothecary",
   "ingredients": [
-    {
-      "tag": "botania:petals/cyan"
-    },
-    {
-      "tag": "botania:petals/cyan"
-    },
-    {
-      "tag": "botania:petals/cyan"
-    },
-    {
-      "tag": "botania:petals/light_blue"
-    },
-    {
-      "tag": "botania:petals/light_blue"
-    },
-    {
-      "item": "botania:rune_sloth"
-    },
-    {
-      "item": "botania:rune_lust"
-    },
-    {
-      "item": "botania:life_essence"
-    }
+    "#botania:petals/cyan",
+    "#botania:petals/cyan",
+    "#botania:petals/cyan",
+    "#botania:petals/light_blue",
+    "#botania:petals/light_blue",
+    "botania:rune_sloth",
+    "botania:rune_lust",
+    "botania:life_essence"
   ],
   "output": {
     "count": 1,
     "id": "extrabotany:manalink"
   },
-  "reagent": {
-    "tag": "botania:seed_apothecary_reagent"
-  }
+  "reagent": "#botania:seed_apothecary_reagent"
 }

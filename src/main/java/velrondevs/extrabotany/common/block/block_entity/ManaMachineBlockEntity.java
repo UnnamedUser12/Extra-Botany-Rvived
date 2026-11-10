@@ -5,13 +5,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import velrondevs.botania.common.block.block_entity.BotaniaBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -36,7 +35,7 @@ import velrondevs.botania.api.mana.spark.SparkAttachable;
  * <p>性能：数据改变时，机器最多每 {@value #SYNC_INTERVAL} tick 发一次同步数据包。
  * <p>Performance: when the data changes, a machine sends at most one synchronization packet for each {@value #SYNC_INTERVAL} ticks.
  */
-public abstract class ManaMachineBlockEntity extends BlockEntity implements ManaReceiver, SparkAttachable, Wandable {
+public abstract class ManaMachineBlockEntity extends BotaniaBlockEntity implements ManaReceiver, SparkAttachable, Wandable {
 	protected static final Direction[] ALL_SIDES = Direction.values();
 
 	private static final String TAG_MANA = "mana";
@@ -187,24 +186,14 @@ public abstract class ManaMachineBlockEntity extends BlockEntity implements Mana
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.saveAdditional(tag, registries);
+	public void writePacketNBT(CompoundTag tag, HolderLookup.Provider registries) {
+		super.writePacketNBT(tag, registries);
 		tag.putInt(TAG_MANA, mana);
 	}
 
 	@Override
-	protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.loadAdditional(tag, registries);
-		mana = Math.clamp(tag.getInt(TAG_MANA), 0, getMaxMana());
-	}
-
-	@Override
-	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-		return saveWithoutMetadata(registries);
-	}
-
-	@Override
-	public ClientboundBlockEntityDataPacket getUpdatePacket() {
-		return ClientboundBlockEntityDataPacket.create(this);
+	public void readPacketNBT(CompoundTag tag, HolderLookup.Provider registries) {
+		super.readPacketNBT(tag, registries);
+		mana = Math.clamp(tag.getIntOr(TAG_MANA, 0), 0, getMaxMana());
 	}
 }

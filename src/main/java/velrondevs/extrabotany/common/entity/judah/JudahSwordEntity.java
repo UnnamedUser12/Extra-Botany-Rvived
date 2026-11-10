@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity.judah;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -13,6 +15,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import velrondevs.botania.client.fx.SparkleParticleData;
 
@@ -41,7 +44,7 @@ import velrondevs.extrabotany.common.handler.DamageHandler.DamageKind;
  * <p>Difference from the original: the original changes the global magic and lava damage objects so that they ignore armor permanently. This changes poison, lava and other damage in the full game. This port uses the damage types of the mod.
  */
 public class JudahSwordEntity extends OwnedEntity {
-	private static final EntityDataAccessor<Vector3f> STEP = SynchedEntityData.defineId(JudahSwordEntity.class, EntityDataSerializers.VECTOR3);
+	private static final EntityDataAccessor<Vector3fc> STEP = SynchedEntityData.defineId(JudahSwordEntity.class, EntityDataSerializers.VECTOR3);
 
 	private static final double SPEED = 0.75;
 	private static final double TOUCH_RANGE = 0.75;
@@ -78,8 +81,8 @@ public class JudahSwordEntity extends OwnedEntity {
 
 	@Override
 	public void tick() {
-		Vector3f step = entityData.get(STEP);
-		setPos(getX() + step.x, getY() + step.y, getZ() + step.z);
+		Vector3fc step = entityData.get(STEP);
+		setPos(getX() + step.x(), getY() + step.y(), getZ() + step.z());
 		if (level().isClientSide()) {
 			level().addParticle(SparkleParticleData.sparkle(1.8F, 1F, 0.7F, 0.7F, 25), getX(), getY(), getZ(), 0.0, 0.0, 0.0);
 		} else {
@@ -117,7 +120,7 @@ public class JudahSwordEntity extends OwnedEntity {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag tag) {
+	protected void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putDouble("StartX", start.x);
 		tag.putDouble("StartY", start.y);
@@ -129,11 +132,11 @@ public class JudahSwordEntity extends OwnedEntity {
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundTag tag) {
+	protected void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		start = new Vec3(tag.getDouble("StartX"), tag.getDouble("StartY"), tag.getDouble("StartZ"));
-		end = new Vec3(tag.getDouble("EndX"), tag.getDouble("EndY"), tag.getDouble("EndZ"));
-		damage = tag.getFloat("Damage");
+		start = new Vec3(tag.getDoubleOr("StartX", 0.0D), tag.getDoubleOr("StartY", 0.0D), tag.getDoubleOr("StartZ", 0.0D));
+		end = new Vec3(tag.getDoubleOr("EndX", 0.0D), tag.getDoubleOr("EndY", 0.0D), tag.getDoubleOr("EndZ", 0.0D));
+		damage = tag.getFloatOr("Damage", 0.0F);
 		syncStep();
 	}
 }

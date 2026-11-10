@@ -1,6 +1,6 @@
 package velrondevs.extrabotany.datagen.providers.patchouli.page.patchouli;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.datagen.providers.patchouli.page.AbstractPage;
 
@@ -16,7 +16,7 @@ public class EmptyPage extends AbstractPage<EmptyPage> {
 	}
 
 	@Override
-	public ResourceLocation getType() {
-		return ResourceLocation.tryParse("patchouli:crafting");
+	public Identifier getType() {
+		return Identifier.tryParse("patchouli:crafting");
 	}
 }

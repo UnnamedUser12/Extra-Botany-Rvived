@@ -1,14 +1,15 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import com.mojang.math.Axis;
 
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.client.renderer.IconModelRenderer;
 import velrondevs.extrabotany.common.entity.projectile.PhantomSwordEntity;
@@ -20,7 +21,7 @@ import velrondevs.extrabotany.common.entity.projectile.PhantomSwordEntity;
  * <p>来源：ExtraMeteorP 1.12 {@code RenderPhantomSword}。
  * <p>Source: ExtraMeteorP 1.12 {@code RenderPhantomSword}.
  */
-public class PhantomSwordRenderer extends EntityRenderer<PhantomSwordEntity> {
+public class PhantomSwordRenderer extends ExtraEntityRenderer<PhantomSwordEntity> {
 	private static final float SCALE = 1.5F;
 	private static final float AFTERIMAGE_START_ALPHA = 0.6F;
 	private static final float AFTERIMAGE_FADE_PER_TICK = 0.015F;
@@ -30,7 +31,7 @@ public class PhantomSwordRenderer extends EntityRenderer<PhantomSwordEntity> {
 	}
 
 	@Override
-	public void render(PhantomSwordEntity entity, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
+	protected void render(PhantomSwordEntity entity, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, SubmitNodeCollector collector, int light, CameraRenderState camera) {
 		if (entity.getDelay() > 0) {
 			return;
 		}
@@ -47,14 +48,13 @@ public class PhantomSwordRenderer extends EntityRenderer<PhantomSwordEntity> {
 		// The yaw of the entity is atan2(dx, dz). The rotation value of the original is this angle plus 180 degrees.
 		pose.mulPose(Axis.YP.rotationDegrees(entity.getYRot() + 270));
 		pose.mulPose(Axis.ZP.rotationDegrees(entity.getXRot() - 135));
-		IconModelRenderer.renderFlat(SwordDomainRenderer.model(entity.getVariety()), pose, buffers, alpha, LightTexture.FULL_BRIGHT);
+		IconModelRenderer.renderFlat(SwordDomainRenderer.model(entity.getVariety()), pose, buffers, alpha, LightCoordsUtil.FULL_BRIGHT);
 		pose.popPose();
 
-		super.render(entity, yaw, partialTick, pose, buffers, light);
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(PhantomSwordEntity entity) {
-		return InventoryMenu.BLOCK_ATLAS;
+	public Identifier getTextureLocation(PhantomSwordEntity entity) {
+		return TextureAtlas.LOCATION_BLOCKS;
 	}
 }

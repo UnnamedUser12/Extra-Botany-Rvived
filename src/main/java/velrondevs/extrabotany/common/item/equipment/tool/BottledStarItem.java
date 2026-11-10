@@ -1,7 +1,7 @@
 package velrondevs.extrabotany.common.item.equipment.tool;
 
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -27,19 +27,19 @@ public class BottledStarItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		if (level.isClientSide()) {
-			return InteractionResultHolder.success(stack);
+			return InteractionResult.SUCCESS;
 		}
 		if (!ManaItemHandler.instance().requestManaExactForTool(stack, player, MANA_PER_USE, true)) {
-			return InteractionResultHolder.fail(stack);
+			return InteractionResult.FAIL;
 		}
 
 		BottledStarEntity star = new BottledStarEntity(level, player);
 		star.setPos(player.getX(), player.getEyeY() - 0.1, player.getZ());
 		level.addFreshEntity(star);
-		player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
-		return InteractionResultHolder.success(stack);
+		player.getCooldowns().addCooldown(new ItemStack(this), COOLDOWN_TICKS);
+		return InteractionResult.SUCCESS;
 	}
 }

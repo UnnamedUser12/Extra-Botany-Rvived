@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import velrondevs.extrabotany.registry.ExtraBotanyEntities;
 
 import net.minecraft.nbt.CompoundTag;
@@ -59,13 +61,13 @@ public class VoidFieldEntity extends Entity {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag tag) {
+	protected void addAdditionalSaveData(ValueOutput tag) {
 		tag.putInt(TAG_LIFE, life);
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundTag tag) {
-		life = tag.getInt(TAG_LIFE);
+	protected void readAdditionalSaveData(ValueInput tag) {
+		life = tag.getIntOr(TAG_LIFE, 0);
 	}
 
 	@Override
@@ -75,6 +77,11 @@ public class VoidFieldEntity extends Entity {
 
 	@Override
 	public boolean isPushedByFluid(FluidType type) {
+		return false;
+	}
+
+	@Override
+	public boolean hurtServer(net.minecraft.server.level.ServerLevel level, net.minecraft.world.damagesource.DamageSource source, float amount) {
 		return false;
 	}
 }

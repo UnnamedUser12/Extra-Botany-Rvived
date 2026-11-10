@@ -37,7 +37,7 @@ public interface IAerialite {
 			return;
 		}
 
-		living.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 5 * 20, 1));
+		living.addEffect(new MobEffectInstance(MobEffects.HASTE, 5 * 20, 1));
 	}
 
 	/**

@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.item.brew;
 
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 
@@ -7,12 +9,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -70,7 +72,7 @@ public class HolyWaterGrenadeItem extends Item implements BrewItem, CustomCreati
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand usedHand) {
 		ItemStack stack = player.getItemInHand(usedHand);
 		if (!level.isClientSide()) {
 			level.playSound((Player) null, player.getX(), player.getY(), player.getZ(), SoundEvents.SPLASH_POTION_THROW, SoundSource.PLAYERS, 0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F));
@@ -87,11 +89,11 @@ public class HolyWaterGrenadeItem extends Item implements BrewItem, CustomCreati
 			stack.shrink(1);
 		}
 
-		return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> list, TooltipFlag flags) {
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> list, TooltipFlag flags) {
 		addPotionTooltip(getBrew(stack).getPotionEffects(stack), list, 1, context.tickRate());
 	}
 
@@ -101,11 +103,11 @@ public class HolyWaterGrenadeItem extends Item implements BrewItem, CustomCreati
 		return Component.translatable(getDescriptionId(), Component.translatable(getBrew(stack).getTranslationKey(stack)));
 	}
 
-	public static void addPotionTooltip(List<MobEffectInstance> list, List<Component> lores,
+	public static void addPotionTooltip(List<MobEffectInstance> list, Consumer<Component> lores,
 			float durationFactor, float tickRate) {
 		List<Pair<Holder<Attribute>, AttributeModifier>> attributeModifiers = Lists.newArrayList();
 		if (list.isEmpty()) {
-			lores.add((Component.translatable("effect.none")).withStyle(ChatFormatting.GRAY));
+			lores.accept((Component.translatable("effect.none")).withStyle(ChatFormatting.GRAY));
 		} else {
 			for (MobEffectInstance effectinstance : list) {
 				MutableComponent effectName = Component.translatable(effectinstance.getDescriptionId());
@@ -123,13 +125,13 @@ public class HolyWaterGrenadeItem extends Item implements BrewItem, CustomCreati
 							MobEffectUtil.formatDuration(effectinstance, durationFactor, tickRate));
 				}
 
-				lores.add(effectName.withStyle(effect.value().getCategory().getTooltipFormatting()));
+				lores.accept(effectName.withStyle(effect.value().getCategory().getTooltipFormatting()));
 			}
 		}
 
 		if (!attributeModifiers.isEmpty()) {
-			lores.add(Component.empty());
-			lores.add((Component.translatable("potion.whenDrank")).withStyle(ChatFormatting.DARK_PURPLE));
+			lores.accept(Component.empty());
+			lores.accept((Component.translatable("potion.whenDrank")).withStyle(ChatFormatting.DARK_PURPLE));
 
 			List<Component> enemyModifiers = new ArrayList<>();
 			for (Pair<Holder<Attribute>, AttributeModifier> pair : attributeModifiers) {
@@ -138,9 +140,9 @@ public class HolyWaterGrenadeItem extends Item implements BrewItem, CustomCreati
 				}
 			}
 			if (!enemyModifiers.isEmpty()) {
-				lores.add(Component.empty());
-				lores.add((Component.translatable("tooltip.extrabotany.buff_for_enemy")).withStyle(ChatFormatting.DARK_RED));
-				lores.addAll(enemyModifiers);
+				lores.accept(Component.empty());
+				lores.accept((Component.translatable("tooltip.extrabotany.buff_for_enemy")).withStyle(ChatFormatting.DARK_RED));
+				enemyModifiers.forEach(lores);
 			}
 
 			List<Component> selfModifiers = new ArrayList<>();
@@ -151,9 +153,9 @@ public class HolyWaterGrenadeItem extends Item implements BrewItem, CustomCreati
 			}
 
 			if (!selfModifiers.isEmpty()) {
-				lores.add(Component.empty());
-				lores.add((Component.translatable("tooltip.extrabotany.buff_for_self")).withStyle(ChatFormatting.GREEN));
-				lores.addAll(selfModifiers);
+				lores.accept(Component.empty());
+				lores.accept((Component.translatable("tooltip.extrabotany.buff_for_self")).withStyle(ChatFormatting.GREEN));
+				selfModifiers.forEach(lores);
 			}
 		}
 	}
@@ -173,13 +175,13 @@ public class HolyWaterGrenadeItem extends Item implements BrewItem, CustomCreati
 	@Override
 	public Brew getBrew(ItemStack stack) {
 		String key = ItemNBTHelper.getString(stack, TAG_BREW_KEY, "");
-		ResourceLocation id = ResourceLocation.tryParse(key);
-		Brew brew = id == null ? null : BotaniaAPI.instance().getBrewRegistry().get(id);
+		Identifier id = Identifier.tryParse(key);
+		Brew brew = id == null ? null : BotaniaAPI.instance().getBrewRegistry().getValue(id);
 		return brew == null ? BotaniaBrews.fallbackBrew : brew;
 	}
 
 	public static void setBrew(ItemStack stack, @Nullable Brew brew) {
-		ResourceLocation id;
+		Identifier id;
 		if (brew != null) {
 			id = BotaniaAPI.instance().getBrewRegistry().getKey(brew);
 		} else {
@@ -188,7 +190,7 @@ public class HolyWaterGrenadeItem extends Item implements BrewItem, CustomCreati
 		setBrew(stack, id);
 	}
 
-	public static void setBrew(ItemStack stack, ResourceLocation brew) {
+	public static void setBrew(ItemStack stack, Identifier brew) {
 		ItemNBTHelper.setString(stack, TAG_BREW_KEY, brew.toString());
 	}
 

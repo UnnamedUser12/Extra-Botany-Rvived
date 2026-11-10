@@ -55,7 +55,7 @@ public class FrostRingItem extends BaubleItem {
 		AABB area = new AABB(owner.position(), owner.position()).inflate(getRange());
 		for (LivingEntity living : owner.level().getEntitiesOfClass(LivingEntity.class, area)) {
 			if (living != owner && isLookingAt(owner, living)) {
-				living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 4));
+				living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 4));
 			}
 		}
 	}

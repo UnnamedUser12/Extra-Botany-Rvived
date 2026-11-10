@@ -5,10 +5,10 @@ import velrondevs.extrabotany.common.entity.gaia.behavior.GaiaDisarm;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -16,8 +16,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 import top.theillusivec4.curios.api.CuriosApi;
 
 @GameTestHolder("extrabotany")
@@ -28,9 +28,9 @@ public final class GaiaDisarmGameTests {
         void step(net.minecraft.server.level.ServerLevel level, GaiaIII gaia) { tick(level, gaia, level.getGameTime()); }
     }
     private static ItemStack forbidden(GameTestHelper helper) {
-        var id = ResourceLocation.parse("patchouli:guide_book");
+        var id = Identifier.parse("patchouli:guide_book");
         helper.assertTrue(BuiltInRegistries.ITEM.containsKey(id), "Missing real third-party test item");
-        var stack = new ItemStack(BuiltInRegistries.ITEM.get(id));
+        var stack = new ItemStack(BuiltInRegistries.ITEM.getValue(id));
         var tag = new CompoundTag(); tag.putString("scex_disarm", "preserve-me");
         stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
         return stack;
@@ -58,7 +58,7 @@ public final class GaiaDisarmGameTests {
         disarm.apply(player);
         helper.assertTrue(helper.getLevel().getEntitiesOfClass(ItemEntity.class, player.getBoundingBox().inflate(2)).size() == 3,
                 "Repeated disarm duplicated drops");
-        player.getInventory().selected = 1; disarm.apply(player);
+        player.getInventory().setSelectedSlot(1); disarm.apply(player);
         helper.assertTrue(player.getMainHandItem().isEmpty() && player.getInventory().getItem(12).getCount() == 1,
                 "Selecting a stored forbidden item did not disarm it");
         helper.succeed();
@@ -67,7 +67,7 @@ public final class GaiaDisarmGameTests {
     public static void curiosEquipmentDropsAndCreativeIsExempt(GameTestHelper helper) {
         var player = helper.makeMockPlayer(GameType.SURVIVAL);
         player.setPos(helper.absolutePos(new BlockPos(2, 3, 2)).getCenter());
-        var inventory = CuriosApi.getCuriosInventory(player).orElseThrow();
+        var inventory = CuriosTestHelper.inventory(player);
         var handler = inventory.getCurios().values().stream().filter(h -> h.getStacks().getSlots() > 0).findFirst().orElseThrow();
         var original = forbidden(helper);
         handler.getStacks().setStackInSlot(0, original.copy());
@@ -97,10 +97,10 @@ public final class GaiaDisarmGameTests {
         } finally { net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(cancel); }
         boolean enabled = velrondevs.extrabotany.config.ExtraBotanyConfig.common().guardianItemCheck();
         try {
-            velrondevs.extrabotany.config.ExtraBotanyConfigSpec.setGuardianItemCheck(false);
+            TestConfig.setGuardianItemCheck(false);
             new Disarm().apply(player);
             helper.assertTrue(ItemStack.matches(player.getMainHandItem(), original), "Disabled itemcheck still disarmed");
-        } finally { velrondevs.extrabotany.config.ExtraBotanyConfigSpec.setGuardianItemCheck(enabled); }
+        } finally { TestConfig.setGuardianItemCheck(enabled); }
         helper.succeed();
     }
     @GameTest(template = "empty", timeoutTicks = 40)
@@ -120,7 +120,7 @@ public final class GaiaDisarmGameTests {
         level.addFreshEntity(player);
         var original = forbidden(helper); player.getInventory().setItem(12, original.copy());
         player.setItemSlot(EquipmentSlot.MAINHAND, original.copy());
-        var handler = CuriosApi.getCuriosInventory(player).orElseThrow().getCurios().values().stream()
+        var handler = CuriosTestHelper.inventory(player).getCurios().values().stream()
                 .filter(h -> h.getStacks().getSlots() > 0).findFirst().orElseThrow();
         handler.getStacks().setStackInSlot(0, original.copy());
         var arena = velrondevs.extrabotany.api.gaia.GaiaArena.of(net.minecraft.core.GlobalPos.of(level.dimension(), center), GaiaIII.ARENA_RANGE, GaiaIII.ARENA_HEIGHT);

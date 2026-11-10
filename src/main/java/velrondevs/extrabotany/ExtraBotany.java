@@ -11,7 +11,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -42,6 +43,7 @@ import velrondevs.botania.api.item.Relic;
 import velrondevs.botania.api.mana.ManaItem;
 import velrondevs.botania.api.BotaniaCapabilities;
 import velrondevs.botania.common.handler.EquipmentHandler;
+import velrondevs.botania.registry.BotaniaLazyIds;
 import velrondevs.botania.common.item.CustomCreativeTabContents;
 import velrondevs.botania.common.item.equipment.bauble.BaubleItem;
 import velrondevs.botania.integration.curios.CurioIntegration;
@@ -115,7 +117,7 @@ public class ExtraBotany {
 		registerEvents();
 
 		evt.enqueueWork(() -> {
-			BiConsumer<ResourceLocation, Supplier<? extends Block>> consumer = (resourceLocation, blockSupplier) -> ((FlowerPotBlock) Blocks.FLOWER_POT).addPlant(resourceLocation, blockSupplier);
+			BiConsumer<Identifier, Supplier<? extends Block>> consumer = (resourceLocation, blockSupplier) -> ((FlowerPotBlock) Blocks.FLOWER_POT).addPlant(resourceLocation, blockSupplier);
 			ExtraBotanyBlocks.registerFlowerPotPlants(consumer);
 			ExtraBotanyFlowerBlocks.registerFlowerPotPlants(consumer);
 			UniversalRunes.init();
@@ -145,8 +147,6 @@ public class ExtraBotany {
 		modEventBus.addListener(ExtraBotanyDataMaps::register);
 		modEventBus.addListener((RegisterEvent event) -> runRegistration(
 				event, Registries.SOUND_EVENT, ExtraBotanySounds::init));
-		modEventBus.addListener((RegisterEvent event) -> runRegistration(
-				event, Registries.ARMOR_MATERIAL, ExtraBotanyArmorMaterials::registerArmorMaterials));
 		//Block&ItemBlock&Items
 		bind(modEventBus, Registries.BLOCK, ExtraBotanyBlocks::registerBlocks);
 		bindForItems(modEventBus, ExtraBotanyBlocks::registerItemBlocks);
@@ -180,11 +180,19 @@ public class ExtraBotany {
 
 		//Creative tab
 		bind(modEventBus, Registries.CREATIVE_MODE_TAB, ExtraBotanyCreativeTabs::registerCreativeTabs);
+		modEventBus.addListener(EventPriority.LOWEST, (RegisterEvent event) -> {
+			if (event.getRegistryKey().equals(Registries.BLOCK)) {
+				BotaniaLazyIds.resolveBlocks();
+			} else if (event.getRegistryKey().equals(Registries.ITEM)) {
+				BotaniaLazyIds.resolveItems();
+			}
+		});
 		modEventBus.addListener((BuildCreativeModeTabContentsEvent e) -> ExtraBotanyCreativeTabs.fillTab(e, this.itemsToAddToCreativeTab));
 	}
 
 	private void registerEvents() {
 		IEventBus bus = NeoForge.EVENT_BUS;
+		bus.addListener((net.neoforged.neoforge.event.OnDatapackSyncEvent e) -> e.sendRecipes(ExtraBotanyRecipeTypes.syncedTypes()));
 		bus.addListener((LevelTickEvent.Post event) -> WindImpl.EventHandler.onLevelTick(event.getLevel()));
 		ExtraBotanyEvents.register(bus);
 
@@ -194,9 +202,9 @@ public class ExtraBotany {
 
 	private void attachCapabilities(RegisterCapabilitiesEvent event) {
 
-		event.registerBlockEntity(Capabilities.FluidHandler.BLOCK,
-				ExtraBotanyBlockEntities.LIVINGROCK_BARREL, (barrel, side) -> barrel);
-		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK,
+		event.registerBlockEntity(Capabilities.Fluid.BLOCK,
+				ExtraBotanyBlockEntities.LIVINGROCK_BARREL, (barrel, side) -> barrel.getFluidHandler());
+		event.registerBlockEntity(Capabilities.Energy.BLOCK,
 				ExtraBotanyBlockEntities.MANA_GENERATOR, (generator, side) -> generator.getEnergyStorage());
 		for (BlockEntityType<? extends ManaMachineBlockEntity> machine : List.of(
 				ExtraBotanyBlockEntities.MANA_BUFFER, ExtraBotanyBlockEntities.QUANTUM_MANA_BUFFER,
@@ -263,7 +271,7 @@ public class ExtraBotany {
 			Map.entry(ExtraBotanyItems.motorAccessory, MotorAccessoryItem::makeRelic)
 	));
 
-	private static <T> void bind(IEventBus modEventBus, ResourceKey<Registry<T>> registry, Consumer<BiConsumer<T, ResourceLocation>> source) {
+	private static <T> void bind(IEventBus modEventBus, ResourceKey<Registry<T>> registry, Consumer<BiConsumer<T, Identifier>> source) {
 		modEventBus.addListener((RegisterEvent event) -> {
 			if (registry.equals(event.getRegistryKey())) {
 				source.accept((t, rl) -> event.register(registry, rl, () -> t));
@@ -281,7 +289,7 @@ public class ExtraBotany {
 
 	private final Set<Item> itemsToAddToCreativeTab = new LinkedHashSet<>();
 
-	private void bindForItems(IEventBus modEventBus, Consumer<BiConsumer<Item, ResourceLocation>> source) {
+	private void bindForItems(IEventBus modEventBus, Consumer<BiConsumer<Item, Identifier>> source) {
 		modEventBus.addListener((RegisterEvent event) -> {
 			if (event.getRegistryKey().equals(Registries.ITEM)) {
 				source.accept((t, rl) -> {

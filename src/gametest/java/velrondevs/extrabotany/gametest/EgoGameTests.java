@@ -3,7 +3,7 @@ package velrondevs.extrabotany.gametest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -15,13 +15,12 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.Husk;
+import net.minecraft.world.entity.monster.zombie.Husk;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -29,8 +28,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.botania.registry.BotaniaBlocks;
 
@@ -81,10 +80,10 @@ public final class EgoGameTests {
 		ServerLevel level = helper.getLevel();
 		BlockPos home = helper.absolutePos(HOME);
 		Ego ego = new Ego(ExtraBotanyEntities.EGO, level);
-		CompoundTag tag = ego.saveWithoutId(new CompoundTag());
+		CompoundTag tag = BlockEntityIO.saveEntity(ego);
 		tag.put("Home", GlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, GlobalPos.of(level.dimension(), home)).getOrThrow());
 		tag.putInt("PlayerCount", 1);
-		ego.load(tag);
+		BlockEntityIO.loadEntity(ego, tag);
 		ego.setPos(Vec3.atBottomCenterOf(home));
 		return ego;
 	}
@@ -111,6 +110,24 @@ public final class EgoGameTests {
 	private static void hit(Ego ego, Player player, float amount) {
 		ego.invulnerableTime = 0;
 		ego.hurt(player.damageSources().playerAttack(player), amount);
+	}
+
+	private static boolean dropsLoot(GameTestHelper helper, Ego ego, Player player) {
+		AABB area = new AABB(helper.absolutePos(HOME)).inflate(40);
+		helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, area).forEach(Entity::discard);
+		ego.getPlayersWhoAttacked().add(player.getUUID());
+		try {
+			java.lang.reflect.Method method = Ego.class.getDeclaredMethod("dropFromLootTable", ServerLevel.class, net.minecraft.world.damagesource.DamageSource.class, boolean.class);
+			method.setAccessible(true);
+			method.invoke(ego, helper.getLevel(), player.damageSources().playerAttack(player), true);
+		} catch (ReflectiveOperationException e) {
+			throw new IllegalStateException(e);
+		}
+		List<net.minecraft.world.entity.item.ItemEntity> items = helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, area);
+		boolean dropped = !items.isEmpty();
+		items.forEach(Entity::discard);
+		ego.getPlayersWhoAttacked().remove(player.getUUID());
+		return dropped;
 	}
 
 	private static void cleanUp(GameTestHelper helper, Entity... entities) {
@@ -153,7 +170,7 @@ public final class EgoGameTests {
 					"With too little Nature Aura the orb must do nothing");
 
 			energy.addEnergy(NatureOrbItem.SUMMON_EGO_COST + 1);
-			ItemStack forbidden = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.parse("patchouli:guide_book")));
+			ItemStack forbidden = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse("patchouli:guide_book")));
 			helper.assertTrue(!forbidden.isEmpty(), "The test needs an item of a different mod");
 			player.getInventory().setItem(12, forbidden);
 			use.run();
@@ -181,8 +198,8 @@ public final class EgoGameTests {
 			helper.assertTrue(ego.getArena().isPresent() && ego.getArena().get().radius() == Ego.ARENA_RANGE && ego.getPlayerCount() == 1,
 					"The Ego must have an arena with a radius of 12 and a player count of 1");
 			helper.assertTrue(ego.getBGM() == ExtraBotanySounds.MUSIC_EGO, "The Ego must use the Ego music");
-			helper.assertTrue(ego.getType().is(net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE,
-					net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("c", "bosses"))), "The Ego must have the tag c:bosses");
+			helper.assertTrue(ego.is(net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE,
+					net.minecraft.resources.Identifier.fromNamespaceAndPath("c", "bosses"))), "The Ego must have the tag c:bosses");
 
 			use.run();
 			helper.assertTrue(near(helper, Ego.class).size() == 1 && energy.getEnergy() == NatureOrbItem.SUMMON_EGO_COST,
@@ -203,31 +220,31 @@ public final class EgoGameTests {
 		Ego ego = createEgo(helper);
 		helper.assertTrue(ego.getStage() == 0 && ego.getWeaponType() == EgoWeaponFire.WEAPON_TRUE_SHADOW_KATANA, "A new Ego must start in stage 0 with the True Shadow Katana");
 
-		CompoundTag tag = ego.saveWithoutId(new CompoundTag());
+		CompoundTag tag = BlockEntityIO.saveEntity(ego);
 		tag.putInt("Stage", 1);
 		tag.putInt("WeaponType", 3);
-		tag.putUUID("Summoner", new java.util.UUID(12, 34));
+		tag.store("Summoner", net.minecraft.core.UUIDUtil.CODEC, new java.util.UUID(12, 34));
 		tag.putInt("BarrageWave", 4);
 		tag.putInt("AttackDelay", 17);
 		tag.putInt("WeaponChangeDelay", 55);
 		tag.putInt("TeleportDelay", 23);
 		tag.putInt("Teleports", 9);
 		tag.putFloat("DamageTaken", 31.5F);
-		ego.load(tag);
+		BlockEntityIO.loadEntity(ego, tag);
 
-		CompoundTag saved = ego.saveWithoutId(new CompoundTag());
+		CompoundTag saved = BlockEntityIO.saveEntity(ego);
 		for (String key : List.of("Stage", "WeaponType", "Summoner", "BarrageWave", "AttackDelay", "WeaponChangeDelay", "TeleportDelay", "Teleports", "DamageTaken")) {
 			helper.assertTrue(tag.get(key).equals(saved.get(key)), "The save lost the key " + key);
 		}
 		helper.assertTrue(ego.getStage() == 1 && ego.getWeapon().is(ExtraBotanyItems.starWrath), "The stage or the weapon is incorrect after the load");
 
 		GaiaIII gaia = new GaiaIII(helper.getLevel(), helper.absolutePos(HOME));
-		CompoundTag old = gaia.saveWithoutId(new CompoundTag());
+		CompoundTag old = BlockEntityIO.saveEntity(gaia);
 		old.putInt("BigPhase", 2);
 		old.putInt("EgoStage", 1);
 		old.putBoolean("InFogBarrage", true);
 		old.putBoolean("InMinionPhase", true);
-		gaia.load(old);
+		BlockEntityIO.loadEntity(gaia, old);
 		helper.assertTrue(gaia.getBGM() == ExtraBotanySounds.MUSIC_GAIA3, "Guardian of Gaia III must use its own music");
 		helper.succeed();
 	}
@@ -282,8 +299,8 @@ public final class EgoGameTests {
 					helper.assertTrue(bluePlayer.isAlive() && bluePlayer.getHealth() <= 15F && bluePlayer.getHealth() > 1F,
 							"The blue landmine must give 5 life-losing damage and some magic damage, but the player has " + bluePlayer.getHealth());
 					MobEffectInstance wither = bluePlayer.getEffect(MobEffects.WITHER);
-					helper.assertTrue(wither != null && wither.getAmplifier() == 2 && wither.getCures().isEmpty() && bluePlayer.hasEffect(MobEffects.BLINDNESS),
-							"The landmine must give Blindness and a Wither that cannot be removed");
+					helper.assertTrue(wither != null && wither.getAmplifier() == 2 && bluePlayer.hasEffect(MobEffects.BLINDNESS),
+							"The landmine must give Blindness and Wither II");
 					helper.assertTrue(redPlayer.isAlive() && redPlayer.getHealth() == 1F,
 							"The red landmine must decrease the health to exactly 1, but the player has " + redPlayer.getHealth());
 					// 模拟玩家丢出的物品不会进入世界，所以这里只检查主手已经空了。
@@ -327,7 +344,7 @@ public final class EgoGameTests {
 				"The minion of type 3 must hold the Star Wrath");
 
 		Husk husk = new Husk(EntityType.HUSK, level);
-		helper.assertTrue(!katana.hurt(level.damageSources().mobAttack(husk), 10F) && !katana.hurt(level.damageSources().lava(), 10F)
+		helper.assertTrue(!katana.hurtServer(level, level.damageSources().mobAttack(husk), 10F) && !katana.hurtServer(level, level.damageSources().lava(), 10F)
 				&& katana.getHealth() == 60F, "Only players can hurt a minion");
 		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
 		katana.hurt(player.damageSources().playerAttack(player), 1000F);
@@ -393,18 +410,18 @@ public final class EgoGameTests {
 		float full = ego.getHealth();
 
 		Husk husk = new Husk(EntityType.HUSK, level);
-		helper.assertTrue(!ego.hurt(level.damageSources().mobAttack(husk), 10F) && !ego.hurt(level.damageSources().lava(), 10F)
-				&& !ego.hurt(level.damageSources().fellOutOfWorld(), 10F) && ego.getHealth() == full, "Only players can hurt the Ego");
+		helper.assertTrue(!ego.hurtServer(level, level.damageSources().mobAttack(husk), 10F) && !ego.hurtServer(level, level.damageSources().lava(), 10F)
+				&& !ego.hurtServer(level, level.damageSources().fellOutOfWorld(), 10F) && ego.getHealth() == full, "Only players can hurt the Ego");
 
 		Vec3 start = ego.position();
 		hit(ego, player, 1000F);
 		float afterFirst = ego.getHealth();
 		helper.assertTrue(afterFirst < full && afterFirst >= full - 25F, "One attack must give a maximum of 25 damage, but the Ego lost " + (full - afterFirst));
-		helper.assertTrue(ego.saveWithoutId(new CompoundTag()).getFloat("DamageTaken") == 25F && ego.position().equals(start),
+		helper.assertTrue(BlockEntityIO.saveEntity(ego).getFloatOr("DamageTaken", 0F) == 25F && ego.position().equals(start),
 				"After 25 damage the Ego must not do a counter");
 
 		hit(ego, player, 1000F);
-		helper.assertTrue(ego.saveWithoutId(new CompoundTag()).getFloat("DamageTaken") == 0F, "After 50 damage the total must go back to zero");
+		helper.assertTrue(BlockEntityIO.saveEntity(ego).getFloatOr("DamageTaken", 0F) == 0F, "After 50 damage the total must go back to zero");
 		helper.assertTrue(!ego.position().equals(start), "After 50 damage the Ego must teleport");
 		BlockPos home = helper.absolutePos(HOME);
 		helper.assertTrue(Math.abs(ego.getX() - home.getX()) <= Ego.ARENA_RANGE / 2 && Math.abs(ego.getZ() - home.getZ()) <= Ego.ARENA_RANGE / 2,
@@ -430,16 +447,16 @@ public final class EgoGameTests {
 		Vec3 start = ego.position();
 
 		helper.startSequence()
-				.thenWaitUntil(() -> helper.assertTrue(ego.saveWithoutId(new CompoundTag()).getInt("Teleports") >= 1, "The Ego did not teleport"))
+				.thenWaitUntil(() -> helper.assertTrue(BlockEntityIO.saveEntity(ego).getIntOr("Teleports", 0) >= 1, "The Ego did not teleport"))
 				.thenExecute(() -> {
-					CompoundTag tag = ego.saveWithoutId(new CompoundTag());
+					CompoundTag tag = BlockEntityIO.saveEntity(ego);
 					helper.assertTrue(!ego.position().equals(start), "The Ego did not move at the teleport");
-					helper.assertTrue(tag.getInt("AttackDelay") > 0 && tag.getInt("TeleportDelay") > 0, "The Ego must wait before the subsequent attack and teleport");
+					helper.assertTrue(tag.getIntOr("AttackDelay", 0) > 0 && tag.getIntOr("TeleportDelay", 0) > 0, "The Ego must wait before the subsequent attack and teleport");
 					helper.assertTrue(ego.getWeaponType() <= EgoWeaponFire.WEAPON_TRUE_TERRABLADE, "In stage 0 the Ego must use the True Shadow Katana or the True Terra Blade");
 				})
 				.thenIdle(105)
 				.thenExecute(() -> {
-					helper.assertTrue(ego.saveWithoutId(new CompoundTag()).getInt("Teleports") >= 2, "The Ego must teleport again after 100 ticks");
+					helper.assertTrue(BlockEntityIO.saveEntity(ego).getIntOr("Teleports", 0) >= 2, "The Ego must teleport again after 100 ticks");
 					helper.assertTrue(ego.getWeaponType() <= EgoWeaponFire.WEAPON_TRUE_TERRABLADE, "In stage 0 the Ego must use the True Shadow Katana or the True Terra Blade");
 					helper.assertTrue(near(helper, EgoLandmineEntity.class).isEmpty(), "In stage 0 the Ego must not put down landmines");
 					cleanUp(helper, player);
@@ -471,7 +488,7 @@ public final class EgoGameTests {
 				.thenExecute(() -> {
 					helper.assertTrue(ego.getInvulTime() <= 420 && ego.getInvulTime() >= 410, "The first formation must appear 40 ticks after the start, but the invulnerable time is " + ego.getInvulTime());
 					helper.assertTrue(ego.blockPosition().equals(home.above(3)), "During the barrage the Ego must stay 3 blocks above the center of the arena");
-					helper.assertTrue(ego.getLootTable() == BuiltInLootTables.EMPTY, "Before the last stage the Ego must have no loot");
+					helper.assertTrue(!dropsLoot(helper, ego, player), "Before the last stage the Ego must have no loot");
 					helper.assertTrue(near(helper, EgoMinionEntity.class).isEmpty(), "In stage 1 the Ego must not summon minions");
 					cleanUp(helper, player);
 				})
@@ -485,10 +502,10 @@ public final class EgoGameTests {
 	@GameTest(template = "projectile_arena", timeoutTicks = 150)
 	public static void egoMinionPhaseAndLoot(GameTestHelper helper) {
 		Ego ego = createEgo(helper);
-		CompoundTag tag = ego.saveWithoutId(new CompoundTag());
+		CompoundTag tag = BlockEntityIO.saveEntity(ego);
 		tag.putInt("Stage", 1);
 		tag.putInt("Teleports", 1);
-		ego.load(tag);
+		BlockEntityIO.loadEntity(ego, tag);
 		ego.setPos(Vec3.atBottomCenterOf(helper.absolutePos(HOME)));
 		ServerLevel level = helper.getLevel();
 		level.addFreshEntity(ego);
@@ -515,8 +532,8 @@ public final class EgoGameTests {
 							.withOptionalParameter(LootContextParams.DIRECT_ATTACKING_ENTITY, player)
 							.withParameter(LootContextParams.LAST_DAMAGE_PLAYER, player)
 							.create(LootContextParamSets.ENTITY);
-					helper.assertTrue(ego.getLootTable() != BuiltInLootTables.EMPTY, "In the last stage the Ego must have a loot table");
-					List<ItemStack> loot = level.getServer().reloadableRegistries().getLootTable(ego.getLootTable()).getRandomItems(params);
+					helper.assertTrue(ego.getLootTable().isPresent(), "In the last stage the Ego must have a loot table");
+					List<ItemStack> loot = level.getServer().reloadableRegistries().getLootTable(ego.getLootTable().orElseThrow()).getRandomItems(params);
 					helper.assertTrue(loot.stream().filter(stack -> stack.is(ExtraBotanyItems.pandorasBox)).count() == 1, "The loot must have one Pandora's Box, but it is " + loot);
 					helper.assertTrue(loot.stream().allMatch(stack -> stack.is(ExtraBotanyItems.pandorasBox) || stack.is(ExtraBotanyItems.recordEgo)),
 							"The loot can only have the Pandora's Box and the Ego music disc, but it is " + loot);

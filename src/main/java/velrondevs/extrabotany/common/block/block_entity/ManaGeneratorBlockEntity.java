@@ -11,7 +11,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 import velrondevs.extrabotany.config.ExtraBotanyConfig;
 
@@ -53,9 +56,9 @@ public class ManaGeneratorBlockEntity extends ManaMachineBlockEntity {
 	private static final String TAG_ENERGY = "energy";
 
 	private int energy;
-	private final IEnergyStorage energyStorage = new EnergyStorage();
+	private final EnergyHandler energyStorage = new EnergyStorage();
 	@SuppressWarnings("unchecked")
-	private final BlockCapabilityCache<IEnergyStorage, Direction>[] neighbours = new BlockCapabilityCache[ALL_SIDES.length];
+	private final BlockCapabilityCache<EnergyHandler, Direction>[] neighbours = new BlockCapabilityCache[ALL_SIDES.length];
 
 	public ManaGeneratorBlockEntity(BlockPos pos, BlockState state) {
 		super(ExtraBotanyBlockEntities.MANA_GENERATOR, pos, state);
@@ -78,7 +81,7 @@ public class ManaGeneratorBlockEntity extends ManaMachineBlockEntity {
 	 * 给别的方块使用的能量接口。
 	 * The energy interface for other blocks.
 	 */
-	public IEnergyStorage getEnergyStorage() {
+	public EnergyHandler getEnergyStorage() {
 		return energyStorage;
 	}
 
@@ -105,10 +108,14 @@ public class ManaGeneratorBlockEntity extends ManaMachineBlockEntity {
 		for (Direction side : ALL_SIDES) {
 			BlockPos neighbour = worldPosition.relative(side);
 			if (energy < maxEnergy) {
-				IEnergyStorage source = getNeighbour(level, side).getCapability();
+				EnergyHandler source = getNeighbour(level, side).getCapability();
 				if (source != null) {
 					int request = Math.min(ENERGY_PER_CONVERSION, maxEnergy - energy);
-					setEnergy(energy + Math.clamp(source.extractEnergy(request, false), 0, request));
+					try (Transaction transaction = Transaction.openRoot()) {
+						int extracted = Math.clamp(source.extract(request, transaction), 0, request);
+						transaction.commit();
+						setEnergy(energy + extracted);
+					}
 				}
 			}
 			pushManaToSpreader(neighbour, transferSpeed);
@@ -123,10 +130,10 @@ public class ManaGeneratorBlockEntity extends ManaMachineBlockEntity {
 		}
 	}
 
-	private BlockCapabilityCache<IEnergyStorage, Direction> getNeighbour(ServerLevel level, Direction side) {
-		BlockCapabilityCache<IEnergyStorage, Direction> cache = neighbours[side.ordinal()];
+	private BlockCapabilityCache<EnergyHandler, Direction> getNeighbour(ServerLevel level, Direction side) {
+		BlockCapabilityCache<EnergyHandler, Direction> cache = neighbours[side.ordinal()];
 		if (cache == null) {
-			cache = BlockCapabilityCache.create(Capabilities.EnergyStorage.BLOCK, level, worldPosition.relative(side), side.getOpposite(),
+			cache = BlockCapabilityCache.create(Capabilities.Energy.BLOCK, level, worldPosition.relative(side), side.getOpposite(),
 					() -> !isRemoved(), () -> {});
 			neighbours[side.ordinal()] = cache;
 		}
@@ -134,54 +141,67 @@ public class ManaGeneratorBlockEntity extends ManaMachineBlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.saveAdditional(tag, registries);
+	public void writePacketNBT(CompoundTag tag, HolderLookup.Provider registries) {
+		super.writePacketNBT(tag, registries);
 		tag.putInt(TAG_ENERGY, energy);
 	}
 
 	@Override
-	protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.loadAdditional(tag, registries);
-		energy = Math.clamp(tag.getInt(TAG_ENERGY), 0, getMaxEnergy());
+	public void readPacketNBT(CompoundTag tag, HolderLookup.Provider registries) {
+		super.readPacketNBT(tag, registries);
+		energy = Math.clamp(tag.getIntOr(TAG_ENERGY, 0), 0, getMaxEnergy());
 	}
 
-	private final class EnergyStorage implements IEnergyStorage {
+	private final class EnergyStorage implements EnergyHandler {
+		private final EnergyJournal journal = new EnergyJournal();
+
 		@Override
-		public int receiveEnergy(int maxReceive, boolean simulate) {
-			int received = Math.clamp(maxReceive, 0, Math.max(0, getMaxEnergy() - energy));
-			if (!simulate) {
-				setEnergy(energy + received);
+		public long getAmountAsLong() {
+			return energy;
+		}
+
+		@Override
+		public long getCapacityAsLong() {
+			return getMaxEnergy();
+		}
+
+		@Override
+		public int insert(int amount, TransactionContext transaction) {
+			int received = Math.clamp(amount, 0, Math.max(0, getMaxEnergy() - energy));
+			if (received > 0) {
+				journal.updateSnapshots(transaction);
+				energy += received;
 			}
 			return received;
 		}
 
 		@Override
-		public int extractEnergy(int maxExtract, boolean simulate) {
-			int extracted = Math.clamp(maxExtract, 0, energy);
-			if (!simulate) {
-				setEnergy(energy - extracted);
+		public int extract(int amount, TransactionContext transaction) {
+			int extracted = Math.clamp(amount, 0, energy);
+			if (extracted > 0) {
+				journal.updateSnapshots(transaction);
+				energy -= extracted;
 			}
 			return extracted;
 		}
+	}
 
+	private final class EnergyJournal extends SnapshotJournal<Integer> {
 		@Override
-		public int getEnergyStored() {
+		protected Integer createSnapshot() {
 			return energy;
 		}
 
 		@Override
-		public int getMaxEnergyStored() {
-			return getMaxEnergy();
+		protected void revertToSnapshot(Integer snapshot) {
+			energy = snapshot;
 		}
 
 		@Override
-		public boolean canExtract() {
-			return energy > 0;
-		}
-
-		@Override
-		public boolean canReceive() {
-			return energy < getMaxEnergy();
+		protected void onRootCommit(Integer originalState) {
+			if (energy != originalState) {
+				markChanged();
+			}
 		}
 	}
 }

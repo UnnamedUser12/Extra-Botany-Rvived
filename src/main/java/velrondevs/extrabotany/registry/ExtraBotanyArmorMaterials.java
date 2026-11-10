@@ -1,28 +1,26 @@
 package velrondevs.extrabotany.registry;
 
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.EquipmentAsset;
+import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.crafting.Ingredient;
 
-import velrondevs.extrabotany.common.helper.RegistryHelper;
-import velrondevs.botania.registry.BotaniaItems;
+import velrondevs.botania.common.lib.BotaniaTags;
 
-import velrondevs.extrabotany.registry.ExtraBotanyItems;
-import velrondevs.extrabotany.registry.ExtraBotanySounds;
+import velrondevs.extrabotany.common.item.material.RepairTags;
+import velrondevs.extrabotany.common.lib.ExtraBotanyTags;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.EnumMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
 
-/** ExtraBotany's registered armor materials for Minecraft 1.21's holder-based API. */
 public final class ExtraBotanyArmorMaterials {
 	public static final int STARRY_IDOL_DURABILITY_FACTOR = 16;
 	public static final int PLEIADS_MAID_COMBAT_DURABILITY_FACTOR = 50;
@@ -32,65 +30,41 @@ public final class ExtraBotanyArmorMaterials {
 	public static final int SHOOTING_GUARDIAN_DURABILITY_FACTOR = 34;
 	public static final int SILENT_SAGES_DURABILITY_FACTOR = 50;
 
-	private static final List<RegistryHelper.HolderProxy<ArmorMaterial>> ALL = new ArrayList<>();
-	// 这三种材料的护甲值来自原版 1.16。原版的数组顺序是靴子、护腿、胸甲、头盔。
-	// The armor values of these three materials come from the original 1.16. The array sequence of the original is boots, leggings, chestplate, helmet.
-	public static final Holder<ArmorMaterial> MIKU = create("miku",
-			Map.of(ArmorItem.Type.BOOTS, 2, ArmorItem.Type.LEGGINGS, 4, ArmorItem.Type.CHESTPLATE, 5, ArmorItem.Type.HELMET, 1),
-			22, net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_LEATHER, () -> Ingredient.of(ExtraBotanyItems.manaDrink), 0, 0);
-	public static final Holder<ArmorMaterial> SHOOTING_GUARDIAN = create("shootingguardian",
-			Map.of(ArmorItem.Type.BOOTS, 3, ArmorItem.Type.LEGGINGS, 7, ArmorItem.Type.CHESTPLATE, 8, ArmorItem.Type.HELMET, 4),
-			34, net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_IRON, () -> Ingredient.of(ExtraBotanyItems.orichalcos), 2, 0);
-	public static final Holder<ArmorMaterial> SILENT_SAGES = create("silentsages",
-			Map.of(ArmorItem.Type.BOOTS, 4, ArmorItem.Type.LEGGINGS, 8, ArmorItem.Type.CHESTPLATE, 9, ArmorItem.Type.HELMET, 5),
-			40, net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_IRON, () -> Ingredient.of(ExtraBotanyItems.orichalcos), 3, 0);
+	public static final ArmorMaterial MIKU = create("miku", MIKU_DURABILITY_FACTOR,
+			2, 4, 5, 1,
+			22, SoundEvents.ARMOR_EQUIP_LEATHER, RepairTags.MANA_DRINK, 0, 0);
+	public static final ArmorMaterial SHOOTING_GUARDIAN = create("shootingguardian", SHOOTING_GUARDIAN_DURABILITY_FACTOR,
+			3, 7, 8, 4,
+			34, SoundEvents.ARMOR_EQUIP_IRON, ExtraBotanyTags.Items.INGOTS_ORICHALCOS, 2, 0);
+	public static final ArmorMaterial SILENT_SAGES = create("silentsages", SILENT_SAGES_DURABILITY_FACTOR,
+			4, 8, 9, 5,
+			40, SoundEvents.ARMOR_EQUIP_IRON, ExtraBotanyTags.Items.INGOTS_ORICHALCOS, 3, 0);
+	public static final ArmorMaterial STARRY_IDOL = create("starry_idol", STARRY_IDOL_DURABILITY_FACTOR,
+			2, 5, 6, 2,
+			18, ExtraBotanySounds.ARMOR_EQUIP_IDOL, BotaniaTags.Items.MANAWEAVE_CLOTH, 0, 0);
+	public static final ArmorMaterial PLEIADS_MAID_COMBAT = create("pleiads_maid_combat", PLEIADS_MAID_COMBAT_DURABILITY_FACTOR,
+			4, 7, 8, 3,
+			50, ExtraBotanySounds.ARMOR_EQUIP_MAID, RepairTags.DAS_RHEINGOLD, 4, 0);
+	public static final ArmorMaterial GOBLIN_SLAYER = create("goblin_slayer", GOBLIN_SLAYER_DURABILITY_FACTOR,
+			3, 6, 6, 3,
+			40, ExtraBotanySounds.ARMOR_EQUIP_GOBLIN, ExtraBotanyTags.Items.INGOTS_PHOTONIUM, 2.5F, 0);
+	public static final ArmorMaterial SHADOW_WARRIOR = create("shadow_warrior", SHADOW_WARRIOR_DURABILITY_FACTOR,
+			3, 7, 6, 3,
+			28, ExtraBotanySounds.ARMOR_EQUIP_WARRIOR, ExtraBotanyTags.Items.INGOTS_SHADOWIUM, 1.5F, 0);
 
-	public static final Holder<ArmorMaterial> STARRY_IDOL = create("starry_idol",
-			Map.of(
-					ArmorItem.Type.BOOTS, 2,
-					ArmorItem.Type.LEGGINGS, 5,
-					ArmorItem.Type.CHESTPLATE, 6,
-					ArmorItem.Type.HELMET, 2),
-			18, ExtraBotanySounds.ARMOR_EQUIP_IDOL, () -> Ingredient.of(BotaniaItems.manaweaveCloth), 0, 0);
-
-	public static final Holder<ArmorMaterial> PLEIADS_MAID_COMBAT = create("pleiads_maid_combat",
-			Map.of(
-					ArmorItem.Type.BOOTS, 4,
-					ArmorItem.Type.LEGGINGS, 7,
-					ArmorItem.Type.CHESTPLATE, 8,
-					ArmorItem.Type.HELMET, 3),
-			50, ExtraBotanySounds.ARMOR_EQUIP_MAID, () -> Ingredient.of(ExtraBotanyItems.dasRheingold), 4, 0);
-
-	public static final Holder<ArmorMaterial> GOBLIN_SLAYER = create("goblin_slayer",
-			Map.of(
-					ArmorItem.Type.BOOTS, 3,
-					ArmorItem.Type.LEGGINGS, 6,
-					ArmorItem.Type.CHESTPLATE, 6,
-					ArmorItem.Type.HELMET, 3),
-			40, ExtraBotanySounds.ARMOR_EQUIP_GOBLIN, () -> Ingredient.of(ExtraBotanyItems.photonium), 2.5F, 0);
-
-	public static final Holder<ArmorMaterial> SHADOW_WARRIOR = create("shadow_warrior",
-			Map.of(
-					ArmorItem.Type.BOOTS, 3,
-					ArmorItem.Type.LEGGINGS, 7,
-					ArmorItem.Type.CHESTPLATE, 6,
-					ArmorItem.Type.HELMET, 3),
-			28, ExtraBotanySounds.ARMOR_EQUIP_WARRIOR, () -> Ingredient.of(ExtraBotanyItems.shadowium), 1.5F, 0);
-
-	private static Holder<ArmorMaterial> create(String name, Map<ArmorItem.Type, Integer> defense,
-			int enchantmentValue, Holder<SoundEvent> equipSound, Supplier<Ingredient> repairIngredient,
-			float toughness, float knockbackResistance) {
-		ResourceLocation id = prefix(name);
-		RegistryHelper.HolderProxy<ArmorMaterial> proxy = RegistryHelper.lazyHolderProxy(
-				Registries.ARMOR_MATERIAL, id,
-				() -> new ArmorMaterial(defense, enchantmentValue, equipSound,
-						repairIngredient, List.of(new ArmorMaterial.Layer(id)), toughness, knockbackResistance));
-		ALL.add(proxy);
-		return proxy;
+	public static ResourceKey<EquipmentAsset> assetKey(String name) {
+		return ResourceKey.create(EquipmentAssets.ROOT_ID, prefix(name));
 	}
 
-	public static void registerArmorMaterials(Registry<ArmorMaterial> registry) {
-		ALL.forEach(proxy -> proxy.register(registry));
+	private static ArmorMaterial create(String name, int durabilityFactor, int boots, int leggings, int chestplate, int helmet,
+			int enchantmentValue, Holder<SoundEvent> equipSound, TagKey<Item> repair, float toughness, float knockbackResistance) {
+		Map<ArmorType, Integer> defense = new EnumMap<>(ArmorType.class);
+		defense.put(ArmorType.BOOTS, boots);
+		defense.put(ArmorType.LEGGINGS, leggings);
+		defense.put(ArmorType.CHESTPLATE, chestplate);
+		defense.put(ArmorType.HELMET, helmet);
+		defense.put(ArmorType.BODY, chestplate);
+		return new ArmorMaterial(durabilityFactor, defense, enchantmentValue, equipSound, toughness, knockbackResistance, repair, assetKey(name));
 	}
 
 	private ExtraBotanyArmorMaterials() {}

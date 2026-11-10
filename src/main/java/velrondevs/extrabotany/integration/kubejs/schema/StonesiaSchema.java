@@ -14,7 +14,7 @@ import velrondevs.extrabotany.integration.kubejs.util.BlockStateComponent;
  */
 public interface StonesiaSchema {
 
-	RecipeKey<StateIngredient> INPUT = BlockStateComponent.TYPE.inputKey("input");
+	RecipeKey<StateIngredient> INPUT = BlockStateComponent.INSTANCE.inputKey("input");
 	RecipeKey<Integer> OUTPUT_MANA = NumberComponent.INT.outputKey("outputMana");
 
 	RecipeSchema SCHEMA = new RecipeSchema(OUTPUT_MANA, INPUT);

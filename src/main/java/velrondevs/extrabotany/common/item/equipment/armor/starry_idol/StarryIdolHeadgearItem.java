@@ -1,5 +1,6 @@
 package velrondevs.extrabotany.common.item.equipment.armor.starry_idol;
 
+import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -13,7 +14,7 @@ import velrondevs.botania.api.mana.ManaDiscountArmor;
  */
 public class StarryIdolHeadgearItem extends StarryIdolArmorItem implements ManaDiscountArmor {
 	public StarryIdolHeadgearItem(Properties properties) {
-		super(Type.HELMET, properties);
+		super(ArmorType.HELMET, properties);
 	}
 
 	@Override

@@ -4,7 +4,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -43,7 +43,7 @@ public class ManaInfusionProvider extends ExtraBotanyRecipeProvider {
 
 	@Override
 	public void buildRecipes(RecipeOutput recipeOutput) {
-		Consumer<FinishedRecipe> consumer = recipe -> recipeOutput.accept(recipe.id,
+		Consumer<FinishedRecipe> consumer = recipe -> recipeOutput.accept(key(recipe.id),
 				new ManaInfusionRecipe(recipe.output, recipe.input, recipe.mana,
 						recipe.group.isEmpty() ? null : recipe.group, recipe.catalyst), null);
 		consumer.accept(new FinishedRecipe(id("nightmare_fuel"), new ItemStack(ExtraBotanyItems.nightmareFuel), Ingredient.of(Items.COAL), 2000));
@@ -80,7 +80,7 @@ public class ManaInfusionProvider extends ExtraBotanyRecipeProvider {
 		return FinishedRecipe.alchemy(id(id), new ItemStack(items, 4), ingr(block), 25, "botania:block_deconstruction");
 	}
 
-	protected ResourceLocation id(String s) {
+	protected Identifier id(String s) {
 		return prefix("mana_infusion/" + s);
 	}
 
@@ -94,7 +94,7 @@ public class ManaInfusionProvider extends ExtraBotanyRecipeProvider {
 
 		private static final StateIngredient DIMENSION = StateIngredientHelper.of(ExtraBotanyBlocks.dimensionCatalyst);
 
-		private final ResourceLocation id;
+		private final Identifier id;
 		private final Ingredient input;
 		private final ItemStack output;
 		private final int mana;
@@ -102,31 +102,31 @@ public class ManaInfusionProvider extends ExtraBotanyRecipeProvider {
 		@Nullable
 		private final StateIngredient catalyst;
 
-		public static FinishedRecipe conjuration(ResourceLocation id, ItemStack output, Ingredient input, int mana) {
+		public static FinishedRecipe conjuration(Identifier id, ItemStack output, Ingredient input, int mana) {
 			return new FinishedRecipe(id, output, input, mana, "", CONJURATION);
 		}
 
-		public static FinishedRecipe dimension(ResourceLocation id, ItemStack output, Ingredient input, int mana) {
+		public static FinishedRecipe dimension(Identifier id, ItemStack output, Ingredient input, int mana) {
 			return new FinishedRecipe(id, output, input, mana, "", DIMENSION);
 		}
 
-		public static FinishedRecipe alchemy(ResourceLocation id, ItemStack output, Ingredient input, int mana) {
+		public static FinishedRecipe alchemy(Identifier id, ItemStack output, Ingredient input, int mana) {
 			return alchemy(id, output, input, mana, "");
 		}
 
-		public static FinishedRecipe alchemy(ResourceLocation id, ItemStack output, Ingredient input, int mana, String group) {
+		public static FinishedRecipe alchemy(Identifier id, ItemStack output, Ingredient input, int mana, String group) {
 			return new FinishedRecipe(id, output, input, mana, group, ALCHEMY);
 		}
 
-		public FinishedRecipe(ResourceLocation id, ItemStack output, Ingredient input, int mana) {
+		public FinishedRecipe(Identifier id, ItemStack output, Ingredient input, int mana) {
 			this(id, output, input, mana, "");
 		}
 
-		public FinishedRecipe(ResourceLocation id, ItemStack output, Ingredient input, int mana, String group) {
+		public FinishedRecipe(Identifier id, ItemStack output, Ingredient input, int mana, String group) {
 			this(id, output, input, mana, group, null);
 		}
 
-		public FinishedRecipe(ResourceLocation id, ItemStack output, Ingredient input, int mana, String group, @Nullable StateIngredient catalyst) {
+		public FinishedRecipe(Identifier id, ItemStack output, Ingredient input, int mana, String group, @Nullable StateIngredient catalyst) {
 			this.id = id;
 			this.input = input;
 			this.output = output;

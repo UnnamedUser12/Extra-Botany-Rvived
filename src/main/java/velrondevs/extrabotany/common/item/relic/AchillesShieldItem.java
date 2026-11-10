@@ -1,9 +1,15 @@
 package velrondevs.extrabotany.common.item.relic;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -44,34 +50,34 @@ public class AchillesShieldItem extends ManasteelShieldItem {
 	private static final float MAX_ABSORPTION = 20.0F;
 
 	public AchillesShieldItem(Properties properties) {
-		super(properties.durability(ItemTiers.ACHILLES_SHIELD.getUses()), ItemTiers.ACHILLES_SHIELD);
+		super(properties.durability(ItemTiers.ACHILLES_SHIELD.durability()), ItemTiers.ACHILLES_SHIELD);
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		if (!isReleased(stack)) {
 			if (hand == InteractionHand.MAIN_HAND &&
 					player.isSecondaryUseActive() &&
 					player.getAbsorptionAmount() >= RELEASE_ABSORPTION_REQUIRE) {
 				setReleased(stack, true);
-				return InteractionResultHolder.success(stack);
+				return InteractionResult.SUCCESS;
 			}
 			return super.use(level, player, hand);
 		} else {
 			if (hand == InteractionHand.MAIN_HAND &&
 					player.isSecondaryUseActive()) {
 				setReleased(stack, false);
-				return InteractionResultHolder.success(stack);
+				return InteractionResult.SUCCESS;
 			}
-			return InteractionResultHolder.pass(stack);
+			return InteractionResult.PASS;
 		}
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
-		super.inventoryTick(stack, world, entity, slot, selected);
-		if (!world.isClientSide && entity instanceof Player player) {
+	public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		super.inventoryTick(stack, world, entity, eqSlot);
+		if (!world.isClientSide() && entity instanceof Player player) {
 			var relic = velrondevs.extrabotany.xplat.EXplatAbstractions.INSTANCE.findRelic(stack);
 			if (relic != null) {
 				relic.tickBinding(player);
@@ -95,13 +101,13 @@ public class AchillesShieldItem extends ManasteelShieldItem {
 	}
 
 	@Override
-	public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+	public void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		if (isReleased(stack)) {
 			BotaniaItems.thunderSword.hurtEnemy(stack, target, attacker);
 		} else {
 			attacker.setAbsorptionAmount(Math.min(MAX_ABSORPTION, attacker.getAbsorptionAmount() + 2F));
 		}
-		return super.hurtEnemy(stack, target, attacker);
+		super.hurtEnemy(stack, target, attacker);
 	}
 
 	@Override
@@ -178,8 +184,8 @@ public class AchillesShieldItem extends ManasteelShieldItem {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		super.appendHoverText(stack, context, tooltip, flags);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		super.appendHoverText(stack, context, tooltipDisplay, tooltip, flags);
 		RelicImpl.addDefaultTooltip(stack, tooltip);
 	}
 }

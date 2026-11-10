@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "A": {
-      "tag": "botania:petals/lime"
-    },
-    "B": {
-      "item": "botania:pixie_dust"
-    },
-    "C": {
-      "item": "botania:mana_glass"
-    }
+    "A": "#botania:petals/lime",
+    "B": "botania:pixie_dust",
+    "C": "botania:mana_glass"
   },
   "pattern": [
     "AAA",

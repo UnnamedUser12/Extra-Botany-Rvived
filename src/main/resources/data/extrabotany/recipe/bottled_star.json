@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "A": {
-      "tag": "botania:petals/yellow"
-    },
-    "B": {
-      "item": "extrabotany:spirit_fragment"
-    },
-    "C": {
-      "item": "botania:mana_glass"
-    }
+    "A": "#botania:petals/yellow",
+    "B": "extrabotany:spirit_fragment",
+    "C": "botania:mana_glass"
   },
   "pattern": [
     "AAA",

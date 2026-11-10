@@ -2,19 +2,14 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "A": {
-      "tag": "botania:elementium_ingots"
-    },
-    "B": {
-      "item": "extrabotany:boat_manasteel"
-    }
+    "A": "#botania:elementium_ingots",
+    "B": "extrabotany:boat_manasteel"
   },
   "pattern": [
     "ABA",
     "AAA"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:boat_elementium"
   }
 }

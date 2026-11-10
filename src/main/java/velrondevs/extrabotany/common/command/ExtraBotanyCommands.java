@@ -16,7 +16,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 public final class ExtraBotanyCommands {
     private ExtraBotanyCommands() {}
     public static void register(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("exbot").requires(source -> source.hasPermission(2))
+        event.getDispatcher().register(Commands.literal("exbot").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("itemcheck").executes(context -> {
                     boolean current = ExtraBotanyConfig.common().guardianItemCheck();
                     context.getSource().sendSuccess(() -> Component.translatable("commands.extrabotany.itemcheck.query",

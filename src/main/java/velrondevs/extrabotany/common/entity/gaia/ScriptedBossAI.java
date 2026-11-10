@@ -1,9 +1,8 @@
 package velrondevs.extrabotany.common.entity.gaia;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.mojang.serialization.Dynamic;
 
+import net.minecraft.world.entity.ai.ActivityData;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Swim;
 import net.minecraft.world.entity.schedule.Activity;
@@ -11,6 +10,8 @@ import net.minecraft.world.entity.schedule.Activity;
 import velrondevs.extrabotany.common.entity.gaia.behavior.GaiaCleanPlayerUnstableEffects;
 import velrondevs.extrabotany.common.entity.gaia.behavior.GaiaDisarm;
 import velrondevs.extrabotany.common.entity.gaia.behavior.GaiaSmashBlocksAround;
+
+import java.util.List;
 
 /**
  * 空之律者和本我的行为树。
@@ -25,17 +26,16 @@ import velrondevs.extrabotany.common.entity.gaia.behavior.GaiaSmashBlocksAround;
 public final class ScriptedBossAI extends GaiaAI {
 	private ScriptedBossAI() {}
 
-	static Brain<?> makeBrain(Dynamic<?> ops) {
-		Brain<Gaia> brain = Brain.<Gaia>provider(MEMORY_TYPES, SENSOR_TYPES).makeBrain(ops);
-		brain.addActivity(Activity.CORE, 0, ImmutableList.of(
-				new Swim(0.8F),
-				new GaiaDisarm<>()
-		));
-		brain.addActivity(Activity.FIGHT, 10, ImmutableList.of(
-				new GaiaSmashBlocksAround<>(),
-				new GaiaCleanPlayerUnstableEffects<>()
-		));
-		brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
+	protected static Brain<?> makeBrain(Gaia boss, Brain.Packed packed) {
+		Brain<Gaia> brain = Brain.<Gaia>provider(MEMORY_TYPES, SENSOR_TYPES, body -> List.of(
+				ActivityData.<Gaia>create(Activity.CORE, 0, ImmutableList.of(
+						new Swim<Gaia>(0.8F),
+						new GaiaDisarm<Gaia>()
+				)),
+				ActivityData.<Gaia>create(Activity.FIGHT, 10, ImmutableList.of(
+						new GaiaSmashBlocksAround<Gaia>(),
+						new GaiaCleanPlayerUnstableEffects<Gaia>()
+				)))).makeBrain(boss, packed);
 		brain.setDefaultActivity(Activity.FIGHT);
 		brain.useDefaultActivity();
 		return brain;

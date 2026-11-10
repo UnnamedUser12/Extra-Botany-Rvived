@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "G": {
-      "item": "botania:gaia_ingot"
-    },
-    "O": {
-      "tag": "extrabotany:orichalcos_ingots"
-    },
-    "S": {
-      "item": "botania:mana_string"
-    }
+    "G": "botania:gaia_ingot",
+    "O": "#extrabotany:orichalcos_ingots",
+    "S": "botania:mana_string"
   },
   "pattern": [
     " GS",
@@ -18,7 +12,6 @@
     " GS"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:failnaught"
   }
 }

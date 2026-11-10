@@ -150,6 +150,6 @@ public class EnchanterBlockEntity extends ExtraFunctionalFlowerBlockEntity {
 	@Override
 	public void readFromPacketNBT(CompoundTag cmp) {
 		super.readFromPacketNBT(cmp);
-		setConsumedMana(cmp.getInt(TAG_CONSUMED));
+		setConsumedMana(cmp.getIntOr(TAG_CONSUMED, 0));
 	}
 }

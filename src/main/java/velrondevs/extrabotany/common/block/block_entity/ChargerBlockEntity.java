@@ -54,7 +54,7 @@ public abstract class ChargerBlockEntity extends ExposedSimpleInventoryBlockEnti
 
 	@Override
 	protected SimpleContainer createItemHandler() {
-		return new SimpleContainer(1) {
+		return new Inventory(1) {
 			@Override
 			public int getMaxStackSize() {
 				return 1;
@@ -149,8 +149,8 @@ public abstract class ChargerBlockEntity extends ExposedSimpleInventoryBlockEnti
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.loadAdditional(tag, registries);
+	public void readPacketNBT(CompoundTag tag, HolderLookup.Provider registries) {
+		super.readPacketNBT(tag, registries);
 		// The inherited inventory loader calls setChanged; loading is not a new mutation.
 		syncPending = false;
 	}
@@ -208,7 +208,7 @@ public abstract class ChargerBlockEntity extends ExposedSimpleInventoryBlockEnti
 
 	private void playSound() {
 		level.playSound(null, worldPosition, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, .2f,
-				((level.random.nextFloat() - level.random.nextFloat()) * .7f + 1) * 2);
+				((level.getRandom().nextFloat() - level.getRandom().nextFloat()) * .7f + 1) * 2);
 	}
 
 	@Nullable

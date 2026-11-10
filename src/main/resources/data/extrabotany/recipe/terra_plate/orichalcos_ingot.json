@@ -1,15 +1,9 @@
 {
   "type": "botania:terra_plate",
   "ingredients": [
-    {
-      "item": "botania:gaia_ingot"
-    },
-    {
-      "item": "extrabotany:gilded_potato_mashed"
-    },
-    {
-      "item": "extrabotany:hero_medal"
-    }
+    "botania:gaia_ingot",
+    "extrabotany:gilded_potato_mashed",
+    "extrabotany:hero_medal"
   ],
   "mana": 500000,
   "result": {

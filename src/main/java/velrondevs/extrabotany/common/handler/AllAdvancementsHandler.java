@@ -1,7 +1,7 @@
 package velrondevs.extrabotany.common.handler;
 
 import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,7 +29,7 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  */
 public final class AllAdvancementsHandler {
 	private static final String MAIN_PREFIX = "main/";
-	private static final ResourceLocation ALL_STATS = prefix(MAIN_PREFIX + LibAdvancementNames.ALL_STATS);
+	private static final Identifier ALL_STATS = prefix(MAIN_PREFIX + LibAdvancementNames.ALL_STATS);
 
 	private AllAdvancementsHandler() {}
 
@@ -44,7 +44,7 @@ public final class AllAdvancementsHandler {
 		if (earned.id().equals(ALL_STATS)) {
 			// 和原版相同：不管这个进度是怎么得到的，得到它的时候就给奖杯。
 			// The same as in the original: the Trophy is given when the player gets this advancement, by any method.
-			ItemEntity trophy = serverPlayer.spawnAtLocation(new ItemStack(ExtraBotanyBlocks.trophy), 0F);
+			ItemEntity trophy = serverPlayer.spawnAtLocation(serverPlayer.level(), new ItemStack(ExtraBotanyBlocks.trophy));
 			if (trophy != null) {
 				trophy.setNoPickUpDelay();
 			}
@@ -61,7 +61,7 @@ public final class AllAdvancementsHandler {
 		if (!(player instanceof ServerPlayer serverPlayer) || !PlayerHelper.isTruePlayer(player)) {
 			return;
 		}
-		ServerAdvancementManager manager = serverPlayer.server.getAdvancements();
+		ServerAdvancementManager manager = serverPlayer.level().getServer().getAdvancements();
 		AdvancementHolder goal = manager.get(ALL_STATS);
 		if (goal == null) {
 			return;
@@ -88,7 +88,7 @@ public final class AllAdvancementsHandler {
 	}
 
 	private static boolean isMainAdvancement(AdvancementHolder holder) {
-		ResourceLocation id = holder.id();
+		Identifier id = holder.id();
 		return LibMisc.MOD_ID.equals(id.getNamespace()) && id.getPath().startsWith(MAIN_PREFIX) && !id.equals(ALL_STATS)
 				&& holder.value().display().isPresent();
 	}

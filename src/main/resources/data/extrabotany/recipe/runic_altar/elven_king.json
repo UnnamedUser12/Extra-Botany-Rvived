@@ -2,28 +2,16 @@
   "type": "botania:runic_altar",
   "catalysts": [],
   "ingredients": [
-    {
-      "item": "botania:elementium_ingot"
-    },
-    {
-      "item": "botania:elementium_ingot"
-    },
-    {
-      "item": "botania:quartz_elven"
-    },
-    {
-      "item": "botania:quartz_elven"
-    },
-    {
-      "item": "botania:rune_spring"
-    }
+    "botania:elementium_ingot",
+    "botania:elementium_ingot",
+    "botania:quartz_elven",
+    "botania:quartz_elven",
+    "botania:rune_spring"
   ],
   "mana": 4000,
   "output": {
     "count": 1,
     "id": "extrabotany:elven_king"
   },
-  "reagent": {
-    "item": "botania:livingrock"
-  }
+  "reagent": "botania:livingrock"
 }

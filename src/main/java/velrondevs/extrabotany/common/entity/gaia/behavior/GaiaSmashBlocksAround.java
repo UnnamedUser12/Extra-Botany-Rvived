@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -26,9 +26,9 @@ import java.util.List;
 public class GaiaSmashBlocksAround<E extends Gaia> extends Behavior<E> {
 
 	protected static final TagKey<Block> BLACKLIST = BotaniaTags.Blocks.GAIA_BREAK_BLACKLIST;
-	protected static final List<ResourceLocation> CHEATY_BLOCKS = Arrays.asList(
-			ResourceLocation.tryBuild("openblocks", "beartrap"),
-			ResourceLocation.tryBuild("thaumictinkerer", "magnet")
+	protected static final List<Identifier> CHEATY_BLOCKS = Arrays.asList(
+			Identifier.tryBuild("openblocks", "beartrap"),
+			Identifier.tryBuild("thaumictinkerer", "magnet")
 	);
 
 	public GaiaSmashBlocksAround() {

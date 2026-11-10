@@ -1,15 +1,15 @@
 package velrondevs.extrabotany.datagen.providers.recipes;
 
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.criterion.InventoryChangeTrigger;
+import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -32,14 +32,6 @@ public class SmithingRecipeProvider extends ExtraBotanyRecipeProvider {
 	public SmithingRecipeProvider(PackOutput packOutput,
 			CompletableFuture<HolderLookup.Provider> lookupProvider) {
 		super(packOutput, lookupProvider);
-	}
-
-	private static Criterion<InventoryChangeTrigger.TriggerInstance> conditionsFromItem(ItemLike item) {
-		return InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(item).build());
-	}
-
-	public static Criterion<InventoryChangeTrigger.TriggerInstance> conditionsFromTag(TagKey<Item> tag) {
-		return InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(tag).build());
 	}
 
 	@Override
@@ -65,7 +57,7 @@ public class SmithingRecipeProvider extends ExtraBotanyRecipeProvider {
 				.unlocks("has_item", conditionsFromItem(BotaniaItems.gaiaIngot))
 				.save(consumer, id(ExtraBotanyItems.gaiaHammer));
 		SmithingTransformRecipeBuilder.smithing(
-				Ingredient.of(ExtraBotanyTags.Items.INGOTS_ORICHALCOS),
+				tag(ExtraBotanyTags.Items.INGOTS_ORICHALCOS),
 				Ingredient.of(ExtraBotanyItems.terrasteelShield),
 				heroMedal,
 				RecipeCategory.COMBAT,
@@ -75,8 +67,8 @@ public class SmithingRecipeProvider extends ExtraBotanyRecipeProvider {
 				.save(consumer, id(ExtraBotanyItems.achillesShield));
 	}
 
-	protected ResourceLocation id(ItemLike itemLike) {
-		return prefix("smithing/" + getItemName(itemLike));
+	protected net.minecraft.resources.ResourceKey<net.minecraft.world.item.crafting.Recipe<?>> id(ItemLike itemLike) {
+		return key(prefix("smithing/" + getItemName(itemLike)));
 	}
 
 	protected static String getItemName(ItemLike itemLike) {

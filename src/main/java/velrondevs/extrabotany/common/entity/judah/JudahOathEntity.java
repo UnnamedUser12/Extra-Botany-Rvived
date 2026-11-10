@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity.judah;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -182,7 +184,7 @@ public class JudahOathEntity extends ThrowableProjectile {
 			if (living == owner || !DamageHandler.INSTANCE.checkPassable(living, owner)) {
 				continue;
 			}
-			living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 9));
+			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 20, 9));
 			aim = living.position();
 		}
 		if (standbyTicks > ATTACK_START_TICKS && tickCount % SPEAR_INTERVAL_TICKS == 0 && attacks < SPEAR_COUNT) {
@@ -240,7 +242,7 @@ public class JudahOathEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
+	public void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putInt(TAG_VARIANT, entityData.get(VARIANT));
 		tag.putInt(TAG_DAMAGE, damage);
@@ -248,12 +250,10 @@ public class JudahOathEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
+	public void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		entityData.set(VARIANT, Variant.byId(tag.getInt(TAG_VARIANT)).ordinal());
-		if (tag.contains(TAG_DAMAGE)) {
-			damage = tag.getInt(TAG_DAMAGE);
-		}
-		entityData.set(ROTATION, tag.getFloat(TAG_ROTATION));
+		entityData.set(VARIANT, Variant.byId(tag.getIntOr(TAG_VARIANT, 0)).ordinal());
+		damage = tag.getIntOr(TAG_DAMAGE, damage);
+		entityData.set(ROTATION, tag.getFloatOr(TAG_ROTATION, 0F));
 	}
 }

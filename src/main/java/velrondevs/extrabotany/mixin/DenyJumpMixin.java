@@ -15,7 +15,7 @@ import velrondevs.extrabotany.registry.ExtraBotanyMobEffects;
  */
 @Mixin(LivingEntity.class)
 public class DenyJumpMixin {
-	@Inject(method = "getJumpPower", at = @At("RETURN"), cancellable = true)
+	@Inject(method = "getJumpPower()F", at = @At("RETURN"), cancellable = true)
 	private void getJumpPower(CallbackInfoReturnable<Float> cir) {
 		LivingEntity self = (LivingEntity) (Object) this;
 		if (self.hasEffect(ExtraBotanyMobEffects.IMMOBILIZE)) {

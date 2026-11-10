@@ -1,5 +1,10 @@
 package velrondevs.extrabotany.common.item.relic;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -7,7 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -18,7 +23,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -58,28 +63,29 @@ public class CameraItem extends RelicItem implements IShadowium {
 	//Z键 饰品栏也能拍照
 	//车万女仆联动
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+	public InteractionResult use(Level world, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		var relic = velrondevs.extrabotany.xplat.EXplatAbstractions.INSTANCE.findRelic(stack);
 		if (relic == null ||
 				!relic.isRightPlayer(player) ||
 				!ManaItemHandler.instance().requestManaExactForTool(stack, player, MANA_PER_USE, false)) {
-			return InteractionResultHolder.pass(stack);
+			return InteractionResult.PASS;
 		}
 
-		player.playNotifySound(ExtraBotanySounds.CAMERA_FOCUS, SoundSource.PLAYERS, .3F, SoundEventUtil.randomPitch(world));
+		player.playSound(ExtraBotanySounds.CAMERA_FOCUS, .3F, SoundEventUtil.randomPitch(world));
 		return ItemUtils.startUsingInstantly(world, player, hand);
 	}
 
 	@Override
-	public void releaseUsing(ItemStack stack, Level world, LivingEntity entity, int timeLeft) {
+	public boolean releaseUsing(ItemStack stack, Level world, LivingEntity entity, int timeLeft) {
 		if (!(entity instanceof Player player)) {
-			return;
+			return false;
 		}
 
-		if (executeCapture(world, player, player.getUsedItemHand()).getResult() == InteractionResult.SUCCESS) {
-			player.getCooldowns().addCooldown(this, 20 * 8);
+		if (executeCapture(world, player, player.getUsedItemHand()) == InteractionResult.SUCCESS) {
+			player.getCooldowns().addCooldown(new ItemStack(this), 20 * 8);
 		}
+		return true;
 	}
 
 	@Override
@@ -88,11 +94,11 @@ public class CameraItem extends RelicItem implements IShadowium {
 	}
 
 	@Override
-	public UseAnim getUseAnimation(ItemStack stack) {
-		return UseAnim.SPYGLASS;
+	public ItemUseAnimation getUseAnimation(ItemStack stack) {
+		return ItemUseAnimation.SPYGLASS;
 	}
 
-	public static InteractionResultHolder<ItemStack> executeCapture(Level world, Player player, InteractionHand hand) {
+	public static InteractionResult executeCapture(Level world, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		var relic = velrondevs.extrabotany.xplat.EXplatAbstractions.INSTANCE.findRelic(stack);
 		if (relic != null && (player.isCreative() || (relic.isRightPlayer(player) &&
@@ -120,18 +126,18 @@ public class CameraItem extends RelicItem implements IShadowium {
 			}
 
 			world.playSound(null, player.getOnPos(), ExtraBotanySounds.CAMERA_USE, SoundSource.PLAYERS);
-			return InteractionResultHolder.success(stack);
+			return InteractionResult.SUCCESS;
 		}
-		return InteractionResultHolder.pass(player.getItemInHand(hand));
+		return InteractionResult.PASS;
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
-		shadowiumTick(stack, world, entity, slot, selected);
+	public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		shadowiumTick(stack, world, entity, 0, false);
 		if (!(entity instanceof Player player)) {
 			return;
 		}
-		super.inventoryTick(stack, world, entity, slot, selected);
+		super.inventoryTick(stack, world, entity, eqSlot);
 		ItemStack usingItem = player.getUseItem();
 
 		if (usingItem.isEmpty() || !(usingItem.getItem() instanceof CameraItem)) {
@@ -163,7 +169,7 @@ public class CameraItem extends RelicItem implements IShadowium {
 		if (!player.level().isClientSide()) {
 			return;
 		}
-		player.playNotifySound(ExtraBotanySounds.CAMERA_CHARGE, SoundSource.PLAYERS, .3F, SoundEventUtil.randomPitch(player.level()));
+		player.playSound(ExtraBotanySounds.CAMERA_CHARGE, .3F, SoundEventUtil.randomPitch(player.level()));
 	}
 
 	public int getManaPerUse() {
@@ -190,9 +196,9 @@ public class CameraItem extends RelicItem implements IShadowium {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		tooltip.add(Component.translatable("tooltip.extrabotany.camera").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
-		tooltip.add(Component.literal(""));
-		super.appendHoverText(stack, context, tooltip, flags);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		tooltip.accept(Component.translatable("tooltip.extrabotany.camera").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
+		tooltip.accept(Component.literal(""));
+		super.appendHoverText(stack, context, tooltipDisplay, tooltip, flags);
 	}
 }

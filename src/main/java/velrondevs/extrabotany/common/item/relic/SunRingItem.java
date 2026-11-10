@@ -5,7 +5,7 @@ import com.google.common.collect.Multimap;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -125,7 +125,7 @@ public class SunRingItem extends RelicBaubleItem implements BlockChangedListener
 
 	@Override
 	public Multimap<Holder<Attribute>, AttributeModifier> getEquippedAttributeModifiers(ItemStack stack) {
-		ResourceLocation slotId = getBaubleModifierId(stack);
+		Identifier slotId = getBaubleModifierId(stack);
 		Multimap<Holder<Attribute>, AttributeModifier> attributes = HashMultimap.create();
 		// 原版使用 Forge 的触及距离属性。它只影响方块，不影响实体。
 		// The original uses the reach distance attribute of Forge. That attribute only applies to blocks, not to entities.

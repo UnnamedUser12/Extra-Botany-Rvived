@@ -4,11 +4,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.critereon.ContextAwarePredicate;
-import net.minecraft.advancements.critereon.EntityPredicate;
-import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.criterion.ContextAwarePredicate;
+import net.minecraft.advancements.criterion.EntityPredicate;
+import net.minecraft.advancements.criterion.ItemPredicate;
+import net.minecraft.advancements.criterion.SimpleCriterionTrigger;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -21,7 +21,7 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * An advancement trigger: the mana in an item is in the specified range. The mana is a long value, because the capacity of the Master Band of Mana is more than the range of an int.
  */
 public class ManaChargeTrigger extends SimpleCriterionTrigger<ManaChargeTrigger.TriggerInstance> {
-	public static final ResourceLocation ID = prefix("mana_charge");
+	public static final Identifier ID = prefix("mana_charge");
 	public static final ManaChargeTrigger INSTANCE = new ManaChargeTrigger();
 
 	public void trigger(ServerPlayer player, ItemStack itemStack, long mana) {

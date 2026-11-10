@@ -7,7 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ToolMaterial;
 
 import velrondevs.botania.api.BotaniaAPI;
 
@@ -19,7 +19,7 @@ public class TerrasteelShieldItem extends ManasteelShieldItem {
 
 	public static final float THORNS_RETURN_RATE = 0.5F;
 
-	public TerrasteelShieldItem(Properties properties, Tier tier) {
+	public TerrasteelShieldItem(Properties properties, ToolMaterial tier) {
 		super(properties, tier);
 	}
 

@@ -1,24 +1,24 @@
 package velrondevs.extrabotany.gametest;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.monster.Husk;
+import net.minecraft.world.entity.animal.golem.IronGolem;
+import net.minecraft.world.entity.monster.zombie.Husk;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.botania.api.item.Relic;
 import velrondevs.botania.api.mana.ManaItem;
@@ -149,9 +149,9 @@ public final class SpearAndJudahGameTests {
 		for (int i = 0; i < 599; i++) {
 			player.getCooldowns().tick();
 		}
-		helper.assertTrue(player.getCooldowns().isOnCooldown(item), "The paid cooldown ended before 600 ticks");
+		helper.assertTrue(player.getCooldowns().isOnCooldown(new ItemStack(item)), "The paid cooldown ended before 600 ticks");
 		player.getCooldowns().tick();
-		helper.assertFalse(player.getCooldowns().isOnCooldown(item), "The paid cooldown was longer than 600 ticks");
+		helper.assertFalse(player.getCooldowns().isOnCooldown(new ItemStack(item)), "The paid cooldown was longer than 600 ticks");
 		helper.succeed();
 	}
 
@@ -166,9 +166,9 @@ public final class SpearAndJudahGameTests {
 		for (int i = 0; i < 1199; i++) {
 			player.getCooldowns().tick();
 		}
-		helper.assertTrue(player.getCooldowns().isOnCooldown(item), "The cooldown with no mana ended before 1200 ticks");
+		helper.assertTrue(player.getCooldowns().isOnCooldown(new ItemStack(item)), "The cooldown with no mana ended before 1200 ticks");
 		player.getCooldowns().tick();
-		helper.assertFalse(player.getCooldowns().isOnCooldown(item), "The cooldown with no mana was longer than 1200 ticks");
+		helper.assertFalse(player.getCooldowns().isOnCooldown(new ItemStack(item)), "The cooldown with no mana was longer than 1200 ticks");
 		helper.succeed();
 	}
 
@@ -199,9 +199,9 @@ public final class SpearAndJudahGameTests {
 		Player player = playerHolding(helper, ExtraBotanyItems.spearOfSubspace);
 		SubspaceEntity rift = new SubspaceEntity(helper.getLevel(), player, SubspaceEntity.Mode.BURSTS, 120, 23, 13, 1.75F, 57F);
 
-		SubspaceEntity loaded = ExtraBotanyEntities.SUBSPACE.create(helper.getLevel());
-		loaded.load(rift.saveWithoutId(new CompoundTag()));
-		SubspaceEntity synced = ExtraBotanyEntities.SUBSPACE.create(helper.getLevel());
+		SubspaceEntity loaded = ExtraBotanyEntities.SUBSPACE.create(helper.getLevel(), EntitySpawnReason.LOAD);
+		TestNbt.loadEntity(helper.getLevel().registryAccess(), loaded, TestNbt.saveEntity(helper.getLevel().registryAccess(), rift));
+		SubspaceEntity synced = ExtraBotanyEntities.SUBSPACE.create(helper.getLevel(), EntitySpawnReason.LOAD);
 		synced.getEntityData().assignValues(rift.getEntityData().getNonDefaultValues());
 
 		for (SubspaceEntity copy : List.of(loaded, synced)) {
@@ -277,14 +277,14 @@ public final class SpearAndJudahGameTests {
 		for (Variant variant : Variant.values()) {
 			Item item = JudahOathItem.itemFor(variant);
 			player.setItemInHand(InteractionHand.MAIN_HAND, boundStack(item, player));
-			helper.assertTrue(item.use(helper.getLevel(), player, InteractionHand.MAIN_HAND).getResult().consumesAction(),
+			helper.assertTrue(item.use(helper.getLevel(), player, InteractionHand.MAIN_HAND).consumesAction(),
 					variant + " could not be used after the cooldown ended");
 			casts++;
 			for (Variant other : Variant.values()) {
 				Item otherItem = JudahOathItem.itemFor(other);
-				helper.assertTrue(player.getCooldowns().isOnCooldown(otherItem), other + " is not on the shared cooldown");
+				helper.assertTrue(player.getCooldowns().isOnCooldown(new ItemStack(otherItem)), other + " is not on the shared cooldown");
 				player.setItemInHand(InteractionHand.MAIN_HAND, boundStack(otherItem, player));
-				helper.assertFalse(otherItem.use(helper.getLevel(), player, InteractionHand.MAIN_HAND).getResult().consumesAction(),
+				helper.assertFalse(otherItem.use(helper.getLevel(), player, InteractionHand.MAIN_HAND).consumesAction(),
 						other + " was used during the shared cooldown");
 			}
 			int ownedOaths = (int) find(helper, JudahOathEntity.class).stream().filter(oath -> oath.getOwner() == player).count();
@@ -294,9 +294,9 @@ public final class SpearAndJudahGameTests {
 			for (int tick = 0; tick < 79; tick++) {
 				player.getCooldowns().tick();
 			}
-			helper.assertTrue(player.getCooldowns().isOnCooldown(item), "The shared cooldown ended before 80 ticks");
+			helper.assertTrue(player.getCooldowns().isOnCooldown(new ItemStack(item)), "The shared cooldown ended before 80 ticks");
 			player.getCooldowns().tick();
-			helper.assertFalse(player.getCooldowns().isOnCooldown(item), "The shared cooldown was longer than 80 ticks");
+			helper.assertFalse(player.getCooldowns().isOnCooldown(new ItemStack(item)), "The shared cooldown was longer than 80 ticks");
 		}
 		find(helper, JudahOathEntity.class).forEach(Entity::discard);
 		helper.succeed();
@@ -360,7 +360,7 @@ public final class SpearAndJudahGameTests {
 
 		// 客户端只收到同步数据。它必须能靠同步数据让剑前进。
 		// The client only gets the synchronized data. It must be able to move the sword from that data.
-		JudahSwordEntity mirror = ExtraBotanyEntities.JUDAH_SWORD.create(helper.getLevel());
+		JudahSwordEntity mirror = ExtraBotanyEntities.JUDAH_SWORD.create(helper.getLevel(), EntitySpawnReason.LOAD);
 		mirror.setPos(start);
 		mirror.getEntityData().assignValues(sword.getEntityData().getNonDefaultValues());
 		mirror.tick();

@@ -4,12 +4,9 @@
     "type": "block",
     "block": "extrabotany:dimension_catalyst"
   },
-  "input": {
-    "item": "minecraft:sand"
-  },
+  "input": "minecraft:sand",
   "mana": 500,
   "output": {
-    "count": 1,
     "id": "minecraft:soul_sand"
   }
 }

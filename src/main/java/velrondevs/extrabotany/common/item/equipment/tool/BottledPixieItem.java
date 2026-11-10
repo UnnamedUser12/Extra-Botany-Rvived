@@ -1,9 +1,11 @@
 package velrondevs.extrabotany.common.item.equipment.tool;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -32,22 +34,22 @@ public class BottledPixieItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		if (!(level instanceof ServerLevel serverLevel)) {
-			return InteractionResultHolder.success(stack);
+			return InteractionResult.SUCCESS;
 		}
 		if (!ManaItemHandler.instance().requestManaExactForTool(stack, player, MANA_PER_USE, true)) {
-			return InteractionResultHolder.fail(stack);
+			return InteractionResult.FAIL;
 		}
 
 		PetPixieEntity pixie = new PetPixieEntity(ExtraBotanyEntities.PET_PIXIE, serverLevel);
 		pixie.setPos(player.getX(), player.getY() + 1.5, player.getZ());
 		pixie.setProps(player, PIXIE_DAMAGE);
 		EventHooks.finalizeMobSpawn(pixie, serverLevel, serverLevel.getCurrentDifficultyAt(pixie.blockPosition()),
-				MobSpawnType.MOB_SUMMONED, null);
+				EntitySpawnReason.MOB_SUMMONED, null);
 		serverLevel.addFreshEntity(pixie);
-		player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
-		return InteractionResultHolder.success(stack);
+		player.getCooldowns().addCooldown(new ItemStack(this), COOLDOWN_TICKS);
+		return InteractionResult.SUCCESS;
 	}
 }

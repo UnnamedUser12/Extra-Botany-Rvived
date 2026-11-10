@@ -2,7 +2,7 @@ package velrondevs.extrabotany.datagen.providers.patchouli.page.extrabotany;
 
 import com.demonwav.mcdev.annotations.Translatable;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.datagen.providers.patchouli.page.AbstractPage;
 
@@ -26,7 +26,7 @@ public class SmithingPage extends AbstractPage<SmithingPage> {
 	}
 
 	@Override
-	public ResourceLocation getType() {
-		return ResourceLocation.tryParse("extrabotany:smithing");
+	public Identifier getType() {
+		return Identifier.tryParse("extrabotany:smithing");
 	}
 }

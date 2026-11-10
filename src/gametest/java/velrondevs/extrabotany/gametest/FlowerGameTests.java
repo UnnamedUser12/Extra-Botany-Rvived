@@ -3,13 +3,13 @@ package velrondevs.extrabotany.gametest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Husk;
+import net.minecraft.world.entity.monster.zombie.Husk;
 import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -20,8 +20,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.botania.api.block_entity.FunctionalFlowerBlockEntity;
 import velrondevs.botania.api.block_entity.GeneratingFlowerBlockEntity;
@@ -146,7 +146,7 @@ public final class FlowerGameTests {
 		HydroangeasBlockEntity hydroangeas = plant(helper, CENTER.west(), velrondevs.botania.registry.BotaniaFlowerBlocks.hydroangeas.defaultBlockState(), HydroangeasBlockEntity.class);
 		CompoundTag old = hydroangeas.saveCustomOnly(registries);
 		old.putInt(TAG_DECAY, 500);
-		hydroangeas.loadCustomOnly(old, registries);
+		BlockEntityIO.loadCustom(hydroangeas, old);
 		lily.setPassiveDecayTicks(500);
 
 		// 充能的永寂龙胆不工作。 / A powered Serenitian does no work.
@@ -163,7 +163,7 @@ public final class FlowerGameTests {
 			serenitian.tickFlower();
 		}
 		helper.assertTrue(lily.getPassiveDecayTicks() == 0, "The Serenitian did not set the decay counter of the Sunshine Lily to zero");
-		helper.assertTrue(hydroangeas.saveCustomOnly(registries).getInt(TAG_DECAY) == 0,
+		helper.assertTrue(hydroangeas.saveCustomOnly(registries).getIntOr(TAG_DECAY, 0) == 0,
 				"The Serenitian did not set the decay counter of the Hydroangeas to zero");
 		helper.succeed();
 	}
@@ -185,7 +185,7 @@ public final class FlowerGameTests {
 
 		// 客户端用 loadCustomOnly 读取更新数据包。 / The client reads the update packet with loadCustomOnly.
 		BellflowerBlockEntity client = new BellflowerBlockEntity(flower.getBlockPos(), flower.getBlockState());
-		client.loadCustomOnly(flower.getUpdateTag(registries), registries);
+		BlockEntityIO.loadCustom(client, registries, flower.getUpdateTag(registries));
 		helper.assertTrue(Math.abs(client.getWindLevel() - wind) < 0.005, "The update packet does not have the wind level");
 		helper.succeed();
 	}

@@ -1,14 +1,14 @@
 package velrondevs.extrabotany.gametest;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Husk;
+import net.minecraft.world.entity.monster.zombie.Husk;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -16,8 +16,8 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import top.theillusivec4.curios.api.CuriosApi;
 
@@ -86,7 +86,7 @@ public final class MountGameTests {
 		if (relic != null) {
 			relic.bindToUUID(player.getUUID());
 		}
-		var inventory = CuriosApi.getCuriosInventory(player).orElseThrow();
+		var inventory = CuriosTestHelper.inventory(player);
 		var handler = inventory.getCurios().values().stream()
 				.filter(candidate -> candidate.getStacks().getSlots() > 0)
 				.findFirst().orElseThrow();
@@ -159,7 +159,7 @@ public final class MountGameTests {
 		Player player = player(helper, 2.5, 2, 2.5);
 		MotorEntity motor = new MotorEntity(helper.getLevel(), pos(helper, 2.5, 2, 2.5));
 		helper.getLevel().addFreshEntity(motor);
-		player.startRiding(motor, true);
+		player.startRiding(motor, true, true);
 		Husk husk = husk(helper, 3.2, 2.5);
 
 		helper.runAfterDelay(4, () -> {
@@ -176,7 +176,7 @@ public final class MountGameTests {
 		Player player = player(helper, 2.5, 2, 2.5);
 		MotorEntity motor = new MotorEntity(helper.getLevel(), pos(helper, 2.5, 2, 2.5));
 		helper.getLevel().addFreshEntity(motor);
-		player.startRiding(motor, true);
+		player.startRiding(motor, true, true);
 		// 尸壳离机车 1.9 格：在旋风的范围内，但是碰不到机车。
 		// The husk is 1.9 blocks from the motor: in the range of the cyclone, but it does not touch the motor.
 		Husk husk = husk(helper, 4.4, 2.5);
@@ -212,7 +212,7 @@ public final class MountGameTests {
 		Player player = player(helper, 2.5, 2, 2.5);
 		MotorEntity motor = new MotorEntity(helper.getLevel(), pos(helper, 2.5, 2, 2.5));
 		helper.getLevel().addFreshEntity(motor);
-		player.startRiding(motor, true);
+		player.startRiding(motor, true, true);
 
 		// 骑乘不满 120 tick 时，跳跃键不消耗能量。
 		// Before 120 riding ticks, the jump key takes no energy.
@@ -230,7 +230,7 @@ public final class MountGameTests {
 		Player player = player(helper, 2.5, 4.5, 2.5);
 		UfoEntity ufo = new UfoEntity(helper.getLevel(), pos(helper, 2.5, 4.5, 2.5));
 		helper.getLevel().addFreshEntity(ufo);
-		player.startRiding(ufo, true);
+		player.startRiding(ufo, true, true);
 		// 这只猪保留 AI。没有 AI 的生物不会按速度移动，所以飞碟拉不动它。
 		// This pig keeps its AI. A mob with no AI does not move with its velocity, so the car cannot pull it.
 		Pig pig = helper.spawn(EntityType.PIG, new BlockPos(2, 2, 2));

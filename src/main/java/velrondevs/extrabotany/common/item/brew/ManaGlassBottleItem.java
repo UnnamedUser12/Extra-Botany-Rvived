@@ -75,7 +75,7 @@ public class ManaGlassBottleItem extends Item implements CustomCreativeTabConten
 		}
 
 		receiver.receiveMana(-LADLE_OUT_MANA);
-		return InteractionResult.sidedSuccess(level.isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 
 	protected ItemStack turnBottleIntoItem(ItemStack bottleStack, Player player, ItemStack filledBottleStack) {

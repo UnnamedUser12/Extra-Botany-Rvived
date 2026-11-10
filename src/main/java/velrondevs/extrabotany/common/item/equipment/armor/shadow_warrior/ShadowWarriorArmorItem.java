@@ -1,5 +1,8 @@
 package velrondevs.extrabotany.common.item.equipment.armor.shadow_warrior;
 
+import velrondevs.extrabotany.registry.ExtraBotanyArmorMaterials;
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.server.level.ServerLevel;
 import com.google.common.base.Suppliers;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
@@ -14,7 +17,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
@@ -46,19 +50,18 @@ public class ShadowWarriorArmorItem extends StarryIdolArmorItem implements IShad
 			new ItemStack(ExtraBotanyItems.shadowWarriorBoots)
 	});
 
-	public ShadowWarriorArmorItem(Type type, Properties properties) {
-		this(ExtraBotanyAPI.instance().getShadowWarriorArmorMaterial(), type, properties);
+	public ShadowWarriorArmorItem(ArmorType type, Properties properties) {
+		this(ExtraBotanyArmorMaterials.SHADOW_WARRIOR, type, properties);
 	}
 
-	public ShadowWarriorArmorItem(Holder<ArmorMaterial> material, Type type, Properties properties) {
-		super(material, type, properties);
+	public ShadowWarriorArmorItem(ArmorMaterial material, ArmorType type, Properties properties) {
+		super(material, type, properties, attributes -> withWarriorModifiers(attributes, type));
 	}
 
-	@Override
-	public ItemAttributeModifiers getDefaultAttributeModifiers() {
-		var modifierId = prefix("shadow_warrior_" + getType().getName());
-		var slot = EquipmentSlotGroup.bySlot(getType().getSlot());
-		return super.getDefaultAttributeModifiers()
+	private static ItemAttributeModifiers withWarriorModifiers(ItemAttributeModifiers attributes, ArmorType type) {
+		var modifierId = prefix("shadow_warrior_" + type.getName());
+		var slot = EquipmentSlotGroup.bySlot(type.getSlot());
+		return attributes
 				.withModifierAdded(Attributes.MAX_HEALTH,
 						new AttributeModifier(modifierId, 5, AttributeModifier.Operation.ADD_VALUE), slot)
 				.withModifierAdded(PixieHandler.PIXIE_SPAWN_CHANCE,
@@ -66,10 +69,10 @@ public class ShadowWarriorArmorItem extends StarryIdolArmorItem implements IShad
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
-		super.inventoryTick(stack, world, entity, slot, selected);
+	public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		super.inventoryTick(stack, world, entity, eqSlot);
 		if (entity instanceof Player) {
-			shadowiumTick(stack, world, entity, slot, selected);
+			shadowiumTick(stack, world, entity, 0, false);
 		}
 	}
 
@@ -113,7 +116,7 @@ public class ShadowWarriorArmorItem extends StarryIdolArmorItem implements IShad
 
 	@Override
 	public boolean hasArmorSetItem(Player player, EquipmentSlot slot) {
-		if (player == null || player.getInventory() == null || player.getInventory().armor == null) {
+		if (player == null || player.getInventory() == null || false) {
 			return false;
 		}
 

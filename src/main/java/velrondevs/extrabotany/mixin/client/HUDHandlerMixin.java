@@ -1,11 +1,10 @@
 package velrondevs.extrabotany.mixin.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.platform.Window;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -18,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import velrondevs.botania.client.core.helper.RenderHelper;
 import velrondevs.botania.client.gui.HUDHandler;
 
 /**
@@ -28,7 +28,7 @@ import velrondevs.botania.client.gui.HUDHandler;
 public class HUDHandlerMixin {
 	//ManaReader
 	@Inject(method = "drawSimpleManaHUD", at = @At("TAIL"), remap = false)
-	private static void drawManaNumber(GuiGraphics gui, int color, int mana, int maxMana,
+	private static void drawManaNumber(GuiGraphicsExtractor gui, int color, int mana, int maxMana,
 			String name, CallbackInfo ci) {
 		Minecraft mc = Minecraft.getInstance();
 		Window window = mc.getWindow();
@@ -39,7 +39,7 @@ public class HUDHandlerMixin {
 		}
 
 		boolean display = false;
-		for (ItemStack stack : player.getHandSlots()) {
+		for (ItemStack stack : new ItemStack[] { player.getMainHandItem(), player.getOffhandItem() }) {
 			if (stack.isEmpty()) {
 				continue;
 			}
@@ -49,11 +49,11 @@ public class HUDHandlerMixin {
 				continue;
 			}
 			CompoundTag tag = data.copyTag();
-			if (tag.contains("extrabotany", Tag.TAG_COMPOUND)) {
-				CompoundTag extraBotany = tag.getCompound("extrabotany");
-				if (extraBotany.contains("mana_reader", Tag.TAG_COMPOUND)) {
-					CompoundTag manaReader = extraBotany.getCompound("mana_reader");
-					if (manaReader.getBoolean("enable")) {
+			if (tag.contains("extrabotany")) {
+				CompoundTag extraBotany = tag.getCompoundOrEmpty("extrabotany");
+				if (extraBotany.contains("mana_reader")) {
+					CompoundTag manaReader = extraBotany.getCompoundOrEmpty("mana_reader");
+					if (manaReader.getBooleanOr("enable", false)) {
 						display = true;
 						break;
 					}
@@ -65,7 +65,6 @@ public class HUDHandlerMixin {
 			return;
 		}
 
-		RenderSystem.enableBlend();
 		String manaString = mana + "/" + maxMana;
 
 		int screenWidth = window.getGuiScaledWidth();
@@ -74,12 +73,11 @@ public class HUDHandlerMixin {
 		x = (int) (((float) screenWidth / 2 - font.width(manaString) * 0.75f / 2));
 		y += 15;
 
-		gui.pose().pushPose();
-		gui.pose().scale(0.75f, 0.75f, 1f);
-		gui.drawString(font, manaString, (int) (x / 0.75f), (int) (y / 0.75f), color);
-		gui.pose().popPose();
+		gui.pose().pushMatrix();
+		gui.pose().scale(0.75f, 0.75f);
+		RenderHelper.drawString(gui, font, manaString, (int) (x / 0.75f), (int) (y / 0.75f), color);
+		gui.pose().popMatrix();
 
-		RenderSystem.disableBlend();
 	}
 
 	//Takeover original render
@@ -89,7 +87,7 @@ public class HUDHandlerMixin {
 		cancellable = true,
 		remap = false
 	)
-	private static void onRenderManaBar(GuiGraphics gui, int totalMana, int totalMaxMana,
+	private static void onRenderManaBar(GuiGraphicsExtractor gui, int totalMana, int totalMaxMana,
 			CallbackInfo ci) {
 		ci.cancel();
 	}

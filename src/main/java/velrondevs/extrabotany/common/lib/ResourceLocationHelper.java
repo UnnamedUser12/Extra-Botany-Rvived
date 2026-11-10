@@ -1,17 +1,17 @@
 package velrondevs.extrabotany.common.lib;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class ResourceLocationHelper {
-	public static ResourceLocation prefix(String path) {
-		return ResourceLocation.tryBuild(LibMisc.MOD_ID, path);
+	public static Identifier prefix(String path) {
+		return Identifier.tryBuild(LibMisc.MOD_ID, path);
 	}
 
-	public static ResourceLocation prefixBotania(String path) {
-		return ResourceLocation.tryBuild("botania", path);
+	public static Identifier prefixBotania(String path) {
+		return Identifier.tryBuild("botania", path);
 	}
 
-	public static ResourceLocation location(String namespace, String path) {
-		return ResourceLocation.tryBuild(namespace, path);
+	public static Identifier location(String namespace, String path) {
+		return Identifier.tryBuild(namespace, path);
 	}
 }

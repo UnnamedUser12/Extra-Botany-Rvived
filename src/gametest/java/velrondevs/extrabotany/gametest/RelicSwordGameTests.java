@@ -2,7 +2,7 @@ package velrondevs.extrabotany.gametest;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -18,8 +18,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.botania.api.item.Relic;
 import velrondevs.botania.api.mana.ManaItem;
@@ -152,14 +152,16 @@ public final class RelicSwordGameTests {
 		var damage = player.getAttribute(Attributes.ATTACK_DAMAGE);
 		var nightDamageId = prefix("shadow_katana_night_damage");
 
-		long savedTime = level.getDayTime();
+		long savedTime = level.getDefaultClockTime();
 		try {
-			level.setDayTime(6000);
+			helper.setTime(6000);
+			level.environmentAttributes().invalidateTickCache();
 			level.updateSkyBrightness();
 			ShadowKatanaItem.updateNightBonus(player);
 			helper.assertTrue(!damage.hasModifier(nightDamageId), "The night bonus applied during the day");
 
-			level.setDayTime(18000);
+			helper.setTime(18000);
+			level.environmentAttributes().invalidateTickCache();
 			level.updateSkyBrightness();
 			ShadowKatanaItem.updateNightBonus(player);
 			helper.assertTrue(damage.hasModifier(nightDamageId), "The night bonus did not apply at night");
@@ -168,7 +170,8 @@ public final class RelicSwordGameTests {
 			ShadowKatanaItem.updateNightBonus(player);
 			helper.assertTrue(!damage.hasModifier(nightDamageId), "The night bonus stayed after the katana left the hand");
 		} finally {
-			level.setDayTime(savedTime);
+			helper.setTime(savedTime);
+			level.environmentAttributes().invalidateTickCache();
 			level.updateSkyBrightness();
 		}
 		helper.succeed();
@@ -184,15 +187,15 @@ public final class RelicSwordGameTests {
 				new AttributeModifier(prefix("shadow_katana_night_damage"), 10,
 						AttributeModifier.Operation.ADD_VALUE),
 				EquipmentSlot.MAINHAND);
-		helper.assertTrue(stack.getComponentsPatch().get(DataComponents.ATTRIBUTE_MODIFIERS) != null, "Test setup failed");
+		helper.assertTrue(stack.getComponentsPatch().getPatch(DataComponents.ATTRIBUTE_MODIFIERS) != null, "Test setup failed");
 
 		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
 		ManaItem mana = supplyMana(player, 1000);
-		stack.getItem().inventoryTick(stack, helper.getLevel(), player, 0, false);
+		stack.getItem().inventoryTick(stack, helper.getLevel(), player, null);
 
 		helper.assertTrue(stack.getDamageValue() == 9 && mana.getMana() == 880,
 				"One durability point must cost 120 mana, damage=" + stack.getDamageValue() + " mana=" + mana.getMana());
-		helper.assertTrue(stack.getComponentsPatch().get(DataComponents.ATTRIBUTE_MODIFIERS) == null,
+		helper.assertTrue(stack.getComponentsPatch().getPatch(DataComponents.ATTRIBUTE_MODIFIERS) == null,
 				"The modifiers of the old version stayed on the item");
 		helper.succeed();
 	}
@@ -206,10 +209,10 @@ public final class RelicSwordGameTests {
 		stack.getItem().use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
 		var pixies = helper.getLevel().getEntitiesOfClass(PetPixieEntity.class, new AABB(player.blockPosition()).inflate(8));
 		helper.assertTrue(pixies.size() == 1 && mana.getMana() == 700, "Expected one pet pixie for 300 mana");
-		helper.assertTrue(player.getCooldowns().isOnCooldown(stack.getItem()), "The bottle has no cooldown");
+		helper.assertTrue(player.getCooldowns().isOnCooldown(stack), "The bottle has no cooldown");
 
 		PetPixieEntity pixie = pixies.getFirst();
-		helper.assertTrue(!pixie.hurt(player.damageSources().playerAttack(player), 5F), "The owner damaged its own pixie");
+		helper.assertTrue(!pixie.hurtServer(helper.getLevel(), player.damageSources().playerAttack(player), 5F), "The owner damaged its own pixie");
 		helper.assertTrue(pixie.getTarget() != player, "The pet pixie selected its owner as the target");
 		pixie.discard();
 		helper.succeed();
@@ -240,7 +243,7 @@ public final class RelicSwordGameTests {
 		helper.assertTrue(result.getCount() == 1, "The drink was not used up");
 		helper.assertTrue(player.getHealth() == 15F, "The drink must give back 5 health");
 		helper.assertTrue(mana.getMana() == 10000, "The drink must give 10000 mana, gave " + mana.getMana());
-		helper.assertTrue(player.hasEffect(MobEffects.DAMAGE_BOOST) && player.hasEffect(MobEffects.JUMP), "Missing effects");
+		helper.assertTrue(player.hasEffect(MobEffects.STRENGTH) && player.hasEffect(MobEffects.JUMP_BOOST), "Missing effects");
 		helper.assertTrue(player.getInventory().countItem(ExtraBotanyItems.manaGlassBottle) == 1, "The bottle was not given back");
 		helper.succeed();
 	}

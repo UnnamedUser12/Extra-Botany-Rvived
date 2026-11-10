@@ -2,7 +2,7 @@ package velrondevs.extrabotany.common.loot;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.NestedLootTable;
@@ -37,7 +37,7 @@ public final class ExtraBotanyLootHandler {
 	private ExtraBotanyLootHandler() {}
 
 	public static void onLootTableLoad(LootTableLoadEvent event) {
-		ResourceLocation id = event.getName();
+		Identifier id = event.getName();
 		String name = id.toString();
 		if (!name.startsWith(CHEST_PREFIX)) {
 			return;

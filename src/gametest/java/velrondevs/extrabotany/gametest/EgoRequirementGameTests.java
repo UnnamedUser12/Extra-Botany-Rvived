@@ -3,7 +3,7 @@ package velrondevs.extrabotany.gametest;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,8 +16,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import top.theillusivec4.curios.api.CuriosApi;
 
@@ -64,7 +64,8 @@ public final class EgoRequirementGameTests {
 		helper.assertTrue(!new ItemStack(ExtraBotanyItems.trueTerrablade).is(ExtraBotanyTags.Items.NEEDS_EGO_DEFEAT)
 				&& !new ItemStack(Items.DIAMOND_SWORD).is(ExtraBotanyTags.Items.NEEDS_EGO_DEFEAT), "Other items must not be in the tag");
 
-		helper.assertTrue(!ExtraBotanyConfig.common().relicsNeedEgoDefeat(), "The rule must be off by default");
+		helper.assertTrue(!TestConfig.relicsNeedEgoDefeatDefault(), "The rule must be off by default");
+		TestConfig.setRelicsNeedEgoDefeat(false);
 		Player player = mockPlayer(helper, GameType.SURVIVAL);
 		ItemStack excalibur = new ItemStack(ExtraBotanyItems.excalibur);
 		player.setItemInHand(InteractionHand.MAIN_HAND, excalibur);
@@ -81,11 +82,21 @@ public final class EgoRequirementGameTests {
 	 * 规则打开时：没有进度的玩家拿着、穿着和戴着的受限遗物被丢出，交互被取消；别的物品和创造模式的玩家不受影响；完成进度之后一切恢复。
 	 * With the rule on: the restricted relics that a player with no advancement holds and wears are dropped, and the interaction is cancelled; other items and players in creative mode are not affected; after the advancement all is as usual.
 	 */
+	private static void survival(ServerPlayer player) {
+		try {
+			var method = net.minecraft.server.level.ServerPlayerGameMode.class.getDeclaredMethod("setGameModeForPlayer", GameType.class, GameType.class);
+			method.setAccessible(true);
+			method.invoke(player.gameMode, GameType.SURVIVAL, null);
+		} catch (ReflectiveOperationException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
 	@GameTest(template = "empty", timeoutTicks = 20)
 	public static void theRuleDropsRelicsUntilTheEgoIsDefeated(GameTestHelper helper) {
 		boolean before = ExtraBotanyConfig.common().relicsNeedEgoDefeat();
 		try {
-			ExtraBotanyConfigSpec.setRelicsNeedEgoDefeat(true);
+			TestConfig.setRelicsNeedEgoDefeat(true);
 
 			// 模拟玩家没有进度。
 			// A mock player has no advancements.
@@ -94,7 +105,7 @@ public final class EgoRequirementGameTests {
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ExtraBotanyItems.excalibur));
 			player.setItemInHand(InteractionHand.OFF_HAND, sword);
 			player.setItemSlot(EquipmentSlot.HEAD, new ItemStack(ExtraBotanyItems.camera));
-			var curios = CuriosApi.getCuriosInventory(player).orElseThrow().getCurios().values().stream()
+			var curios = CuriosTestHelper.inventory(player).getCurios().values().stream()
 					.filter(handler -> handler.getStacks().getSlots() > 0).findFirst().orElseThrow().getStacks();
 			curios.setStackInSlot(0, new ItemStack(ExtraBotanyItems.sunRing));
 			// 背包里的遗物不受影响：规则只管拿着、穿着和戴着的。
@@ -126,6 +137,7 @@ public final class EgoRequirementGameTests {
 			ServerPlayer winner = new ServerPlayer(helper.getLevel().getServer(), helper.getLevel(),
 					new GameProfile(UUID.randomUUID(), "eb-test-winner"), ClientInformation.createDefault());
 			winner.setPos(Vec3.atBottomCenterOf(helper.absolutePos(STAND)));
+			survival(winner);
 			ItemStack relic = new ItemStack(ExtraBotanyItems.excalibur);
 			winner.setItemInHand(InteractionHand.MAIN_HAND, relic);
 			helper.assertTrue(EgoRequirementHandler.isForbidden(winner, relic), "Before the advancement a real player must not use the relic");
@@ -136,7 +148,7 @@ public final class EgoRequirementGameTests {
 			EgoRequirementHandler.onInteract(allowed);
 			helper.assertTrue(winner.getMainHandItem() == relic && !allowed.isCanceled(), "After the advancement the relic must stay and the interaction must continue");
 		} finally {
-			ExtraBotanyConfigSpec.setRelicsNeedEgoDefeat(before);
+			TestConfig.setRelicsNeedEgoDefeat(before);
 		}
 		helper.succeed();
 	}

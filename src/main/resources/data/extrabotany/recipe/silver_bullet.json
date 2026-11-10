@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "C": {
-      "item": "extrabotany:the_chaos"
-    },
-    "M": {
-      "item": "botania:mana_gun"
-    },
-    "P": {
-      "tag": "c:ingots/photonium"
-    },
-    "S": {
-      "tag": "c:ingots/manasteel"
-    }
+    "C": "extrabotany:the_chaos",
+    "M": "botania:mana_gun",
+    "P": "#c:ingots/photonium",
+    "S": "#c:ingots/manasteel"
   },
   "pattern": [
     "PPS",

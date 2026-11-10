@@ -1,9 +1,11 @@
 package velrondevs.extrabotany.common.item;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -26,11 +28,11 @@ public class ZadkielItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level world, Player player, @NotNull InteractionHand hand) {
+	public InteractionResult use(Level world, Player player, @NotNull InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 
-		if (!world.isClientSide) {
-			player.getCooldowns().addCooldown(this, 60);
+		if (!world.isClientSide()) {
+			player.getCooldowns().addCooldown(new ItemStack(this), 60);
 
 			Vec3 look = player.getLookAngle();
 			ServerLevel serverWorld = (ServerLevel) world;
@@ -67,12 +69,12 @@ public class ZadkielItem extends Item {
 			}
 		}
 
-		return InteractionResultHolder.success(stack);
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
-		super.inventoryTick(stack, level, entity, slotId, isSelected);
+	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		super.inventoryTick(stack, level, entity, eqSlot);
 		if (level.isClientSide()) {
 			return;
 		}

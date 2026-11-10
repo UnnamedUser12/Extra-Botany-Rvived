@@ -6,7 +6,7 @@ import velrondevs.extrabotany.common.item.equipment.bauble.DispersiveRingItem;
 import velrondevs.extrabotany.common.item.relic.voidcore.CoreOfTheVoidItem;
 import velrondevs.extrabotany.xplat.EXplatAbstractions;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -15,8 +15,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 import velrondevs.botania.api.block_entity.FunctionalFlowerBlockEntity;
 import velrondevs.botania.api.mana.ManaItem;
 import velrondevs.botania.registry.BotaniaItems;
@@ -58,16 +58,15 @@ public final class LegacyAccessoryParityGameTests {
         var core = (CoreOfTheVoidItem) ExtraBotanyItems.coreOfTheVoid;
         ItemStack stack = new ItemStack(core);
         EXplatAbstractions.INSTANCE.findRelic(stack).bindToUUID(player.getUUID());
-        stack = ItemStack.parseOptional(helper.getLevel().registryAccess(),
-                (CompoundTag) stack.save(helper.getLevel().registryAccess()));
+        { var registries = helper.getLevel().registryAccess(); stack = BlockEntityIO.parseStack(registries, BlockEntityIO.saveStack(registries, stack)); }
         helper.assertTrue(EXplatAbstractions.INSTANCE.findRelic(stack).isRightPlayer(player),
                 "Relic ownership did not survive item reload");
         player.addEffect(new MobEffectInstance(MobEffects.POISON, 600));
         player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 600));
-        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 600));
+        player.addEffect(new MobEffectInstance(MobEffects.SPEED, 600));
         core.onWornTick(stack, player);
         helper.assertTrue(!player.hasEffect(MobEffects.POISON) && !player.hasEffect(MobEffects.WEAKNESS)
-                && player.hasEffect(MobEffects.MOVEMENT_SPEED), "Cure failed or removed a beneficial effect");
+                && player.hasEffect(MobEffects.SPEED), "Cure failed or removed a beneficial effect");
         helper.assertTrue(mana.getMana() == 800, "The cure must charge once for all active harmful effects");
         core.onWornTick(stack, player);
         helper.assertTrue(mana.getMana() == 800, "An idle core charged for an absent harmful effect");
@@ -82,7 +81,7 @@ public final class LegacyAccessoryParityGameTests {
     private static FunctionalFlowerBlockEntity flower(GameTestHelper helper, BlockPos pos) {
         helper.setBlock(pos.below(), Blocks.GRASS_BLOCK);
         helper.setBlock(pos, ExtraBotanyFlowerBlocks.necrofleur);
-        return helper.getBlockEntity(pos);
+        return helper.getBlockEntity(pos, FunctionalFlowerBlockEntity.class);
     }
 
     @GameTest(template = "projectile_arena", timeoutTicks = 20)

@@ -1,5 +1,8 @@
 package velrondevs.extrabotany.common.entity.mount;
 
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -9,6 +12,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
@@ -71,7 +75,7 @@ public class MotorEntity extends MountEntity {
 
 	private static final EntityDataAccessor<Integer> ENERGY = SynchedEntityData.defineId(MotorEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> CYCLONE_TICKS = SynchedEntityData.defineId(MotorEntity.class, EntityDataSerializers.INT);
-	private static final EntityDataAccessor<Optional<UUID>> OWNER = SynchedEntityData.defineId(MotorEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+	private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> OWNER = SynchedEntityData.defineId(MotorEntity.class, EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
 
 	private static final int CHARGE_DELAY_TICKS = 120;
 	private static final int ENERGY_GAIN = 2;
@@ -138,11 +142,11 @@ public class MotorEntity extends MountEntity {
 	 */
 	@Nullable
 	public UUID getOwnerId() {
-		return entityData.get(OWNER).orElse(null);
+		return entityData.get(OWNER).map(EntityReference::getUUID).orElse(null);
 	}
 
 	public void setOwnerId(@Nullable UUID owner) {
-		entityData.set(OWNER, Optional.ofNullable(owner));
+		entityData.set(OWNER, Optional.ofNullable(owner).map(EntityReference::<LivingEntity>of));
 	}
 
 	/**
@@ -263,7 +267,7 @@ public class MotorEntity extends MountEntity {
 
 		// 骑手的客户端自己控制运动。其他客户端只显示服务端同步的数据。
 		// The client of the rider controls the movement itself. Other clients only show the data that the server synchronizes.
-		boolean controlling = isControlledByLocalInstance();
+		boolean controlling = isLocalInstanceAuthoritative();
 		if (controlling || !level().isClientSide()) {
 			updateLean();
 		}
@@ -404,21 +408,21 @@ public class MotorEntity extends MountEntity {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag tag) {
+	protected void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putInt(TAG_ENERGY, getEnergy());
 		tag.putInt(TAG_CYCLONE, getCycloneTicks());
 		UUID owner = getOwnerId();
 		if (owner != null) {
-			tag.putUUID(TAG_OWNER, owner);
+			tag.store(TAG_OWNER, UUIDUtil.CODEC, owner);
 		}
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundTag tag) {
+	protected void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		setEnergy(tag.getInt(TAG_ENERGY));
-		setCycloneTicks(tag.getInt(TAG_CYCLONE));
-		setOwnerId(tag.hasUUID(TAG_OWNER) ? tag.getUUID(TAG_OWNER) : null);
+		setEnergy(tag.getIntOr(TAG_ENERGY, 0));
+		setCycloneTicks(tag.getIntOr(TAG_CYCLONE, 0));
+		setOwnerId(tag.read(TAG_OWNER, UUIDUtil.CODEC).orElse(null));
 	}
 }

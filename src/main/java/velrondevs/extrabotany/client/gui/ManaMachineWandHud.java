@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.Window;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 import velrondevs.botania.api.BotaniaAPIClient;
@@ -30,7 +30,7 @@ public class ManaMachineWandHud implements WandHUD {
 	}
 
 	@Override
-	public void renderHUD(GuiGraphics gui, Minecraft mc) {
+	public void renderHUD(GuiGraphicsExtractor gui, Minecraft mc) {
 		Window window = mc.getWindow();
 		Font font = mc.font;
 		String name = machine.getBlockState().getBlock().getName().getString();
@@ -43,7 +43,7 @@ public class ManaMachineWandHud implements WandHUD {
 		RenderHelper.renderHUDBox(gui, centerX - halfWidth, centerY + 8, centerX + halfWidth, centerY + (detail == null ? 30 : 42));
 		BotaniaAPIClient.instance().drawSimpleManaHUD(gui, MANA_COLOR, machine.getCurrentMana(), machine.getMaxMana(), name);
 		if (detail != null) {
-			gui.drawString(font, detail, centerX - detailWidth / 2, centerY + 30, 0xFFFFFF);
+			RenderHelper.drawString(gui, font, detail, centerX - detailWidth / 2, centerY + 30, 0xFFFFFF);
 		}
 	}
 }

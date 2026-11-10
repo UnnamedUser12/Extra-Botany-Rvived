@@ -3,9 +3,7 @@
   "category": "building",
   "group": "extrabotany:quartz_pillar",
   "key": {
-    "Q": {
-      "item": "extrabotany:elementium_quartz_block"
-    }
+    "Q": "extrabotany:elementium_quartz_block"
   },
   "pattern": [
     "Q",

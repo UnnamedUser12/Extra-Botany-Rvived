@@ -3,7 +3,7 @@ package velrondevs.extrabotany.datagen.providers.tags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.data.tags.KeyTagProvider;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageType;
@@ -25,11 +25,11 @@ import static net.minecraft.tags.DamageTypeTags.*;
  * 生成伤害类型标签。它决定本模组的每种伤害能绕过什么（护甲、盾牌、抗性等），以及和平友好之证能不能挡住它。
  * Makes the damage type tags. They set what each damage type of this mod goes through (armor, shields, resistance and others), and if the Peace Amulet can stop it.
  */
-public class DamageTypeTagProvider extends TagsProvider<DamageType> {
+public class DamageTypeTagProvider extends KeyTagProvider<DamageType> {
 	Map<ResourceKey<DamageType>, List<TagKey<DamageType>>> map = new LinkedHashMap<>();
 
 	public DamageTypeTagProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> lookupProvider) {
-		super(packOutput, Registries.DAMAGE_TYPE, lookupProvider, LibMisc.MOD_ID, null);
+		super(packOutput, Registries.DAMAGE_TYPE, lookupProvider, LibMisc.MOD_ID);
 		map.put(EXCALIBUR_BEAM_DAMAGE, List.of(
 				PEACE_AMULET_AVAILABLE, BYPASSES_ARMOR, BYPASSES_SHIELD
 		));

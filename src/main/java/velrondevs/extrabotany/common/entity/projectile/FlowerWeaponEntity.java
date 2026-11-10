@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity.projectile;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -253,16 +255,16 @@ public class FlowerWeaponEntity extends ThrowableProjectile {
 
 		Holder<MobEffect> effect = switch (variety) {
 			case 2 -> MobEffects.BLINDNESS;
-			case 3 -> MobEffects.CONFUSION;
+			case 3 -> MobEffects.NAUSEA;
 			case 6 -> MobEffects.WITHER;
-			case 7 -> MobEffects.MOVEMENT_SLOWDOWN;
+			case 7 -> MobEffects.SLOWNESS;
 			case 9 -> MobEffects.UNLUCK;
 			case 10 -> MobEffects.POISON;
 			case 11 -> MobEffects.WEAKNESS;
-			case 13 -> MobEffects.DAMAGE_BOOST;
+			case 13 -> MobEffects.STRENGTH;
 			case 14 -> MobEffects.ABSORPTION;
-			case 15 -> MobEffects.JUMP;
-			case 16 -> MobEffects.MOVEMENT_SPEED;
+			case 15 -> MobEffects.JUMP_BOOST;
+			case 16 -> MobEffects.SPEED;
 			default -> null;
 		};
 		if (effect != null) {
@@ -306,7 +308,7 @@ public class FlowerWeaponEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
+	public void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putBoolean(TAG_CHARGING, entityData.get(CHARGING));
 		tag.putInt(TAG_VARIETY, entityData.get(VARIETY));
@@ -317,13 +319,13 @@ public class FlowerWeaponEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
+	public void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		entityData.set(CHARGING, tag.getBoolean(TAG_CHARGING));
-		entityData.set(VARIETY, tag.getInt(TAG_VARIETY));
-		chargeTicks = tag.getInt(TAG_CHARGE_TICKS);
-		liveTicks = tag.getInt(TAG_LIVE_TICKS);
-		entityData.set(DELAY, tag.getInt(TAG_DELAY));
-		entityData.set(ROTATION, tag.getFloat(TAG_ROTATION));
+		entityData.set(CHARGING, tag.getBooleanOr(TAG_CHARGING, false));
+		entityData.set(VARIETY, tag.getIntOr(TAG_VARIETY, 0));
+		chargeTicks = tag.getIntOr(TAG_CHARGE_TICKS, 0);
+		liveTicks = tag.getIntOr(TAG_LIVE_TICKS, 0);
+		entityData.set(DELAY, tag.getIntOr(TAG_DELAY, 0));
+		entityData.set(ROTATION, tag.getFloatOr(TAG_ROTATION, 0F));
 	}
 }

@@ -11,9 +11,9 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
-import net.minecraft.world.item.component.Unbreakable;
+import net.minecraft.util.Unit;
 import net.minecraft.world.phys.Vec3;
 
 import org.jetbrains.annotations.Nullable;
@@ -49,11 +49,10 @@ public class FirstFractalItem extends RelicSwordItem {
 	private static final int FINAL_SWORD_VARIETY = 9;
 
 	public FirstFractalItem(Properties props) {
-		super(Tiers.NETHERITE, props
+		super(ToolMaterial.NETHERITE, createFractalAttributes(), props
 				// 原版的最初分型没有耐久。
 				// The First Fractal of the original has no durability.
-				.component(DataComponents.UNBREAKABLE, new Unbreakable(false))
-				.attributes(createFractalAttributes()));
+				.component(DataComponents.UNBREAKABLE, Unit.INSTANCE));
 	}
 
 	public static Relic makeRelic(ItemStack stack) {
@@ -87,8 +86,8 @@ public class FirstFractalItem extends RelicSwordItem {
 	@Override
 	protected boolean useSkill(Player player, ItemStack stack, @Nullable Entity target) {
 		if (!hasDefeatedHerrscher(player)) {
-			player.displayClientMessage(
-					Component.translatable("extrabotany.message.advancement_required").withStyle(ChatFormatting.RED), true);
+			player.sendOverlayMessage(
+					Component.translatable("extrabotany.message.advancement_required").withStyle(ChatFormatting.RED));
 			return false;
 		}
 

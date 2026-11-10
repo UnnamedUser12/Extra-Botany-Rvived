@@ -3,7 +3,7 @@ package velrondevs.extrabotany.common.item;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -31,18 +31,18 @@ public class AirshipItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		HitResult hit = getPlayerPOVHitResult(level, player, ClipContext.Fluid.ANY);
 		if (hit.getType() != HitResult.Type.BLOCK) {
-			return InteractionResultHolder.pass(stack);
+			return InteractionResult.PASS;
 		}
 		Vec3 look = player.getViewVector(1.0F);
 		boolean blocked = !level.getEntities(player,
 				player.getBoundingBox().expandTowards(look.scale(REACH)).inflate(1.0),
 				entity -> !entity.isSpectator() && entity.isPickable()).isEmpty();
 		if (blocked) {
-			return InteractionResultHolder.pass(stack);
+			return InteractionResult.PASS;
 		}
 		Vec3 pos = hit.getLocation();
 		boolean water = level.getFluidState(BlockPos.containing(pos)).is(FluidTags.WATER)
@@ -50,9 +50,9 @@ public class AirshipItem extends Item {
 		AirshipEntity airship = new AirshipEntity(level, new Vec3(pos.x, water ? pos.y - 0.12 : pos.y, pos.z), tier);
 		airship.setYRot(player.getYRot());
 		if (!level.noCollision(airship, airship.getBoundingBox())) {
-			return InteractionResultHolder.fail(stack);
+			return InteractionResult.FAIL;
 		}
-		if (!level.isClientSide) {
+		if (!level.isClientSide()) {
 			level.addFreshEntity(airship);
 			level.gameEvent(player, GameEvent.ENTITY_PLACE, hit.getLocation());
 			if (!player.getAbilities().instabuild) {
@@ -60,6 +60,6 @@ public class AirshipItem extends Item {
 			}
 		}
 		player.awardStat(net.minecraft.stats.Stats.ITEM_USED.get(this));
-		return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 }

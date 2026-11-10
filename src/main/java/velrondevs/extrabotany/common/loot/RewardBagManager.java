@@ -1,6 +1,6 @@
 package velrondevs.extrabotany.common.loot;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -20,8 +20,8 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * The data map of the reward bag contents. It was made to show the possible items of a reward bag on the client. This function was not completed in Reburn, thus the map is always empty at this time.
  */
 public class RewardBagManager implements ResourceManagerReloadListener {
-	private static final Map<ResourceLocation, List<LootData>> pool = new LinkedHashMap<>();
-	private static final Set<ResourceLocation> rewardBagIds = new HashSet<>();
+	private static final Map<Identifier, List<LootData>> pool = new LinkedHashMap<>();
+	private static final Set<Identifier> rewardBagIds = new HashSet<>();
 
 	public static void registerListener() {
 		velrondevs.botania.xplat.XplatAbstractions.INSTANCE.registerReloadListener(PackType.SERVER_DATA, prefix("reward_bag"), new RewardBagManager());
@@ -34,7 +34,7 @@ public class RewardBagManager implements ResourceManagerReloadListener {
 		/*
 		for (var resource : resourceManager.listResources("reward_bags", p -> p.getPath().endsWith(".json")).entrySet()) {
 			String path = resource.getKey().getPath().replace(".json", "").replace("reward_bags/", "");
-			rewardBagIds.add(ResourceLocation.fromNamespaceAndPath(resource.getKey().getNamespace(), path));
+			rewardBagIds.add(Identifier.fromNamespaceAndPath(resource.getKey().getNamespace(), path));
 		}
 		
 		*/
@@ -51,7 +51,7 @@ public class RewardBagManager implements ResourceManagerReloadListener {
 	}
 
 	@Nullable
-	public static List<LootData> getData(ResourceLocation key) {
+	public static List<LootData> getData(Identifier key) {
 		if (!pool.containsKey(key)) {
 			return null;
 		}

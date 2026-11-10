@@ -1,22 +1,22 @@
 package velrondevs.extrabotany.gametest;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
+import velrondevs.extrabotany.common.item.equipment.armor.starry_idol.StarryIdolArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.botania.api.mana.ManaItem;
 import velrondevs.botania.api.mana.ManaItemHandler;
@@ -70,16 +70,17 @@ public final class ArmorGameTests {
 	 */
 	private static void wear(Player player, Item... pieces) {
 		for (Item piece : pieces) {
-			player.setItemSlot(((ArmorItem) piece).getEquipmentSlot(), new ItemStack(piece));
+			player.setItemSlot(((StarryIdolArmorItem) piece).getEquipmentSlot(), new ItemStack(piece));
 		}
 		player.tick();
 	}
 
 	private static void assertDefense(GameTestHelper helper, Item[] set, int... expected) {
 		for (int i = 0; i < set.length; i++) {
-			int defense = ((ArmorItem) set[i]).getDefense();
+			StarryIdolArmorItem armor = (StarryIdolArmorItem) set[i];
+			int defense = armor.getMaterial().defense().getOrDefault(armor.getType(), 0);
 			helper.assertTrue(defense == expected[i], set[i] + " has " + defense + " armor, expected " + expected[i]);
-			helper.assertTrue(((ArmorItem) set[i]).getEquipmentSlot() == ARMOR_SLOTS[i], set[i] + " is in the wrong slot");
+			helper.assertTrue(((StarryIdolArmorItem) set[i]).getEquipmentSlot() == ARMOR_SLOTS[i], set[i] + " is in the wrong slot");
 		}
 	}
 
@@ -170,7 +171,7 @@ public final class ArmorGameTests {
 		Player plain = player(helper);
 		Zombie first = armoredZombie(helper);
 		helper.assertTrue(first.getArmorValue() >= 20, "The test zombie has " + first.getArmorValue() + " armor");
-		first.hurt(helper.getLevel().damageSources().playerAttack(plain), 10F);
+		first.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(plain), 10F);
 		float reduced = first.getMaxHealth() - first.getHealth();
 		helper.assertTrue(reduced > 0F && reduced < 5F, "Armor did not decrease the damage of a plain player: " + reduced);
 		first.discard();
@@ -179,7 +180,7 @@ public final class ArmorGameTests {
 		wear(guardian, shootingGuardianSet());
 		guardian.setHealth(10F);
 		Zombie second = armoredZombie(helper);
-		second.hurt(helper.getLevel().damageSources().playerAttack(guardian), 10F);
+		second.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(guardian), 10F);
 		float full = second.getMaxHealth() - second.getHealth();
 		helper.assertTrue(Math.abs(full - 10F) < 1.0E-4F, "The set did not ignore armor: " + full);
 		helper.assertTrue(Math.abs(guardian.getHealth() - 12F) < 1.0E-4F,

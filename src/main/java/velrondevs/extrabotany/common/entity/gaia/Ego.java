@@ -1,6 +1,8 @@
 package velrondevs.extrabotany.common.entity.gaia;
 
-import com.mojang.serialization.Dynamic;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -24,9 +26,10 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -137,7 +140,7 @@ public class Ego extends Gaia {
 
 	private static final EntityDataAccessor<Integer> STAGE = SynchedEntityData.defineId(Ego.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> WEAPON = SynchedEntityData.defineId(Ego.class, EntityDataSerializers.INT);
-	private static final EntityDataAccessor<Optional<UUID>> SUMMONER = SynchedEntityData.defineId(Ego.class, EntityDataSerializers.OPTIONAL_UUID);
+	private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> SUMMONER = SynchedEntityData.defineId(Ego.class, EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
 
 	private int barrageWave;
 	private int attackDelay;
@@ -185,7 +188,7 @@ public class Ego extends Gaia {
 			ego.setHome(GlobalPos.of(level.dimension(), pos));
 			ego.setArena(arena);
 			ego.setPos(pos.getX() + 0.5, pos.getY() + 3, pos.getZ() + 0.5);
-			ego.entityData.set(SUMMONER, Optional.of(player.getUUID()));
+			ego.entityData.set(SUMMONER, Optional.of(EntityReference.<LivingEntity>of(player.getUUID())));
 			ego.setCustomName(player.getDisplayName());
 
 			List<Player> players = arena.getPlayersAround(level);
@@ -195,7 +198,7 @@ public class Ego extends Gaia {
 			ego.getAttribute(Attributes.ARMOR).setBaseValue(ARMOR);
 			ego.setHealth(ego.getMaxHealth());
 
-			EventHooks.finalizeMobSpawn(ego, serverLevel, serverLevel.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null);
+			EventHooks.finalizeMobSpawn(ego, serverLevel, serverLevel.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
 			serverLevel.addFreshEntity(ego);
 			serverLevel.playSound(null, pos, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 10F, 0.1F);
 			for (Player nearby : players) {
@@ -212,12 +215,12 @@ public class Ego extends Gaia {
 	// ---------------------------------------------------------------------
 
 	@Override
-	protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-		return ScriptedBossAI.makeBrain(dynamic);
+	protected Brain<?> makeBrain(Brain.Packed packed) {
+		return ScriptedBossAI.makeBrain(this, packed);
 	}
 
 	@Override
-	protected void initMemories(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData) {}
+	protected void initMemories(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason, @Nullable SpawnGroupData spawnData) {}
 
 	@Override
 	protected void updateAI() {
@@ -249,8 +252,11 @@ public class Ego extends Gaia {
 	 * There is only loot when the boss is defeated in the last stage. Thus a player cannot kill it early by a different method to get the reward.
 	 */
 	@Override
-	public ResourceKey<LootTable> getDefaultLootTable() {
-		return getStage() < LAST_STAGE ? BuiltInLootTables.EMPTY : getType().getDefaultLootTable();
+	protected void dropFromLootTable(ServerLevel level, DamageSource source, boolean wasRecentlyHit) {
+		if (getStage() < LAST_STAGE) {
+			return;
+		}
+		super.dropFromLootTable(level, source, wasRecentlyHit);
 	}
 
 	/**
@@ -290,7 +296,7 @@ public class Ego extends Gaia {
 	 * The UUID of the summoner. The client uses it to find the skin of the summoner.
 	 */
 	public Optional<UUID> getSummoner() {
-		return entityData.get(SUMMONER);
+		return entityData.get(SUMMONER).map(EntityReference::getUUID);
 	}
 
 	@Override
@@ -306,11 +312,11 @@ public class Ego extends Gaia {
 	// ---------------------------------------------------------------------
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel level) {
 		// 公共代码会把无敌时间减 1。原版的节奏按减 1 之前的值计算，所以先记下它。
 		// The common code decreases the invulnerable time by 1. The timing of the original uses the value before the decrease, thus it is recorded first.
 		int invul = getInvulTime();
-		super.customServerAiStep();
+		super.customServerAiStep(level);
 		if (level().getDifficulty() == Difficulty.PEACEFUL) {
 			discard();
 			return;
@@ -511,8 +517,8 @@ public class Ego extends Gaia {
 	// ---------------------------------------------------------------------
 
 	@Override
-	public boolean hurt(DamageSource source, float amount) {
-		if (level().isClientSide() || !(source.getEntity() instanceof Player player) || !PlayerHelper.isTruePlayer(player)
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+		if (!(source.getEntity() instanceof Player player) || !PlayerHelper.isTruePlayer(player)
 				|| getInvulTime() > 0 || !Float.isFinite(amount)) {
 			return false;
 		}
@@ -522,7 +528,7 @@ public class Ego extends Gaia {
 			damageTaken = 0;
 			teleportRandomly();
 		}
-		return super.hurt(source, dealt);
+		return super.hurtServer(level, source, dealt);
 	}
 
 	@Override
@@ -552,11 +558,11 @@ public class Ego extends Gaia {
 	// ---------------------------------------------------------------------
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
+	public void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putInt(TAG_STAGE, getStage());
 		tag.putInt(TAG_WEAPON, getWeaponType());
-		getSummoner().ifPresent(uuid -> tag.putUUID(TAG_SUMMONER, uuid));
+		getSummoner().ifPresent(uuid -> tag.store(TAG_SUMMONER, UUIDUtil.CODEC, uuid));
 		tag.putInt(TAG_BARRAGE_WAVE, barrageWave);
 		tag.putInt(TAG_ATTACK_DELAY, attackDelay);
 		tag.putInt(TAG_WEAPON_CHANGE_DELAY, weaponChangeDelay);
@@ -566,16 +572,16 @@ public class Ego extends Gaia {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
+	public void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		setStage(tag.getInt(TAG_STAGE));
-		setWeaponType(tag.getInt(TAG_WEAPON));
-		entityData.set(SUMMONER, tag.hasUUID(TAG_SUMMONER) ? Optional.of(tag.getUUID(TAG_SUMMONER)) : Optional.empty());
-		barrageWave = tag.getInt(TAG_BARRAGE_WAVE);
-		attackDelay = tag.getInt(TAG_ATTACK_DELAY);
-		weaponChangeDelay = tag.getInt(TAG_WEAPON_CHANGE_DELAY);
-		teleportDelay = tag.getInt(TAG_TELEPORT_DELAY);
-		teleports = tag.getInt(TAG_TELEPORTS);
-		damageTaken = tag.getFloat(TAG_DAMAGE_TAKEN);
+		setStage(tag.getIntOr(TAG_STAGE, 0));
+		setWeaponType(tag.getIntOr(TAG_WEAPON, 0));
+		entityData.set(SUMMONER, tag.read(TAG_SUMMONER, UUIDUtil.CODEC).map(EntityReference::<LivingEntity>of));
+		barrageWave = tag.getIntOr(TAG_BARRAGE_WAVE, 0);
+		attackDelay = tag.getIntOr(TAG_ATTACK_DELAY, 0);
+		weaponChangeDelay = tag.getIntOr(TAG_WEAPON_CHANGE_DELAY, 0);
+		teleportDelay = tag.getIntOr(TAG_TELEPORT_DELAY, 0);
+		teleports = tag.getIntOr(TAG_TELEPORTS, 0);
+		damageTaken = tag.getFloatOr(TAG_DAMAGE_TAKEN, 0.0F);
 	}
 }

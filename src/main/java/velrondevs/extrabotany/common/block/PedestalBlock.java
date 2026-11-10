@@ -1,10 +1,11 @@
 package velrondevs.extrabotany.common.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -28,7 +29,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import velrondevs.botania.common.block.BotaniaWaterloggedBlock;
-import velrondevs.botania.common.block.block_entity.SimpleInventoryBlockEntity;
 
 import velrondevs.extrabotany.api.block.PedestalVariant;
 import velrondevs.extrabotany.registry.ExtraBotanyBlockEntities;
@@ -89,9 +89,9 @@ public class PedestalBlock extends BotaniaWaterloggedBlock implements EntityBloc
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
 		if (!(world.getBlockEntity(pos) instanceof PedestalBlockEntity pedestal)) {
-			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		}
 		return asItemResult(pedestal.use(state, world, pos, player, hand, hit));
 	}
@@ -103,14 +103,8 @@ public class PedestalBlock extends BotaniaWaterloggedBlock implements EntityBloc
 				: InteractionResult.PASS;
 	}
 
-	private static ItemInteractionResult asItemResult(InteractionResult result) {
-		return switch (result) {
-			case SUCCESS, SUCCESS_NO_ITEM_USED -> ItemInteractionResult.SUCCESS;
-			case CONSUME -> ItemInteractionResult.CONSUME;
-			case CONSUME_PARTIAL -> ItemInteractionResult.CONSUME_PARTIAL;
-			case FAIL -> ItemInteractionResult.FAIL;
-			case PASS -> ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-		};
+	private static InteractionResult asItemResult(InteractionResult result) {
+		return result instanceof InteractionResult.Pass ? InteractionResult.TRY_WITH_EMPTY_HAND : result;
 	}
 
 	@NotNull
@@ -122,7 +116,7 @@ public class PedestalBlock extends BotaniaWaterloggedBlock implements EntityBloc
 	@Nullable
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-		if (level.isClientSide) {
+		if (level.isClientSide()) {
 			return createTickerHelper(type, ExtraBotanyBlockEntities.PEDESTAL, PedestalBlockEntity::clientTick);
 		} else {
 			return createTickerHelper(type, ExtraBotanyBlockEntities.PEDESTAL, PedestalBlockEntity::serverTick);
@@ -130,15 +124,8 @@ public class PedestalBlock extends BotaniaWaterloggedBlock implements EntityBloc
 	}
 
 	@Override
-	public void onRemove(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull BlockState newState, boolean isMoving) {
-		if (!state.is(newState.getBlock())) {
-			BlockEntity be = world.getBlockEntity(pos);
-			if (be instanceof SimpleInventoryBlockEntity inventory) {
-				Containers.dropContents(world, pos, inventory.getItemHandler());
-				world.updateNeighbourForOutputSignal(pos, this);
-			}
-			super.onRemove(state, world, pos, newState, isMoving);
-		}
+	protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
+		Containers.updateNeighboursAfterDestroy(state, level, pos);
 	}
 
 	@Override
@@ -147,7 +134,7 @@ public class PedestalBlock extends BotaniaWaterloggedBlock implements EntityBloc
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos) {
+	public int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos, Direction direction) {
 		if (!(world.getBlockEntity(pos) instanceof PedestalBlockEntity pedestal)) {
 			return 0;
 		}

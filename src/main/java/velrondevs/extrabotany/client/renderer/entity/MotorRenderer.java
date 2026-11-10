@@ -1,16 +1,18 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.common.entity.mount.MotorEntity;
 
@@ -26,8 +28,8 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>和原版的差异：原版把"40 × 骑乘 tick 数"的角度值直接当作弧度使用，所以车轮每 tick 跳到一个不连续的角度。这里按机车实际移动的距离转动车轮。
  * <p>Difference from the original: the original uses the degree value "40 × riding ticks" as radians, so the wheels jump to a different angle on each tick. This port turns the wheels by the distance that the motor actually moves.
  */
-public class MotorRenderer extends EntityRenderer<MotorEntity> {
-	private static final ResourceLocation TEXTURE = prefix("textures/entity/motor.png");
+public class MotorRenderer extends ExtraEntityRenderer<MotorEntity> {
+	private static final Identifier TEXTURE = prefix("textures/entity/motor.png");
 
 	private final ModelPart body;
 	private final ModelPart frontWheel;
@@ -41,7 +43,7 @@ public class MotorRenderer extends EntityRenderer<MotorEntity> {
 	}
 
 	@Override
-	public void render(MotorEntity motor, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
+	protected void render(MotorEntity motor, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, SubmitNodeCollector collector, int light, CameraRenderState camera) {
 		pose.pushPose();
 		pose.translate(0.0, 1.5, 0.0);
 		pose.mulPose(Axis.YP.rotationDegrees(180F - yaw));
@@ -53,14 +55,13 @@ public class MotorRenderer extends EntityRenderer<MotorEntity> {
 		frontWheel.xRot = wheelAngle;
 		backWheel.xRot = wheelAngle;
 
-		VertexConsumer buffer = buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
+		VertexConsumer buffer = buffers.getBuffer(RenderTypes.entityCutout(TEXTURE));
 		body.render(pose, buffer, light, OverlayTexture.NO_OVERLAY);
 		pose.popPose();
-		super.render(motor, yaw, partialTick, pose, buffers, light);
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(MotorEntity motor) {
+	public Identifier getTextureLocation(MotorEntity motor) {
 		return TEXTURE;
 	}
 }

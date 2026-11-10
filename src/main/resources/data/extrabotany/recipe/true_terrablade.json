@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "0": {
-      "tag": "c:ingots/terrasteel"
-    },
-    "1": {
-      "item": "botania:life_essence"
-    },
-    "2": {
-      "item": "extrabotany:the_origin"
-    },
-    "3": {
-      "item": "botania:terra_sword"
-    }
+    "0": "#c:ingots/terrasteel",
+    "1": "botania:life_essence",
+    "2": "extrabotany:the_origin",
+    "3": "botania:terra_sword"
   },
   "pattern": [
     "  0",

@@ -88,6 +88,8 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>Source: Reburn (Lounode). The hammer processing corresponds to {@code TilePedestal} of ExtraMeteorP 1.12.
  */
 public class PedestalBlockEntity extends ExposedSimpleInventoryBlockEntity implements Pedestal {
+	private static final InteractionResult HANDLED = InteractionResult.CONSUME.withoutItem();
+
 	public static final BlockPos[] POOL_LOCATIONS = {
 			new BlockPos(3, 0, 3), new BlockPos(-3, 0, 3), new BlockPos(3, 0, -3), new BlockPos(-3, 0, -3)
 	};
@@ -195,7 +197,7 @@ public class PedestalBlockEntity extends ExposedSimpleInventoryBlockEntity imple
 
 	@Override
 	protected SimpleContainer createItemHandler() {
-		return new SimpleContainer(1) {
+		return new Inventory(1) {
 			@Override
 			public int getMaxStackSize() {
 				return 1;
@@ -237,7 +239,7 @@ public class PedestalBlockEntity extends ExposedSimpleInventoryBlockEntity imple
 			} else {
 				Containers.dropItemStack(world, player.getX(), player.getY(), player.getZ(), stack);
 			}
-			return new AbstractMap.SimpleEntry<>(InteractionResult.CONSUME_PARTIAL, false);
+			return new AbstractMap.SimpleEntry<>(HANDLED, false);
 		}
 		return new AbstractMap.SimpleEntry<>(InteractionResult.CONSUME, false);
 	}
@@ -291,14 +293,14 @@ public class PedestalBlockEntity extends ExposedSimpleInventoryBlockEntity imple
 
 				if (strikes > 0 && strikes < recipe.getStrike()) {
 					level.playSound(null, pos, SoundEvents.STONE_HIT, SoundSource.PLAYERS, .8f,
-							((player.level().random.nextFloat() - player.level().random.nextFloat()) * .7f + 1) * 2);
+							((player.level().getRandom().nextFloat() - player.level().getRandom().nextFloat()) * .7f + 1) * 2);
 					continue;
 				}
 
 				ItemStack output = recipe.getOutput().copy();
 				this.setItem(output);
-				level.playSound(null, pos, SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, .8F,
-						((player.level().random.nextFloat() - player.level().random.nextFloat()) * .7f + 1) * 2);
+				level.playSound(null, pos, SoundEvents.ITEM_BREAK.value(), SoundSource.PLAYERS, .8F,
+						((player.level().getRandom().nextFloat() - player.level().getRandom().nextFloat()) * .7f + 1) * 2);
 				if (!level.isClientSide()) {
 
 					createExperience((ServerLevel) level, player.position(), recipe.getExp() /* * expBoost*/);
@@ -307,7 +309,7 @@ public class PedestalBlockEntity extends ExposedSimpleInventoryBlockEntity imple
 				break;
 			}
 
-			return denyInteraction ? new AbstractMap.SimpleEntry<>(InteractionResult.CONSUME_PARTIAL, swingOffHand) : new AbstractMap.SimpleEntry<>(InteractionResult.CONSUME, swingOffHand);
+			return denyInteraction ? new AbstractMap.SimpleEntry<>(HANDLED, swingOffHand) : new AbstractMap.SimpleEntry<>(InteractionResult.CONSUME, swingOffHand);
 		}
 
 		return new AbstractMap.SimpleEntry<>(InteractionResult.CONSUME, swingOffHand);
@@ -339,7 +341,7 @@ public class PedestalBlockEntity extends ExposedSimpleInventoryBlockEntity imple
 					playSound();
 				}
 
-				return new AbstractMap.SimpleEntry<>(InteractionResult.CONSUME_PARTIAL, swingOffHand);
+				return new AbstractMap.SimpleEntry<>(HANDLED, swingOffHand);
 			}
 		}
 		return new AbstractMap.SimpleEntry<>(InteractionResult.CONSUME, swingOffHand);
@@ -372,7 +374,7 @@ public class PedestalBlockEntity extends ExposedSimpleInventoryBlockEntity imple
 
 	private void playSound() {
 		level.playSound(null, worldPosition, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, .2f,
-				((level.random.nextFloat() - level.random.nextFloat()) * .7f + 1) * 2);
+				((level.getRandom().nextFloat() - level.getRandom().nextFloat()) * .7f + 1) * 2);
 	}
 
 	private static void createExperience(ServerLevel world, Vec3 pos, int amount) {
@@ -450,9 +452,9 @@ public class PedestalBlockEntity extends ExposedSimpleInventoryBlockEntity imple
 			if (!player.getAbilities().instabuild) flower.shrink(1);
 			setStrikes(0); markUpdated();
 			world.playSound(null, pos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, .5F,
-					((world.random.nextFloat() - world.random.nextFloat()) * .2F + 1) * 1.5F);
+					((world.getRandom().nextFloat() - world.getRandom().nextFloat()) * .2F + 1) * 1.5F);
 		}
-		return new AbstractMap.SimpleEntry<>(InteractionResult.CONSUME_PARTIAL, offhand);
+		return new AbstractMap.SimpleEntry<>(HANDLED, offhand);
 	}
 
 	private void markUpdated() {
@@ -465,7 +467,7 @@ public class PedestalBlockEntity extends ExposedSimpleInventoryBlockEntity imple
 		// The original pedestal accumulates daytime ticks, without a sky-visibility check.
 		if (!self.getItem().is(ExtraBotanyItems.nightmareFuel)) {
 			self.solarTicks = 0;
-		} else if (level.isDay() && ++self.solarTicks >= 6000) {
+		} else if (level.isBrightOutside() && ++self.solarTicks >= 6000) {
 			self.solarTicks = 0;
 			self.setItem(new ItemStack(ExtraBotanyItems.spiritFuel));
 		}
@@ -604,14 +606,14 @@ public class PedestalBlockEntity extends ExposedSimpleInventoryBlockEntity imple
 			this.setStrikes(this.strikes + 1 /*+ efficiency*/);
 			if (strikes > 0 && strikes < recipe.getStrike()) {
 				level.playSound(null, worldPosition, SoundEvents.STONE_HIT, SoundSource.BLOCKS, .8f,
-						((level.random.nextFloat() - level.random.nextFloat()) * .7f + 1) * 2);
+						((level.getRandom().nextFloat() - level.getRandom().nextFloat()) * .7f + 1) * 2);
 				return true;
 			}
 
 			ItemStack output = recipe.getOutput().copy();
 			this.setItem(output);
-			level.playSound(null, worldPosition, SoundEvents.ITEM_BREAK, SoundSource.BLOCKS, .8F,
-					((level.random.nextFloat() - level.random.nextFloat()) * .7f + 1) * 2);
+			level.playSound(null, worldPosition, SoundEvents.ITEM_BREAK.value(), SoundSource.BLOCKS, .8F,
+					((level.getRandom().nextFloat() - level.getRandom().nextFloat()) * .7f + 1) * 2);
 			setStrikes(FINISH_CRAFT_STRIKE_FLAG);
 
 			//Mending
@@ -666,17 +668,17 @@ public class PedestalBlockEntity extends ExposedSimpleInventoryBlockEntity imple
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.loadAdditional(tag, registries);
-		this.strikes = tag.getInt("strikes");
+	public void readPacketNBT(CompoundTag tag, HolderLookup.Provider registries) {
+		super.readPacketNBT(tag, registries);
+		this.strikes = tag.getIntOr("strikes", 0);
 		// Like the 1.12.2 implementation, daylight progress is local to the loaded pedestal.
 		this.solarTicks = 0;
 		this.pendingSync = false;
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.saveAdditional(tag, registries);
+	public void writePacketNBT(CompoundTag tag, HolderLookup.Provider registries) {
+		super.writePacketNBT(tag, registries);
 		tag.putInt("strikes", strikes);
 	}
 

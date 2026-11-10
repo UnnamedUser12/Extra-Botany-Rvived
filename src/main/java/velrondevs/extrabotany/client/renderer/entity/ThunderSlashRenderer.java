@@ -1,6 +1,9 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.model.geom.ModelPart;
@@ -9,11 +12,10 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.common.entity.ThunderSlashEntity;
 
@@ -26,9 +28,9 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>来源：ExtraMeteorP 1.16 {@code RenderSlash} 和 {@code ModelSlash}。
  * <p>Source: ExtraMeteorP 1.16 {@code RenderSlash} and {@code ModelSlash}.
  */
-public class ThunderSlashRenderer extends EntityRenderer<ThunderSlashEntity> {
+public class ThunderSlashRenderer extends ExtraEntityRenderer<ThunderSlashEntity> {
 	private static final int FRAME_COUNT = 35;
-	private static final ResourceLocation[] FRAMES = new ResourceLocation[FRAME_COUNT];
+	private static final Identifier[] FRAMES = new Identifier[FRAME_COUNT];
 	private static final float SCALE = 1.75F;
 	private static final int FULL_BRIGHT = 0xF000F0;
 
@@ -54,18 +56,17 @@ public class ThunderSlashRenderer extends EntityRenderer<ThunderSlashEntity> {
 	}
 
 	@Override
-	public void render(ThunderSlashEntity slash, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
+	protected void render(ThunderSlashEntity slash, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, SubmitNodeCollector collector, int light, CameraRenderState camera) {
 		pose.pushPose();
-		pose.mulPose(entityRenderDispatcher.cameraOrientation());
+		pose.mulPose(camera.orientation);
 		pose.scale(SCALE, -SCALE, -SCALE);
-		VertexConsumer buffer = buffers.getBuffer(RenderType.entityCutoutNoCull(getTextureLocation(slash)));
+		VertexConsumer buffer = buffers.getBuffer(RenderTypes.entityCutout(getTextureLocation(slash)));
 		quad.render(pose, buffer, FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
 		pose.popPose();
-		super.render(slash, yaw, partialTick, pose, buffers, light);
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(ThunderSlashEntity slash) {
+	public Identifier getTextureLocation(ThunderSlashEntity slash) {
 		return FRAMES[slash.tickCount % FRAME_COUNT];
 	}
 }

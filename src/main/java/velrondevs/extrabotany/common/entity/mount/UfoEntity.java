@@ -1,5 +1,8 @@
 package velrondevs.extrabotany.common.entity.mount;
 
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -125,7 +128,7 @@ public class UfoEntity extends MountEntity {
 
 	@Override
 	protected void tickMount(@Nullable Player rider) {
-		if (rider != null && isControlledByLocalInstance()) {
+		if (rider != null && isLocalInstanceAuthoritative()) {
 			fly(rider);
 		}
 		tickCaughtEntity();
@@ -196,7 +199,7 @@ public class UfoEntity extends MountEntity {
 		if (!target.isAlive() || target.isSpectator() || hasPassenger(target) || target.isPassenger()) {
 			return false;
 		}
-		if (target.getType().is(Tags.EntityTypes.BOSSES)) {
+		if (target.getType().builtInRegistryHolder().is(Tags.EntityTypes.BOSSES)) {
 			return false;
 		}
 		if (target instanceof Player targetPlayer) {
@@ -252,17 +255,17 @@ public class UfoEntity extends MountEntity {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag tag) {
+	protected void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		if (caughtUuid != null) {
-			tag.putUUID(TAG_CAUGHT, caughtUuid);
+			tag.store(TAG_CAUGHT, UUIDUtil.CODEC, caughtUuid);
 		}
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundTag tag) {
+	protected void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		caughtUuid = tag.hasUUID(TAG_CAUGHT) ? tag.getUUID(TAG_CAUGHT) : null;
+		caughtUuid = tag.read(TAG_CAUGHT, UUIDUtil.CODEC).orElse(null);
 		entityData.set(CAUGHT_ID, NO_ENTITY);
 	}
 }

@@ -1,5 +1,9 @@
 package velrondevs.extrabotany.common.item.equipment.armor.pleiades_combat_maid;
 
+import velrondevs.extrabotany.registry.ExtraBotanyArmorMaterials;
+import net.minecraft.world.item.Item;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import com.google.common.base.Suppliers;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
@@ -10,7 +14,8 @@ import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
@@ -27,6 +32,7 @@ import velrondevs.extrabotany.common.item.equipment.armor.starry_idol.StarryIdol
 import velrondevs.extrabotany.config.ExtraBotanyConfig;
 
 import java.util.List;
+import java.util.function.UnaryOperator;
 import java.util.function.Supplier;
 
 import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
@@ -44,20 +50,23 @@ public class PleiadesCombatMaidArmorItem extends StarryIdolArmorItem {
 			new ItemStack(ExtraBotanyItems.pleiadesCombatMaidBoots)
 	});
 
-	public PleiadesCombatMaidArmorItem(Type type, Properties properties) {
-		this(ExtraBotanyAPI.instance().getPleiadsMaidCombatArmorMaterial(), type, properties);
+	public PleiadesCombatMaidArmorItem(ArmorType type, Properties properties) {
+		this(ExtraBotanyArmorMaterials.PLEIADS_MAID_COMBAT, type, properties);
 	}
 
-	public PleiadesCombatMaidArmorItem(Holder<ArmorMaterial> material, Type type, Properties properties) {
-		super(material, type, properties);
+	public PleiadesCombatMaidArmorItem(ArmorMaterial material, ArmorType type, Properties properties) {
+		this(material, type, properties, UnaryOperator.identity());
 	}
 
-	@Override
-	public ItemAttributeModifiers getDefaultAttributeModifiers() {
-		var modifierId = prefix("pleiades_combat_maid_" + getType().getName());
-		var slot = EquipmentSlotGroup.bySlot(getType().getSlot());
-		int reduction = getMaterial().value().getDefense(getType());
-		return super.getDefaultAttributeModifiers()
+	protected PleiadesCombatMaidArmorItem(ArmorMaterial material, ArmorType type, Properties properties, UnaryOperator<ItemAttributeModifiers> extra) {
+		super(material, type, properties, attributes -> extra.apply(withMaidModifiers(attributes, material, type)));
+	}
+
+	private static ItemAttributeModifiers withMaidModifiers(ItemAttributeModifiers attributes, ArmorMaterial material, ArmorType type) {
+		var modifierId = prefix("pleiades_combat_maid_" + type.getName());
+		var slot = EquipmentSlotGroup.bySlot(type.getSlot());
+		int reduction = material.defense().getOrDefault(type, 0);
+		return attributes
 				.withModifierAdded(Attributes.KNOCKBACK_RESISTANCE,
 						new AttributeModifier(modifierId, (double) reduction / 20,
 								AttributeModifier.Operation.ADD_VALUE), slot)
@@ -66,17 +75,19 @@ public class PleiadesCombatMaidArmorItem extends StarryIdolArmorItem {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> list, TooltipFlag flags) {
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> list, TooltipFlag flags) {
 		if (ExtraBotanyConfig.client().otakuMode()) {
 			switch (getType()) {
-				case HELMET -> list.add(Component.translatable("tooltip.extrabotany.pleiades_combat_maid_headgear").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
-				case CHESTPLATE -> list.add(Component.translatable("tooltip.extrabotany.pleiades_combat_maid_suit").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
-				case LEGGINGS -> list.add(Component.translatable("tooltip.extrabotany.pleiades_combat_maid_skirt").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
-				case BOOTS -> list.add(Component.translatable("tooltip.extrabotany.pleiades_combat_maid_boots").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
+				case HELMET -> list.accept(Component.translatable("tooltip.extrabotany.pleiades_combat_maid_headgear").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
+				case CHESTPLATE -> list.accept(Component.translatable("tooltip.extrabotany.pleiades_combat_maid_suit").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
+				case LEGGINGS -> list.accept(Component.translatable("tooltip.extrabotany.pleiades_combat_maid_skirt").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
+				case BOOTS -> list.accept(Component.translatable("tooltip.extrabotany.pleiades_combat_maid_boots").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
 			}
-			list.add(Component.empty());
+			list.accept(Component.empty());
 		}
-		TooltipHandler.addOnShift(list, () -> addInformation(stack, context.level(), list, flags));
+		List<Component> shiftLines = new java.util.ArrayList<>();
+		TooltipHandler.addOnShift(shiftLines, () -> addInformation(stack, context.level(), shiftLines, flags));
+		shiftLines.forEach(list);
 	}
 
 	@Override
@@ -101,7 +112,7 @@ public class PleiadesCombatMaidArmorItem extends StarryIdolArmorItem {
 
 	@Override
 	public boolean hasArmorSetItem(Player player, EquipmentSlot slot) {
-		if (player == null || player.getInventory() == null || player.getInventory().armor == null) {
+		if (player == null || player.getInventory() == null || false) {
 			return false;
 		}
 

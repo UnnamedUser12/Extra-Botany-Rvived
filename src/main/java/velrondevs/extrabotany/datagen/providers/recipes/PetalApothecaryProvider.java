@@ -23,7 +23,9 @@ import java.util.concurrent.CompletableFuture;
  * Makes these recipes. The petal apothecary recipes: the flowers of this mod.
  */
 public class PetalApothecaryProvider extends ExtraBotanyRecipeProvider {
-	private static final Ingredient DEFAULT_REAGENT = Ingredient.of(BotaniaTags.Items.SEED_APOTHECARY_REAGENT);
+	private static Ingredient defaultReagent() {
+		return tag(BotaniaTags.Items.SEED_APOTHECARY_REAGENT);
+	}
 
 	public PetalApothecaryProvider(PackOutput packOutput,
 			CompletableFuture<HolderLookup.Provider> lookupProvider) {
@@ -32,21 +34,21 @@ public class PetalApothecaryProvider extends ExtraBotanyRecipeProvider {
 
 	@Override
 	public void buildRecipes(RecipeOutput consumer) {
-		Ingredient white = Ingredient.of(BotaniaTags.Items.PETALS_WHITE);
-		Ingredient orange = Ingredient.of(BotaniaTags.Items.PETALS_ORANGE);
-		Ingredient magenta = Ingredient.of(BotaniaTags.Items.PETALS_MAGENTA);
-		Ingredient lightBlue = Ingredient.of(BotaniaTags.Items.PETALS_LIGHT_BLUE);
-		Ingredient yellow = Ingredient.of(BotaniaTags.Items.PETALS_YELLOW);
-		Ingredient lime = Ingredient.of(BotaniaTags.Items.PETALS_LIME);
-		Ingredient pink = Ingredient.of(BotaniaTags.Items.PETALS_PINK);
-		Ingredient gray = Ingredient.of(BotaniaTags.Items.PETALS_GRAY);
-		Ingredient cyan = Ingredient.of(BotaniaTags.Items.PETALS_CYAN);
-		Ingredient purple = Ingredient.of(BotaniaTags.Items.PETALS_PURPLE);
-		Ingredient blue = Ingredient.of(BotaniaTags.Items.PETALS_BLUE);
-		Ingredient brown = Ingredient.of(BotaniaTags.Items.PETALS_BROWN);
-		Ingredient green = Ingredient.of(BotaniaTags.Items.PETALS_GREEN);
-		Ingredient red = Ingredient.of(BotaniaTags.Items.PETALS_RED);
-		Ingredient black = Ingredient.of(BotaniaTags.Items.PETALS_BLACK);
+		Ingredient white = tag(BotaniaTags.Items.PETALS_WHITE);
+		Ingredient orange = tag(BotaniaTags.Items.PETALS_ORANGE);
+		Ingredient magenta = tag(BotaniaTags.Items.PETALS_MAGENTA);
+		Ingredient lightBlue = tag(BotaniaTags.Items.PETALS_LIGHT_BLUE);
+		Ingredient yellow = tag(BotaniaTags.Items.PETALS_YELLOW);
+		Ingredient lime = tag(BotaniaTags.Items.PETALS_LIME);
+		Ingredient pink = tag(BotaniaTags.Items.PETALS_PINK);
+		Ingredient gray = tag(BotaniaTags.Items.PETALS_GRAY);
+		Ingredient cyan = tag(BotaniaTags.Items.PETALS_CYAN);
+		Ingredient purple = tag(BotaniaTags.Items.PETALS_PURPLE);
+		Ingredient blue = tag(BotaniaTags.Items.PETALS_BLUE);
+		Ingredient brown = tag(BotaniaTags.Items.PETALS_BROWN);
+		Ingredient green = tag(BotaniaTags.Items.PETALS_GREEN);
+		Ingredient red = tag(BotaniaTags.Items.PETALS_RED);
+		Ingredient black = tag(BotaniaTags.Items.PETALS_BLACK);
 		Ingredient runeWater = Ingredient.of(BotaniaItems.runeWater);
 		Ingredient runeFire = Ingredient.of(BotaniaItems.runeFire);
 		Ingredient runeEarth = Ingredient.of(BotaniaItems.runeEarth);
@@ -91,8 +93,8 @@ public class PetalApothecaryProvider extends ExtraBotanyRecipeProvider {
 	}
 
 	private static void make(RecipeOutput consumer, ItemLike output, Ingredient... ingredients) {
-		consumer.accept(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(output.asItem()).getNamespace(), "petal_apothecary/" + net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(output.asItem()).getPath()),
-				new PetalsRecipe(new ItemStack(output), DEFAULT_REAGENT, ingredients), null);
+		consumer.accept(key(net.minecraft.resources.Identifier.fromNamespaceAndPath(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(output.asItem()).getNamespace(), "petal_apothecary/" + net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(output.asItem()).getPath())),
+				new PetalsRecipe(new ItemStack(output), defaultReagent(), ingredients), null);
 	}
 
 	@Override

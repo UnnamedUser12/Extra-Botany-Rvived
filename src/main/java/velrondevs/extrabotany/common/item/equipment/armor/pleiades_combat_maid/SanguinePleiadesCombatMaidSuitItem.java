@@ -15,6 +15,7 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.world.item.equipment.ArmorType;
 import velrondevs.botania.registry.BotaniaMobEffects;
 import velrondevs.botania.common.brew.effect.BloodthirstMobEffect;
 
@@ -50,15 +51,9 @@ public class SanguinePleiadesCombatMaidSuitItem extends PleiadesCombatMaidSuitIt
 	public static final float HEAL_RATE = 0.3F;
 
 	public SanguinePleiadesCombatMaidSuitItem(Properties properties) {
-		super(properties);
-	}
-
-	@Override
-	public ItemAttributeModifiers getDefaultAttributeModifiers() {
-		var modifierId = prefix("pleiades_combat_maid_" + getType().getName());
-		return super.getDefaultAttributeModifiers().withModifierAdded(Attributes.MAX_HEALTH,
-				new AttributeModifier(modifierId, 15, AttributeModifier.Operation.ADD_VALUE),
-				EquipmentSlotGroup.bySlot(getType().getSlot()));
+		super(properties, attributes -> attributes.withModifierAdded(Attributes.MAX_HEALTH,
+				new AttributeModifier(prefix("pleiades_combat_maid_" + ArmorType.CHESTPLATE.getName()), 15, AttributeModifier.Operation.ADD_VALUE),
+				EquipmentSlotGroup.bySlot(ArmorType.CHESTPLATE.getSlot())));
 	}
 
 	@Override
@@ -81,8 +76,8 @@ public class SanguinePleiadesCombatMaidSuitItem extends PleiadesCombatMaidSuitIt
 				return;
 			}
 
-			living.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 10, 1));
-			living.heal(HEAL_RATE * event.getNewDamage());
+			living.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 20 * 10, 1));
+			living.heal(HEAL_RATE * event.getHealthDamage());
 		}
 
 		//Get Blood Suit

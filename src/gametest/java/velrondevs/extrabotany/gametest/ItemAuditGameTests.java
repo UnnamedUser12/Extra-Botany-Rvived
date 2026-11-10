@@ -2,9 +2,9 @@ package velrondevs.extrabotany.gametest;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -15,15 +15,15 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.Husk;
+import net.minecraft.world.entity.monster.zombie.Husk;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.GameType;
 import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.botania.api.mana.ManaItem;
 import velrondevs.botania.registry.BotaniaItems;
@@ -84,10 +84,10 @@ public final class ItemAuditGameTests {
 
 		for (int tick = 1; tick <= 60; tick++) {
 			player.tickCount = tick;
-			hammer.inventoryTick(helper.getLevel(), player, 0, true);
+			hammer.inventoryTick(helper.getLevel(), player, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
 		}
 		helper.assertTrue(mana.getMana() == 10000 - 10, "Expected one buff payment of 10 mana in 60 ticks, used " + (10000 - mana.getMana()));
-		MobEffectInstance haste = player.getEffect(MobEffects.DIG_SPEED);
+		MobEffectInstance haste = player.getEffect(MobEffects.HASTE);
 		helper.assertTrue(haste != null && haste.getAmplifier() == 1, "The hammer did not give Haste II");
 		helper.succeed();
 	}
@@ -104,10 +104,10 @@ public final class ItemAuditGameTests {
 		helper.assertTrue(player.getUseItem().is(ExtraBotanyItems.terrasteelShield), "The player does not use the shield");
 		DamageSource source = player.damageSources().generic();
 
-		ManasteelShieldItem.EventHandler.onShieldBlockDamage(new LivingShieldBlockEvent(player, new DamageContainer(source, 4F), false));
+		ManasteelShieldItem.EventHandler.onShieldBlockDamage(new LivingShieldBlockEvent(player, new DamageContainer(source, 4F), 4F, false));
 		helper.assertFalse(player.hasEffect(MobEffects.REGENERATION), "Damage that was not blocked started the shield effect");
 
-		ManasteelShieldItem.EventHandler.onShieldBlockDamage(new LivingShieldBlockEvent(player, new DamageContainer(source, 4F), true));
+		ManasteelShieldItem.EventHandler.onShieldBlockDamage(new LivingShieldBlockEvent(player, new DamageContainer(source, 4F), 4F, true));
 		helper.assertTrue(player.hasEffect(MobEffects.REGENERATION), "A real block did not start the shield effect");
 		helper.succeed();
 	}
@@ -146,7 +146,7 @@ public final class ItemAuditGameTests {
 	@GameTest(template = "empty", timeoutTicks = 20)
 	public static void featherOfJingweiGivesMaxAbsorption(GameTestHelper helper) {
 		ItemStack feather = new ItemStack(ExtraBotanyItems.featherOfJingwei);
-		ResourceLocation slot = prefix("test_slot");
+		Identifier slot = prefix("test_slot");
 		Multimap<Holder<Attribute>, AttributeModifier> modifiers = ((BaubleItem) feather.getItem()).getEquippedAttributeModifiers(feather);
 		double total = modifiers.get(Attributes.MAX_ABSORPTION).stream().mapToDouble(AttributeModifier::amount).sum();
 		helper.assertTrue(total == AuraFireEntity.ABSORPTION_MAX, "Expected " + AuraFireEntity.ABSORPTION_MAX + " max absorption, got " + total);
@@ -159,8 +159,8 @@ public final class ItemAuditGameTests {
 	 */
 	@GameTest(template = "empty", timeoutTicks = 20)
 	public static void fuelsComeFromTheDataMap(GameTestHelper helper) {
-		int nightmare = new ItemStack(ExtraBotanyItems.nightmareFuel).getBurnTime(RecipeType.SMELTING);
-		int spirit = new ItemStack(ExtraBotanyItems.spiritFuel).getBurnTime(RecipeType.SMELTING);
+		int nightmare = new ItemStack(ExtraBotanyItems.nightmareFuel).getBurnTime(RecipeType.SMELTING, helper.getLevel().fuelValues());
+		int spirit = new ItemStack(ExtraBotanyItems.spiritFuel).getBurnTime(RecipeType.SMELTING, helper.getLevel().fuelValues());
 		helper.assertTrue(nightmare == 3200, "Nightmare Fuel burn time is " + nightmare);
 		helper.assertTrue(spirit == 12800, "Spirit Fuel burn time is " + spirit);
 		helper.succeed();

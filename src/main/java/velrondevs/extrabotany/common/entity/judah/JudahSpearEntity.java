@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity.judah;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -112,7 +114,7 @@ public class JudahSpearEntity extends OwnedEntity {
 			}
 			living.hurt(ExtraBotanyDamageTypes.Sources.source(level().registryAccess(), DamageTypes.LIGHTNING_BOLT, this, owner),
 					damage * ATTACK_DAMAGE_FACTOR);
-			if (!living.getType().is(Tags.EntityTypes.BOSSES)) {
+			if (!living.getType().builtInRegistryHolder().is(Tags.EntityTypes.BOSSES)) {
 				DivineJusticeMobEffect.stack(living);
 			}
 			DamageHandler.INSTANCE.dealTrueDamage(owner, living, damage * TRUE_DAMAGE_FACTOR);
@@ -122,7 +124,7 @@ public class JudahSpearEntity extends OwnedEntity {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag tag) {
+	protected void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putInt(TAG_VARIANT, entityData.get(VARIANT));
 		tag.putFloat(TAG_DAMAGE, damage);
@@ -131,11 +133,11 @@ public class JudahSpearEntity extends OwnedEntity {
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundTag tag) {
+	protected void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		entityData.set(VARIANT, Variant.byId(tag.getInt(TAG_VARIANT)).ordinal());
-		damage = tag.getFloat(TAG_DAMAGE);
-		entityData.set(FAKE, tag.getBoolean(TAG_FAKE));
-		hit = tag.getBoolean(TAG_HIT);
+		entityData.set(VARIANT, Variant.byId(tag.getIntOr(TAG_VARIANT, 0)).ordinal());
+		damage = tag.getFloatOr(TAG_DAMAGE, 0.0F);
+		entityData.set(FAKE, tag.getBooleanOr(TAG_FAKE, false));
+		hit = tag.getBooleanOr(TAG_HIT, false);
 	}
 }

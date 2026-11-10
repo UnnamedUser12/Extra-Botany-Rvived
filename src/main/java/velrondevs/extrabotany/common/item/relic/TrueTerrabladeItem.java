@@ -4,7 +4,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.phys.Vec3;
 
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +26,7 @@ public class TrueTerrabladeItem extends RelicSwordItem {
 	private static final double BEAM_SPEED = 0.8;
 
 	public TrueTerrabladeItem(Properties props) {
-		super(Tiers.DIAMOND, props.attributes(createAttributes(Tiers.DIAMOND, 5, -2F)));
+		super(ToolMaterial.DIAMOND, 5, -2F, props);
 	}
 
 	@Override

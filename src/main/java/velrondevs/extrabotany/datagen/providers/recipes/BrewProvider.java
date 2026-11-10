@@ -3,7 +3,7 @@ package velrondevs.extrabotany.datagen.providers.recipes;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
@@ -50,10 +50,10 @@ public class BrewProvider extends ExtraBotanyRecipeProvider {
 	}
 
 	private static void make(RecipeOutput consumer, String id, Brew brew, Ingredient... inputs) {
-		consumer.accept(idFor(id), new BotanicalBreweryRecipe(brew, inputs), null);
+		consumer.accept(key(idFor(id)), new BotanicalBreweryRecipe(brew, inputs), null);
 	}
 
-	private static ResourceLocation idFor(String path) {
+	private static Identifier idFor(String path) {
 		return prefix("brew/" + path);
 	}
 }

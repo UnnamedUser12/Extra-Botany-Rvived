@@ -5,19 +5,18 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Cow;
-import net.minecraft.world.entity.animal.Pig;
-import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.cow.Cow;
+import net.minecraft.world.entity.animal.pig.Pig;
+import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Husk;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.monster.zombie.Husk;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -34,11 +33,13 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.botania.api.block.PetalApothecary;
 import velrondevs.botania.api.mana.ManaReceiver;
@@ -92,6 +93,57 @@ public final class BlockGameTests {
 		return new BlockHitResult(Vec3.atCenterOf(absolute), Direction.UP, absolute, false);
 	}
 
+	private static int energyInsert(EnergyHandler handler, int amount, boolean simulate) {
+		try (Transaction transaction = Transaction.openRoot()) {
+			int moved = handler.insert(amount, transaction);
+			if (!simulate) {
+				transaction.commit();
+			}
+			return moved;
+		}
+	}
+
+	private static int energyExtract(EnergyHandler handler, int amount, boolean simulate) {
+		try (Transaction transaction = Transaction.openRoot()) {
+			int moved = handler.extract(amount, transaction);
+			if (!simulate) {
+				transaction.commit();
+			}
+			return moved;
+		}
+	}
+
+	private static int fill(LivingrockBarrelBlockEntity barrel, FluidStack stack, boolean simulate) {
+		ResourceHandler<FluidResource> handler = barrel.getFluidHandler();
+		try (Transaction transaction = Transaction.openRoot()) {
+			int moved = handler.insert(FluidResource.of(stack), stack.getAmount(), transaction);
+			if (!simulate) {
+				transaction.commit();
+			}
+			return moved;
+		}
+	}
+
+	private static FluidStack drain(LivingrockBarrelBlockEntity barrel, FluidStack stack, boolean simulate) {
+		ResourceHandler<FluidResource> handler = barrel.getFluidHandler();
+		FluidResource resource = FluidResource.of(stack);
+		try (Transaction transaction = Transaction.openRoot()) {
+			int moved = handler.extract(resource, stack.getAmount(), transaction);
+			if (!simulate) {
+				transaction.commit();
+			}
+			return resource.toStack(moved);
+		}
+	}
+
+	private static FluidStack drain(LivingrockBarrelBlockEntity barrel, int amount, boolean simulate) {
+		FluidResource resource = barrel.getFluidHandler().getResource(0);
+		if (resource.isEmpty()) {
+			return FluidStack.EMPTY;
+		}
+		return drain(barrel, resource.toStack(amount), simulate);
+	}
+
 	// ---------------------------------------------------------------------
 	// 魔力缓存器 / Mana Buffer
 	// ---------------------------------------------------------------------
@@ -113,7 +165,7 @@ public final class BlockGameTests {
 
 		HolderLookup.Provider registries = helper.getLevel().registryAccess();
 		CompoundTag saved = top.saveWithFullMetadata(registries);
-		helper.assertTrue(saved.getInt("mana") == 1000, "The buffer does not save its mana in the key 'mana'");
+		helper.assertTrue(saved.getIntOr("mana", 0) == 1000, "The buffer does not save its mana in the key 'mana'");
 		ManaBufferBlockEntity loaded = (ManaBufferBlockEntity) BlockEntity.loadStatic(top.getBlockPos(), top.getBlockState(), saved, registries);
 		helper.assertTrue(loaded != null && loaded.getCurrentMana() == 1000, "The buffer lost its mana in the save");
 		loaded.receiveMana(Integer.MAX_VALUE);
@@ -178,12 +230,12 @@ public final class BlockGameTests {
 		ManaBufferBlockEntity buffer = place(helper, CENTER, ExtraBotanyBlocks.manaBuffer, ManaBufferBlockEntity.class);
 		BlockState state = buffer.getBlockState();
 		BlockPos pos = buffer.getBlockPos();
-		helper.assertTrue(state.hasAnalogOutputSignal() && state.getAnalogOutputSignal(helper.getLevel(), pos) == 0,
+		helper.assertTrue(state.hasAnalogOutputSignal() && state.getAnalogOutputSignal(helper.getLevel(), pos, Direction.UP) == 0,
 				"An empty Mana Buffer must give the comparator signal 0");
 		buffer.receiveMana(1);
-		helper.assertTrue(state.getAnalogOutputSignal(helper.getLevel(), pos) == 1, "A Mana Buffer with some mana must give a signal of 1 or more");
+		helper.assertTrue(state.getAnalogOutputSignal(helper.getLevel(), pos, Direction.UP) == 1, "A Mana Buffer with some mana must give a signal of 1 or more");
 		buffer.receiveMana(buffer.getMaxMana());
-		helper.assertTrue(state.getAnalogOutputSignal(helper.getLevel(), pos) == 15, "A full Mana Buffer must give the comparator signal 15");
+		helper.assertTrue(state.getAnalogOutputSignal(helper.getLevel(), pos, Direction.UP) == 15, "A full Mana Buffer must give the comparator signal 15");
 		helper.assertTrue(!ExtraBotanyBlocks.quantumManaBuffer.defaultBlockState().hasAnalogOutputSignal(),
 				"The Quantum Mana Buffer must not have a comparator output");
 		helper.succeed();
@@ -199,8 +251,8 @@ public final class BlockGameTests {
 		return place(helper, pos, ExtraBotanyBlocks.manaGenerator, ManaGeneratorBlockEntity.class);
 	}
 
-	private static IEnergyStorage energy(GameTestHelper helper, ManaGeneratorBlockEntity generator, Direction side) {
-		IEnergyStorage storage = helper.getLevel().getCapability(Capabilities.EnergyStorage.BLOCK, generator.getBlockPos(), side);
+	private static EnergyHandler energy(GameTestHelper helper, ManaGeneratorBlockEntity generator, Direction side) {
+		EnergyHandler storage = helper.getLevel().getCapability(Capabilities.Energy.BLOCK, generator.getBlockPos(), side);
 		helper.assertTrue(storage != null, "The energy capability of the Flux Manafield is missing");
 		return storage;
 	}
@@ -212,8 +264,8 @@ public final class BlockGameTests {
 	@GameTest(template = "empty", timeoutTicks = 20)
 	public static void manaGeneratorCapabilities(GameTestHelper helper) {
 		ManaGeneratorBlockEntity generator = generator(helper, GENERATOR_POS);
-		IEnergyStorage storage = energy(helper, generator, null);
-		helper.assertTrue(storage.getMaxEnergyStored() == 40_000, "The energy capacity is not the default of the original (40000 FE)");
+		EnergyHandler storage = energy(helper, generator, null);
+		helper.assertTrue(storage.getCapacityAsInt() == 40_000, "The energy capacity is not the default of the original (40000 FE)");
 		for (Direction side : Direction.values()) {
 			helper.assertTrue(energy(helper, generator, side) == storage, "The energy interface is different on the side " + side);
 		}
@@ -231,33 +283,33 @@ public final class BlockGameTests {
 	@GameTest(template = "empty", timeoutTicks = 20)
 	public static void manaGeneratorEnergyLimitsAndSave(GameTestHelper helper) {
 		ManaGeneratorBlockEntity generator = generator(helper, GENERATOR_POS);
-		IEnergyStorage storage = energy(helper, generator, Direction.UP);
+		EnergyHandler storage = energy(helper, generator, Direction.UP);
 		var chunk = helper.getLevel().getChunkAt(generator.getBlockPos());
-		chunk.setUnsaved(false);
+		chunk.tryMarkSaved();
 
-		helper.assertTrue(storage.receiveEnergy(Integer.MAX_VALUE, true) == 40_000 && storage.getEnergyStored() == 0 && !chunk.isUnsaved(),
+		helper.assertTrue(energyInsert(storage, Integer.MAX_VALUE, true) == 40_000 && storage.getAmountAsInt() == 0 && !chunk.isUnsaved(),
 				"A simulated input changed the Flux Manafield");
-		helper.assertTrue(storage.receiveEnergy(Integer.MAX_VALUE, false) == 40_000 && chunk.isUnsaved(),
+		helper.assertTrue(energyInsert(storage, Integer.MAX_VALUE, false) == 40_000 && chunk.isUnsaved(),
 				"A real input did not fill the Flux Manafield or did not mark the chunk");
-		helper.assertTrue(!storage.canReceive() && storage.canExtract(), "A full Flux Manafield gives incorrect transfer flags");
-		helper.assertTrue(storage.receiveEnergy(-1, false) == 0 && storage.extractEnergy(-1, false) == 0 && storage.getEnergyStored() == 40_000,
+		helper.assertTrue(energyInsert(storage, 1, true) == 0 && energyExtract(storage, 1, true) > 0, "A full Flux Manafield gives incorrect transfer flags");
+		helper.assertTrue(energyInsert(storage, -1, false) == 0 && energyExtract(storage, -1, false) == 0 && storage.getAmountAsInt() == 40_000,
 				"A negative request changed the energy");
-		chunk.setUnsaved(false);
-		helper.assertTrue(storage.extractEnergy(1250, true) == 1250 && storage.getEnergyStored() == 40_000 && !chunk.isUnsaved(),
+		chunk.tryMarkSaved();
+		helper.assertTrue(energyExtract(storage, 1250, true) == 1250 && storage.getAmountAsInt() == 40_000 && !chunk.isUnsaved(),
 				"A simulated output changed the Flux Manafield");
-		helper.assertTrue(storage.extractEnergy(1250, false) == 1250 && chunk.isUnsaved(), "A real output did not mark the chunk");
+		helper.assertTrue(energyExtract(storage, 1250, false) == 1250 && chunk.isUnsaved(), "A real output did not mark the chunk");
 
 		generator.receiveMana(1234);
 		HolderLookup.Provider registries = helper.getLevel().registryAccess();
 		CompoundTag saved = generator.saveWithoutMetadata(registries);
-		helper.assertTrue(saved.getInt("energy") == 38_750 && saved.getInt("mana") == 1234, "The save does not use the keys 'energy' and 'mana'");
+		helper.assertTrue(saved.getIntOr("energy", 0) == 38_750 && saved.getIntOr("mana", 0) == 1234, "The save does not use the keys 'energy' and 'mana'");
 		ManaGeneratorBlockEntity restored = new ManaGeneratorBlockEntity(generator.getBlockPos(), generator.getBlockState());
-		restored.loadWithComponents(saved, registries);
+		BlockEntityIO.load(restored, registries, saved);
 		helper.assertTrue(restored.getEnergy() == 38_750 && restored.getCurrentMana() == 1234, "The load lost energy or mana");
-		helper.assertTrue(generator.getUpdatePacket().getTag().equals(generator.getUpdateTag(registries)),
+		helper.assertTrue(BlockEntityIO.updatePacketTag(generator).equals(generator.getUpdateTag(registries)),
 				"The update packet and the chunk data are different");
-		helper.assertTrue(storage.extractEnergy(Integer.MAX_VALUE, false) == 38_750 && storage.getEnergyStored() == 0
-				&& !storage.canExtract() && storage.canReceive(), "The output was more than the energy in the machine");
+		helper.assertTrue(energyExtract(storage, Integer.MAX_VALUE, false) == 38_750 && storage.getAmountAsInt() == 0
+				&& energyExtract(storage, 1, true) == 0 && energyInsert(storage, 1, true) > 0, "The output was more than the energy in the machine");
 		helper.succeed();
 	}
 
@@ -268,24 +320,24 @@ public final class BlockGameTests {
 	@GameTest(template = "empty", timeoutTicks = 20)
 	public static void manaGeneratorConvertsOneLotForEachTick(GameTestHelper helper) {
 		ManaGeneratorBlockEntity generator = generator(helper, GENERATOR_POS);
-		IEnergyStorage storage = energy(helper, generator, null);
-		storage.receiveEnergy(3000, false);
+		EnergyHandler storage = energy(helper, generator, null);
+		energyInsert(storage, 3000, false);
 
 		generator.serverTick();
-		helper.assertTrue(generator.getCurrentMana() == 99 && storage.getEnergyStored() == 2000, "The first conversion is not 1000 FE to 99 mana");
+		helper.assertTrue(generator.getCurrentMana() == 99 && storage.getAmountAsInt() == 2000, "The first conversion is not 1000 FE to 99 mana");
 		generator.serverTick();
-		helper.assertTrue(generator.getCurrentMana() == 198 && storage.getEnergyStored() == 1000, "The second conversion is not 1000 FE to 99 mana");
+		helper.assertTrue(generator.getCurrentMana() == 198 && storage.getAmountAsInt() == 1000, "The second conversion is not 1000 FE to 99 mana");
 
 		generator.receiveMana(generator.getMaxMana() - generator.getCurrentMana() - 98);
 		generator.serverTick();
-		helper.assertTrue(storage.getEnergyStored() == 1000 && generator.getAvailableSpaceForMana() == 98,
+		helper.assertTrue(storage.getAmountAsInt() == 1000 && generator.getAvailableSpaceForMana() == 98,
 				"The machine used FE when the result did not fit");
 		generator.receiveMana(98);
 		generator.serverTick();
-		helper.assertTrue(generator.isFull() && storage.getEnergyStored() == 1000, "A machine with full mana used FE");
+		helper.assertTrue(generator.isFull() && storage.getAmountAsInt() == 1000, "A machine with full mana used FE");
 		generator.receiveMana(-99);
 		generator.serverTick();
-		helper.assertTrue(generator.isFull() && storage.getEnergyStored() == 0, "The last lot did not fit exactly");
+		helper.assertTrue(generator.isFull() && storage.getAmountAsInt() == 0, "The last lot did not fit exactly");
 		helper.succeed();
 	}
 
@@ -298,7 +350,7 @@ public final class BlockGameTests {
 		ManaGeneratorBlockEntity generator = generator(helper, GENERATOR_POS);
 		for (Direction side : Direction.values()) {
 			ManaGeneratorBlockEntity source = generator(helper, GENERATOR_POS.relative(side));
-			source.getEnergyStorage().receiveEnergy(4000, false);
+			energyInsert(source.getEnergyStorage(), 4000, false);
 		}
 
 		generator.serverTick();
@@ -312,7 +364,7 @@ public final class BlockGameTests {
 		// 快要装满时，只抽取剩下的空间。
 		// When the machine is almost full, it only takes the remaining space.
 		generator.receiveMana(generator.getMaxMana());
-		generator.getEnergyStorage().receiveEnergy(40_000 - 50 - generator.getEnergy(), false);
+		energyInsert(generator.getEnergyStorage(), 40_000 - 50 - generator.getEnergy(), false);
 		generator.serverTick();
 		int total = 0;
 		for (Direction side : Direction.values()) {
@@ -331,7 +383,7 @@ public final class BlockGameTests {
 		ManaGeneratorBlockEntity generator = generator(helper, GENERATOR_POS);
 		ManaSpreaderBlockEntity spreader = place(helper, GENERATOR_POS.east(), BotaniaBlocks.manaSpreader, ManaSpreaderBlockEntity.class);
 		generator.receiveMana(199);
-		generator.getEnergyStorage().receiveEnergy(1000, false);
+		energyInsert(generator.getEnergyStorage(), 1000, false);
 
 		generator.serverTick();
 		helper.assertTrue(spreader.getCurrentMana() == 0 && generator.getCurrentMana() == 298,
@@ -363,7 +415,7 @@ public final class BlockGameTests {
 	public static void manaLiquefactionConservesResources(GameTestHelper helper) {
 		ManaLiquefactionBlockEntity machine = place(helper, CENTER, ExtraBotanyBlocks.manaLiquefaction, ManaLiquefactionBlockEntity.class);
 		LivingrockBarrelBlockEntity tank = place(helper, CENTER.east(), ExtraBotanyBlocks.livingrockBarrel, LivingrockBarrelBlockEntity.class);
-		tank.fill(fluidedMana(100), FluidAction.EXECUTE);
+		fill(tank, fluidedMana(100), false);
 
 		machine.serverTick();
 		helper.assertTrue(machine.getCurrentMana() == 1000 && machine.getEnergy() == 0 && tank.getFluid().getAmount() == 99,
@@ -385,14 +437,14 @@ public final class BlockGameTests {
 	public static void manaLiquefactionRatesAndLimits(GameTestHelper helper) {
 		ManaLiquefactionBlockEntity machine = place(helper, CENTER, ExtraBotanyBlocks.manaLiquefaction, ManaLiquefactionBlockEntity.class);
 		LivingrockBarrelBlockEntity tank = place(helper, CENTER.east(), ExtraBotanyBlocks.livingrockBarrel, LivingrockBarrelBlockEntity.class);
-		tank.fill(fluidedMana(LivingrockBarrelBlockEntity.CAPACITY), FluidAction.EXECUTE);
+		fill(tank, fluidedMana(LivingrockBarrelBlockEntity.CAPACITY), false);
 		machine.receiveMana(machine.getMaxMana());
 
 		machine.serverTick();
 		helper.assertTrue(tank.getFluid().getAmount() == LivingrockBarrelBlockEntity.CAPACITY && machine.getEnergy() == 0,
 				"A machine with full mana drained fluid");
 
-		tank.drain(LivingrockBarrelBlockEntity.CAPACITY, FluidAction.EXECUTE);
+		drain(tank, LivingrockBarrelBlockEntity.CAPACITY, false);
 		machine.receiveMana(10_000 - machine.getMaxMana());
 		helper.setBlock(CENTER.below(), Blocks.REDSTONE_BLOCK);
 		machine.serverTick();
@@ -458,24 +510,24 @@ public final class BlockGameTests {
 		CompoundTag legacy = new CompoundTag();
 		legacy.putString("fluid", "extrabotany:fluidedmana");
 		legacy.putInt("amount", 15333);
-		barrel.loadWithComponents(legacy, registries);
+		BlockEntityIO.load(barrel, registries, legacy);
 		helper.assertTrue(barrel.getFluid().is(ExtraBotanyFluids.MANA) && barrel.getFluid().getAmount() == 15333, "The barrel did not read the old save format");
 
-		helper.assertTrue(barrel.fill(fluidedMana(1000), FluidAction.SIMULATE) == 667 && barrel.getFluid().getAmount() == 15333,
+		helper.assertTrue(fill(barrel, fluidedMana(1000), true) == 667 && barrel.getFluid().getAmount() == 15333,
 				"A simulated fill changed the barrel");
-		helper.assertTrue(barrel.fill(new FluidStack(Fluids.WATER, 1000), FluidAction.EXECUTE) == 0, "The barrel mixed two fluids");
-		helper.assertTrue(barrel.drain(new FluidStack(Fluids.WATER, 1000), FluidAction.EXECUTE).isEmpty(), "The barrel gave a fluid that it does not hold");
-		helper.assertTrue(barrel.drain(333, FluidAction.SIMULATE).getAmount() == 333 && barrel.getFluid().getAmount() == 15333,
+		helper.assertTrue(fill(barrel, new FluidStack(Fluids.WATER, 1000), false) == 0, "The barrel mixed two fluids");
+		helper.assertTrue(drain(barrel, new FluidStack(Fluids.WATER, 1000), false).isEmpty(), "The barrel gave a fluid that it does not hold");
+		helper.assertTrue(drain(barrel, 333, true).getAmount() == 333 && barrel.getFluid().getAmount() == 15333,
 				"A simulated drain changed the barrel");
-		helper.assertTrue(barrel.drain(333, FluidAction.EXECUTE).getAmount() == 333, "The barrel did not give the fluid");
-		helper.assertTrue(barrel.fill(fluidedMana(5000), FluidAction.EXECUTE) == 1000 && barrel.getFluid().getAmount() == LivingrockBarrelBlockEntity.CAPACITY,
+		helper.assertTrue(drain(barrel, 333, false).getAmount() == 333, "The barrel did not give the fluid");
+		helper.assertTrue(fill(barrel, fluidedMana(5000), false) == 1000 && barrel.getFluid().getAmount() == LivingrockBarrelBlockEntity.CAPACITY,
 				"The barrel holds more than 16 buckets");
 
 		LivingrockBarrelBlockEntity reloaded = (LivingrockBarrelBlockEntity) BlockEntity.loadStatic(pos, state, barrel.saveWithFullMetadata(registries), registries);
 		helper.assertTrue(reloaded != null && reloaded.getFluid().is(ExtraBotanyFluids.MANA)
 				&& reloaded.getFluid().getAmount() == LivingrockBarrelBlockEntity.CAPACITY, "The save lost the fluid");
-		helper.assertTrue(barrel.drain(Integer.MAX_VALUE, FluidAction.EXECUTE).getAmount() == LivingrockBarrelBlockEntity.CAPACITY && barrel.getFluid().isEmpty()
-				&& barrel.fill(new FluidStack(Fluids.WATER, 1), FluidAction.EXECUTE) == 1, "An empty barrel must accept a new fluid");
+		helper.assertTrue(drain(barrel, Integer.MAX_VALUE, false).getAmount() == LivingrockBarrelBlockEntity.CAPACITY && barrel.getFluid().isEmpty()
+				&& fill(barrel, new FluidStack(Fluids.WATER, 1), false) == 1, "An empty barrel must accept a new fluid");
 		helper.succeed();
 	}
 
@@ -488,7 +540,7 @@ public final class BlockGameTests {
 		LivingrockBarrelBlockEntity barrel = place(helper, CENTER, ExtraBotanyBlocks.livingrockBarrel, LivingrockBarrelBlockEntity.class);
 		helper.setBlock(CENTER.east(), BotaniaBlocks.defaultAltar);
 		PetalApothecary apothecary = (PetalApothecary) helper.getLevel().getBlockEntity(helper.absolutePos(CENTER.east()));
-		barrel.fill(new FluidStack(Fluids.WATER, 2500), FluidAction.EXECUTE);
+		fill(barrel, new FluidStack(Fluids.WATER, 2500), false);
 
 		helper.succeedWhen(() -> helper.assertTrue(apothecary.getFluid() == PetalApothecary.State.WATER && barrel.getFluid().getAmount() == 1500,
 				"The barrel did not fill the apothecary with exactly one bucket of water"));
@@ -505,18 +557,18 @@ public final class BlockGameTests {
 		player.setPos(Vec3.atBottomCenterOf(helper.absolutePos(CENTER.above())));
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WATER_BUCKET));
 
-		ItemInteractionResult result = barrel.getBlockState().useItemOn(player.getMainHandItem(), helper.getLevel(), player, InteractionHand.MAIN_HAND, hit(helper, CENTER));
+		InteractionResult result = barrel.getBlockState().useItemOn(player.getMainHandItem(), helper.getLevel(), player, InteractionHand.MAIN_HAND, hit(helper, CENTER));
 		helper.assertTrue(result.consumesAction() && barrel.getFluid().is(Fluids.WATER) && barrel.getFluid().getAmount() == 1000
 				&& player.getMainHandItem().is(Items.BUCKET), "The water bucket did not go into the barrel");
 
-		barrel.drain(1000, FluidAction.EXECUTE);
-		barrel.fill(fluidedMana(500), FluidAction.EXECUTE);
+		drain(barrel, 1000, false);
+		fill(barrel, fluidedMana(500), false);
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WATER_BUCKET));
 		result = barrel.getBlockState().useItemOn(player.getMainHandItem(), helper.getLevel(), player, InteractionHand.MAIN_HAND, hit(helper, CENTER));
-		helper.assertTrue(result == ItemInteractionResult.CONSUME && player.getMainHandItem().is(Items.WATER_BUCKET) && barrel.getFluid().getAmount() == 500,
+		helper.assertTrue(result == InteractionResult.CONSUME && player.getMainHandItem().is(Items.WATER_BUCKET) && barrel.getFluid().getAmount() == 500,
 				"A bucket that the barrel cannot accept must do nothing");
 		helper.assertTrue(barrel.getBlockState().useItemOn(new ItemStack(Items.STICK), helper.getLevel(), player, InteractionHand.MAIN_HAND, hit(helper, CENTER))
-				== ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION, "An item that is not a fluid container must not be stopped");
+				== InteractionResult.TRY_WITH_EMPTY_HAND, "An item that is not a fluid container must not be stopped");
 		helper.succeed();
 	}
 
@@ -532,8 +584,8 @@ public final class BlockGameTests {
 		HolderLookup.Provider registries = helper.getLevel().registryAccess();
 		CompoundTag tag = new CompoundTag();
 		tag.putInt("timePassed", CocoonOfDesireBlockEntity.HATCH_TIME - 1);
-		tag.put("Item", new ItemStack(item).save(registries));
-		cocoon.loadWithComponents(tag, registries);
+		tag.put("Item", BlockEntityIO.saveStack(registries, new ItemStack(item)));
+		BlockEntityIO.load(cocoon, tag);
 	}
 
 	private static AABB around(GameTestHelper helper, BlockPos pos) {
@@ -549,7 +601,7 @@ public final class BlockGameTests {
 		HolderLookup.Provider registries = helper.getLevel().registryAccess();
 		CocoonOfDesireBlockEntity cocoon = place(helper, CENTER.below(), ExtraBotanyBlocks.cocoonOfDesire, CocoonOfDesireBlockEntity.class);
 		almostHatch(helper, cocoon, Items.LEATHER);
-		cocoon.loadWithComponents(cocoon.saveWithFullMetadata(registries), registries);
+		BlockEntityIO.load(cocoon, cocoon.saveWithFullMetadata(registries));
 		helper.assertTrue(cocoon.getTimePassed() == CocoonOfDesireBlockEntity.HATCH_TIME - 1 && cocoon.getItem().is(Items.LEATHER),
 				"The save lost the item or the progress of the cocoon");
 
@@ -614,11 +666,11 @@ public final class BlockGameTests {
 		player.setPos(Vec3.atBottomCenterOf(helper.absolutePos(CENTER)));
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STICK, 5));
 
-		ItemInteractionResult put = state.useItemOn(player.getMainHandItem(), helper.getLevel(), player, InteractionHand.MAIN_HAND, hit(helper, CENTER.below()));
+		InteractionResult put = state.useItemOn(player.getMainHandItem(), helper.getLevel(), player, InteractionHand.MAIN_HAND, hit(helper, CENTER.below()));
 		helper.assertTrue(put.consumesAction() && cocoon.getItem().is(Items.STICK) && cocoon.getItem().getCount() == 1
 				&& player.getMainHandItem().getCount() == 4, "The player did not put exactly one item into the cocoon");
 		helper.assertTrue(state.useItemOn(player.getMainHandItem(), helper.getLevel(), player, InteractionHand.MAIN_HAND, hit(helper, CENTER.below()))
-				== ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION && cocoon.getItem().getCount() == 1, "A cocoon that holds an item accepted a second item");
+				== InteractionResult.TRY_WITH_EMPTY_HAND && cocoon.getItem().getCount() == 1, "A cocoon that holds an item accepted a second item");
 
 		InteractionResult take = state.useWithoutItem(helper.getLevel(), player, hit(helper, CENTER.below()));
 		helper.assertTrue(take.consumesAction() && cocoon.getItem().isEmpty() && player.getInventory().countItem(Items.STICK) == 5,
@@ -670,7 +722,7 @@ public final class BlockGameTests {
 		legacy.putInt("targetZ", -49);
 		legacy.putBoolean("hasPaper", true);
 		legacy.putInt("consumedMana", 18763);
-		lotus.loadWithComponents(legacy, registries);
+		BlockEntityIO.load(lotus, legacy);
 
 		StardustLotusBlockEntity restored = (StardustLotusBlockEntity) BlockEntity.loadStatic(lotus.getBlockPos(), lotus.getBlockState(),
 				lotus.saveWithFullMetadata(registries), registries);
@@ -678,8 +730,8 @@ public final class BlockGameTests {
 				&& new BlockPos(37, 83, -49).equals(restored.getTarget()), "The save lost the paper, the mana or the target of the lotus");
 
 		CompoundTag update = lotus.getUpdateTag(registries);
-		helper.assertTrue(update.getBoolean("hasPaper") && update.getInt("consumedMana") == 18763 && update.getBoolean("hasTarget")
-				&& update.getInt("targetY") == 83, "The update tag for the clients does not have the data of the lotus");
+		helper.assertTrue(update.getBooleanOr("hasPaper", false) && update.getIntOr("consumedMana", 0) == 18763 && update.getBooleanOr("hasTarget", false)
+				&& update.getIntOr("targetY", 0) == 83, "The update tag for the clients does not have the data of the lotus");
 		helper.succeed();
 	}
 

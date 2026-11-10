@@ -10,7 +10,7 @@ import velrondevs.extrabotany.common.block.block_entity.PedestalBlockEntity;
 import velrondevs.extrabotany.common.block.block_entity.PowerFrameBlockEntity;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -28,7 +28,7 @@ import static velrondevs.extrabotany.registry.ExtraBotanyBlocks.*;
 import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
 
 public class ExtraBotanyBlockEntities {
-	private static final Map<ResourceLocation, BlockEntityType<?>> ALL = new HashMap<>();
+	private static final Map<Identifier, BlockEntityType<?>> ALL = new HashMap<>();
 	public static final BlockEntityType<CocoonOfDesireBlockEntity> COCOON_OF_DESIRE =
 			type(prefix("cocoondesire"), CocoonOfDesireBlockEntity::new, cocoonOfDesire);
 	public static final BlockEntityType<LivingrockBarrelBlockEntity> LIVINGROCK_BARREL =
@@ -50,7 +50,7 @@ public class ExtraBotanyBlockEntities {
 	public static final BlockEntityType<PowerFrameBlockEntity> POWER_FRAME =
 			type(prefix(LibBlockNames.POWER_FRAME), PowerFrameBlockEntity::new, powerFrame);
 
-	private static <T extends BlockEntity> BlockEntityType<T> type(ResourceLocation id, BiFunction<BlockPos, BlockState, T> func, Block... blocks) {
+	private static <T extends BlockEntity> BlockEntityType<T> type(Identifier id, BiFunction<BlockPos, BlockState, T> func, Block... blocks) {
 		var ret = EXplatAbstractions.INSTANCE.createBlockEntityType(func, blocks);
 		var old = ALL.put(id, ret);
 		if (old != null) {
@@ -59,7 +59,7 @@ public class ExtraBotanyBlockEntities {
 		return ret;
 	}
 
-	public static void registerTiles(BiConsumer<BlockEntityType<?>, ResourceLocation> r) {
+	public static void registerTiles(BiConsumer<BlockEntityType<?>, Identifier> r) {
 		for (var e : ALL.entrySet()) {
 			r.accept(e.getValue(), e.getKey());
 		}

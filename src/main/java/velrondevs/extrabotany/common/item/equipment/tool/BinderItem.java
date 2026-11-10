@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.item.equipment.tool;
 
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -7,7 +9,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -60,7 +62,7 @@ public class BinderItem extends Item {
 					: InteractionResult.PASS;
 		}
 		BlockPos pos = context.getClickedPos();
-		String dimension = context.getLevel().dimension().location().toString();
+		String dimension = context.getLevel().dimension().identifier().toString();
 		// 一次写入全部四个键。这样物品数据只更新一次。
 		// Write all four keys in one operation. Thus the item data changes only one time.
 		CustomData.update(DataComponents.CUSTOM_DATA, context.getItemInHand(), tag -> {
@@ -69,7 +71,7 @@ public class BinderItem extends Item {
 			tag.putInt(TAG_Z, pos.getZ());
 			tag.putString(TAG_DIMENSION, dimension);
 		});
-		return InteractionResult.sidedSuccess(context.getLevel().isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 
 	/**
@@ -82,13 +84,13 @@ public class BinderItem extends Item {
 		}
 		GlobalPos bound = getBoundPos(stack);
 		if (bound == null || bound.pos().getY() == UNBOUND_Y || bound.dimension() != level.dimension()) {
-			player.displayClientMessage(Component.translatable("message.extrabotany.stardust_lotus.invalid_bind")
-					.withStyle(ChatFormatting.DARK_RED), true);
+			player.sendOverlayMessage(Component.translatable("message.extrabotany.stardust_lotus.invalid_bind")
+					.withStyle(ChatFormatting.DARK_RED));
 		} else {
 			BlockPos target = bound.pos();
 			lotus.setTarget(target);
-			player.displayClientMessage(Component.translatable("message.extrabotany.stardust_lotus.bind_to_pos",
-					target.getX(), target.getY(), target.getZ()), true);
+			player.sendOverlayMessage(Component.translatable("message.extrabotany.stardust_lotus.bind_to_pos",
+					target.getX(), target.getY(), target.getZ()));
 		}
 		return InteractionResult.CONSUME;
 	}
@@ -102,7 +104,7 @@ public class BinderItem extends Item {
 		if (!ItemNBTHelper.verifyExistance(stack, TAG_Y)) {
 			return null;
 		}
-		ResourceLocation dimensionId = ResourceLocation.tryParse(ItemNBTHelper.getString(stack, TAG_DIMENSION, DEFAULT_DIMENSION));
+		Identifier dimensionId = Identifier.tryParse(ItemNBTHelper.getString(stack, TAG_DIMENSION, DEFAULT_DIMENSION));
 		if (dimensionId == null) {
 			return null;
 		}
@@ -114,15 +116,15 @@ public class BinderItem extends Item {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		super.appendHoverText(stack, context, tooltip, flags);
-		tooltip.add(Component.translatable("item.extrabotany.binder.bindx", ItemNBTHelper.getInt(stack, TAG_X, 0))
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		super.appendHoverText(stack, context, tooltipDisplay, tooltip, flags);
+		tooltip.accept(Component.translatable("item.extrabotany.binder.bindx", ItemNBTHelper.getInt(stack, TAG_X, 0))
 				.withStyle(ChatFormatting.GRAY));
-		tooltip.add(Component.translatable("item.extrabotany.binder.bindy", ItemNBTHelper.getInt(stack, TAG_Y, UNBOUND_Y))
+		tooltip.accept(Component.translatable("item.extrabotany.binder.bindy", ItemNBTHelper.getInt(stack, TAG_Y, UNBOUND_Y))
 				.withStyle(ChatFormatting.GRAY));
-		tooltip.add(Component.translatable("item.extrabotany.binder.bindz", ItemNBTHelper.getInt(stack, TAG_Z, 0))
+		tooltip.accept(Component.translatable("item.extrabotany.binder.bindz", ItemNBTHelper.getInt(stack, TAG_Z, 0))
 				.withStyle(ChatFormatting.GRAY));
-		tooltip.add(Component.translatable("item.extrabotany.binder.binddim",
+		tooltip.accept(Component.translatable("item.extrabotany.binder.binddim",
 				ItemNBTHelper.getString(stack, TAG_DIMENSION, DEFAULT_DIMENSION)).withStyle(ChatFormatting.GRAY));
 	}
 }

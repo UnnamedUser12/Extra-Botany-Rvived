@@ -33,7 +33,7 @@ public class HammerDispenseBehavior extends DefaultDispenseItemBehavior {
 			}
 			if (hits > 0) {
 				level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, SoundEvents.ANVIL_HIT,
-						SoundSource.BLOCKS, 0.5F, level.random.nextFloat() - level.random.nextFloat() * 0.2F + 1);
+						SoundSource.BLOCKS, 0.5F, level.getRandom().nextFloat() - level.getRandom().nextFloat() * 0.2F + 1);
 				return stack;
 			}
 		}

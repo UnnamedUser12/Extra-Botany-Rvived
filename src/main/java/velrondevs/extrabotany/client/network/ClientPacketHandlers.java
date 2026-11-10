@@ -30,8 +30,8 @@ public final class ClientPacketHandlers {
 	 * Shows the value that the Mana Reader read in the action bar.
 	 */
 	public static void handleManaReader(ManaReaderPacket packet, Player localPlayer) {
-		localPlayer.displayClientMessage(
-				Component.translatable("message.extrabotany.actionbar.mana_left", packet.mana()), true);
+		localPlayer.sendOverlayMessage(
+				Component.translatable("message.extrabotany.actionbar.mana_left", packet.mana()));
 	}
 
 	/**

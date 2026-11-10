@@ -2,14 +2,8 @@
   "type": "botania:brew",
   "brew": "extrabotany:revolution",
   "ingredients": [
-    {
-      "item": "minecraft:nether_wart"
-    },
-    {
-      "item": "minecraft:iron_pickaxe"
-    },
-    {
-      "item": "minecraft:sugar"
-    }
+    "minecraft:nether_wart",
+    "minecraft:iron_pickaxe",
+    "minecraft:sugar"
   ]
 }

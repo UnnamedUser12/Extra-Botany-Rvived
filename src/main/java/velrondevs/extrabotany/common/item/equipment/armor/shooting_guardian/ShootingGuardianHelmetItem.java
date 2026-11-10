@@ -1,5 +1,6 @@
 package velrondevs.extrabotany.common.item.equipment.armor.shooting_guardian;
 
+import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
 import net.neoforged.neoforge.common.damagesource.DamageContainer;
@@ -28,7 +29,7 @@ public class ShootingGuardianHelmetItem extends ShootingGuardianArmorItem {
 	private static final float HEALING_RATIO = 0.2F;
 
 	public ShootingGuardianHelmetItem(Properties props) {
-		super(Type.HELMET, props);
+		super(ArmorType.HELMET, props);
 	}
 
 	private static boolean hasSet(Player player) {
@@ -53,12 +54,12 @@ public class ShootingGuardianHelmetItem extends ShootingGuardianArmorItem {
 		if (!(event.getSource().getEntity() instanceof Player attacker) || attacker.level().isClientSide()) {
 			return;
 		}
-		if (event.getNewDamage() <= 0 || !hasSet(attacker)) {
+		if (event.getHealthDamage() <= 0 || !hasSet(attacker)) {
 			return;
 		}
 		// 直接设置生命值。这样不会触发治疗事件，也就不会被套装自己的治疗减弱影响。
 		// Set the health directly. This does not start the heal event, so the healing penalty of the set does not apply.
-		attacker.setHealth(Math.min(attacker.getMaxHealth(), attacker.getHealth() + event.getNewDamage() * LIFESTEAL_RATIO));
+		attacker.setHealth(Math.min(attacker.getMaxHealth(), attacker.getHealth() + event.getHealthDamage() * LIFESTEAL_RATIO));
 	}
 
 	/**

@@ -3,7 +3,7 @@ package velrondevs.extrabotany.client.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
@@ -12,11 +12,14 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+
+import velrondevs.botania.client.render.entity.BotaniaPlayerLayer;
 
 import velrondevs.extrabotany.common.handler.HerrscherHandler;
 
@@ -29,8 +32,8 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>来源：ExtraMeteorP 1.16 {@code LayerHerrscher} 和 {@code ModelHerrscher}。
  * <p>Source: ExtraMeteorP 1.16 {@code LayerHerrscher} and {@code ModelHerrscher}.
  */
-public class HerrscherLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
-	private static final ResourceLocation TEXTURE = prefix("textures/entity/herrscher.png");
+public class HerrscherLayer extends BotaniaPlayerLayer {
+	private static final Identifier TEXTURE = prefix("textures/entity/herrscher.png");
 	private static final int FULL_BRIGHT = 0xF000F0;
 	private static final float ARM_OFFSET_Y = -0.4F;
 	private static final float STIGMA_SCALE = 1.4F;
@@ -42,7 +45,7 @@ public class HerrscherLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
 	private final ModelPart rightArmArmor;
 	private final ModelPart stigma;
 
-	public HerrscherLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderer) {
+	public HerrscherLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
 		ModelPart root = createLayer().bakeRoot();
 		this.leftArmArmor = root.getChild("rightArm");
@@ -112,13 +115,13 @@ public class HerrscherLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
 	}
 
 	@Override
-	public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player,
-			float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
+	protected void render(PoseStack pose, MultiBufferSource buffers, SubmitNodeCollector collector, int light, AbstractClientPlayer player,
+			float partialTick) {
 		if (player.isInvisible() || !HerrscherHandler.isHerrscherOfThunder(player)) {
 			return;
 		}
-		VertexConsumer buffer = buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
-		PlayerModel<AbstractClientPlayer> model = getParentModel();
+		VertexConsumer buffer = buffers.getBuffer(RenderTypes.entityCutout(TEXTURE));
+		PlayerModel model = getParentModel();
 
 		pose.pushPose();
 		pose.translate(0F, ARM_OFFSET_Y, 0F);

@@ -1,18 +1,19 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import com.mojang.math.Axis;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.inventory.InventoryMenu;
 
 /**
  * 用文字画出来的效果实体的渲染器。原版用汉字拼出薪炎的剑气、黑洞和终结技，这里保持一样的画法。
@@ -24,7 +25,7 @@ import net.minecraft.world.inventory.InventoryMenu;
  * <p>来源：ExtraMeteorP 1.16 {@code RenderFlamescionSword}、{@code RenderFlamescionVoid} 和 {@code RenderFlamescionUlt}。
  * <p>Source: ExtraMeteorP 1.16 {@code RenderFlamescionSword}, {@code RenderFlamescionVoid} and {@code RenderFlamescionUlt}.
  */
-public class GlyphEffectRenderer<T extends Entity> extends EntityRenderer<T> {
+public class GlyphEffectRenderer<T extends Entity> extends ExtraEntityRenderer<T> {
 	// 原版文字渲染的基础缩放：1/60 格对应 1 个像素。
 	// The base scale of vanilla text rendering: 1 pixel is 1/60 of a block.
 	private static final float PIXEL = 1F / 60F;
@@ -82,10 +83,10 @@ public class GlyphEffectRenderer<T extends Entity> extends EntityRenderer<T> {
 	}
 
 	@Override
-	public void render(T entity, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
+	protected void render(T entity, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, SubmitNodeCollector collector, int light, CameraRenderState camera) {
 		Font font = getFont();
 		pose.pushPose();
-		pose.mulPose(entityRenderDispatcher.cameraOrientation());
+		pose.mulPose(camera.orientation);
 		if (spinDegreesPerTick != 0F) {
 			pose.mulPose(Axis.ZN.rotationDegrees((entity.tickCount + partialTick) * spinDegreesPerTick));
 		}
@@ -104,11 +105,10 @@ public class GlyphEffectRenderer<T extends Entity> extends EntityRenderer<T> {
 					Font.DisplayMode.NORMAL, 0, light);
 		}
 		pose.popPose();
-		super.render(entity, yaw, partialTick, pose, buffers, light);
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(T entity) {
-		return InventoryMenu.BLOCK_ATLAS;
+	public Identifier getTextureLocation(T entity) {
+		return TextureAtlas.LOCATION_BLOCKS;
 	}
 }

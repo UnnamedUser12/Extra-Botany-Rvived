@@ -2,7 +2,7 @@ package velrondevs.extrabotany.datagen.providers.patchouli;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
@@ -43,11 +43,11 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefixBot
  * <p>The entries for the content that was restored from the original, and the category "Extra Botany" itself, are hand-written files in {@code src/main/resources}.
  */
 public final class PatchouliBookProvider extends PatchouliProvider {
-	private static final ResourceLocation CATEGORY = prefixBotania("extrabotanies");
-	private static final ResourceLocation GENERATING_FLOWERS = prefixBotania("generating_flowers");
-	private static final ResourceLocation FUNCTIONAL_FLOWERS = prefixBotania("functional_flowers");
-	private static final ResourceLocation BAUBLES = prefixBotania("baubles");
-	private static final ResourceLocation MANA = prefixBotania("mana");
+	private static final Identifier CATEGORY = prefixBotania("extrabotanies");
+	private static final Identifier GENERATING_FLOWERS = prefixBotania("generating_flowers");
+	private static final Identifier FUNCTIONAL_FLOWERS = prefixBotania("functional_flowers");
+	private static final Identifier BAUBLES = prefixBotania("baubles");
+	private static final Identifier MANA = prefixBotania("mana");
 
 	public PatchouliBookProvider(PackOutput packOutput) {
 		super(packOutput);
@@ -245,7 +245,7 @@ public final class PatchouliBookProvider extends PatchouliProvider {
 		PatchouliBuilder.entry(CATEGORY)
 				.withName("extrabotany.entry.yin_and_yang")
 				.withIcon(ExtraBotanyItems.shadowium)
-				//.withAdvancement(ResourceLocation.tryParse("botania:main/elf_portal_open"))
+				//.withAdvancement(Identifier.tryParse("botania:main/elf_portal_open"))
 				.pages(
 						text("extrabotany.page.yin_and_yang0"),
 						text("extrabotany.page.yin_and_yang1"),
@@ -836,55 +836,55 @@ public final class PatchouliBookProvider extends PatchouliProvider {
 	}
 
 	private BrewPage brew(Brew brew) {
-		ResourceLocation location = BotaniaAPI.instance().getBrewRegistry().getKey(brew);
-		ResourceLocation recipeLocation = location.withPrefix("brew/");
+		Identifier location = BotaniaAPI.instance().getBrewRegistry().getKey(brew);
+		Identifier recipeLocation = location.withPrefix("brew/");
 		return new BrewPage(recipeLocation.toString());
 	}
 
 	private RunicAltarPage runicAlter(ItemLike item) {
-		ResourceLocation location = BuiltInRegistries.ITEM.getKey(item.asItem());
-		ResourceLocation recipeLocation = location.withPrefix("runic_altar/");
+		Identifier location = BuiltInRegistries.ITEM.getKey(item.asItem());
+		Identifier recipeLocation = location.withPrefix("runic_altar/");
 		return new RunicAltarPage(recipeLocation.toString());
 	}
 
 	private PetalApothecaryPage petal(ItemLike item) {
-		ResourceLocation location = BuiltInRegistries.ITEM.getKey(item.asItem());
-		ResourceLocation recipeLocation = location.withPrefix("petal_apothecary/");
+		Identifier location = BuiltInRegistries.ITEM.getKey(item.asItem());
+		Identifier recipeLocation = location.withPrefix("petal_apothecary/");
 		return new PetalApothecaryPage(recipeLocation.toString());
 	}
 
 	private PedestalPage pedestal(ItemLike item) {
-		ResourceLocation location = BuiltInRegistries.ITEM.getKey(item.asItem());
-		ResourceLocation recipeLocation = location.withPrefix("pedestal_smash/");
+		Identifier location = BuiltInRegistries.ITEM.getKey(item.asItem());
+		Identifier recipeLocation = location.withPrefix("pedestal_smash/");
 		return new PedestalPage(recipeLocation.toString());
 	}
 
 	private ManaInfusionPage manaInfusion(ItemLike item) {
-		ResourceLocation location = BuiltInRegistries.ITEM.getKey(item.asItem());
-		ResourceLocation recipeLocation = location.withPrefix("mana_infusion/");
+		Identifier location = BuiltInRegistries.ITEM.getKey(item.asItem());
+		Identifier recipeLocation = location.withPrefix("mana_infusion/");
 		return new ManaInfusionPage(recipeLocation.toString());
 	}
 
 	private ManaInfusionPage manaInfusion(String recipe) {
-		ResourceLocation resourceLocation = prefix("mana_infusion/" + recipe);
+		Identifier resourceLocation = prefix("mana_infusion/" + recipe);
 		return new ManaInfusionPage(resourceLocation.toString());
 	}
 
 	private ElvenTradePage elvenTrade(ItemLike item) {
-		ResourceLocation location = BuiltInRegistries.ITEM.getKey(item.asItem());
-		ResourceLocation recipeLocation = location.withPrefix("elven_trade/");
+		Identifier location = BuiltInRegistries.ITEM.getKey(item.asItem());
+		Identifier recipeLocation = location.withPrefix("elven_trade/");
 		return new ElvenTradePage(recipeLocation.toString());
 	}
 
 	private TerraPlatePage terraPlate(ItemLike item) {
-		ResourceLocation location = BuiltInRegistries.ITEM.getKey(item.asItem());
-		ResourceLocation recipeLocation = location.withPrefix("terra_plate/");
+		Identifier location = BuiltInRegistries.ITEM.getKey(item.asItem());
+		Identifier recipeLocation = location.withPrefix("terra_plate/");
 		return new TerraPlatePage(recipeLocation.toString());
 	}
 
 	private SmithingPage smithing(ItemLike item) {
-		ResourceLocation location = BuiltInRegistries.ITEM.getKey(item.asItem());
-		ResourceLocation recipeLocation = location.withPrefix("smithing/");
+		Identifier location = BuiltInRegistries.ITEM.getKey(item.asItem());
+		Identifier recipeLocation = location.withPrefix("smithing/");
 		return new SmithingPage(recipeLocation.toString());
 	}
 
@@ -1145,16 +1145,16 @@ public final class PatchouliBookProvider extends PatchouliProvider {
 				.save(consumer, id("universal_petal"));
 	}
 
-	private static ResourceLocation mainAdvancement(String name) {
+	private static Identifier mainAdvancement(String name) {
 		return prefix("main/" + name);
 	}
 
-	private static ResourceLocation botaniaAdvancement(String name) {
-		return ResourceLocation.tryBuild("botania", name).withPrefix("main/");
+	private static Identifier botaniaAdvancement(String name) {
+		return Identifier.tryBuild("botania", name).withPrefix("main/");
 	}
 
-	private ResourceLocation id(String fileName) {
-		return ResourceLocation.tryBuild(CATEGORY.getPath(), fileName);
+	private Identifier id(String fileName) {
+		return Identifier.tryBuild(CATEGORY.getPath(), fileName);
 	}
 
 	/**

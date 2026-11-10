@@ -1,11 +1,10 @@
 package velrondevs.extrabotany.common.entity.gaia;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.mojang.serialization.Dynamic;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.ActivityData;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Swim;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -81,15 +80,12 @@ public class GaiaAI {
 		}
 	}
 
-	protected static Brain<?> makeBrain(Gaia gaia, Dynamic<?> ops) {
-		Brain.Provider<Gaia> provider = Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
-		Brain<Gaia> brain = provider.makeBrain(ops);
-		initCoreActivity(brain);
-		initSpawnActivity(brain, EMERGE_TIME);
-		initMobSpawnActivity(brain, MOB_SPAWN_TICKS);
-		initFightActivity(brain);
-
-		brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
+	protected static Brain<?> makeBrain(Gaia gaia, Brain.Packed packed) {
+		Brain<Gaia> brain = Brain.<Gaia>provider(MEMORY_TYPES, SENSOR_TYPES, body -> List.of(
+				coreActivity(),
+				spawnActivity(EMERGE_TIME),
+				mobSpawnActivity(MOB_SPAWN_TICKS),
+				fightActivity())).makeBrain(gaia, packed);
 		brain.setDefaultActivity(Activity.EMERGE);
 		brain.useDefaultActivity();
 		return brain;
@@ -103,32 +99,32 @@ public class GaiaAI {
 		gaia.getBrain().setMemoryWithExpiry(ExtraBotanyMemoryTypes.MOB_SPAWN_TICKS, MOB_SPAWN_TICKS, MOB_SPAWN_TICKS);
 	}
 
-	protected static void initCoreActivity(Brain<? extends Gaia> brain) {
-		brain.addActivity(Activity.CORE, 0, ImmutableList.of(
-				new Swim(0.8F)
+	protected static ActivityData<Gaia> coreActivity() {
+		return ActivityData.create(Activity.CORE, 0, ImmutableList.of(
+				new Swim<Gaia>(0.8F)
 		));
 	}
 
-	protected static void initSpawnActivity(Brain<? extends Gaia> brain, int emergeTime) {
-		brain.addActivityAndRemoveMemoryWhenStopped(Activity.EMERGE, 1, ImmutableList.of(
-				new GaiaEmerging<>(emergeTime)
+	protected static ActivityData<Gaia> spawnActivity(int emergeTime) {
+		return ActivityData.create(Activity.EMERGE, 1, ImmutableList.of(
+				new GaiaEmerging<Gaia>(emergeTime)
 		), MemoryModuleType.IS_EMERGING);
 	}
 
-	private static void initFightActivity(Brain<? extends Gaia> brain) {
-		brain.addActivity(Activity.FIGHT, 10, ImmutableList.of(
-				new GaiaTeleport<>(),
-				new GaiaSpawnMissile<>(),
-				new GaiaSpawnLandMine<>(),
-				new GaiaSpawnPixies<>(),
-				new GaiaSmashBlocksAround<>(),
-				new GaiaCleanPlayerUnstableEffects<>()
+	protected static ActivityData<Gaia> fightActivity() {
+		return ActivityData.create(Activity.FIGHT, 10, ImmutableList.of(
+				new GaiaTeleport<Gaia>(),
+				new GaiaSpawnMissile<Gaia>(),
+				new GaiaSpawnLandMine<Gaia>(),
+				new GaiaSpawnPixies<Gaia>(),
+				new GaiaSmashBlocksAround<Gaia>(),
+				new GaiaCleanPlayerUnstableEffects<Gaia>()
 		));
 	}
 
-	private static void initMobSpawnActivity(Brain<? extends Gaia> brain, int spawnTicks) {
-		brain.addActivityAndRemoveMemoryWhenStopped(Activity.RAID, 5, ImmutableList.of(
-				new GaiaSpawnMob<>(spawnTicks)
+	protected static ActivityData<Gaia> mobSpawnActivity(int spawnTicks) {
+		return ActivityData.create(Activity.RAID, 5, ImmutableList.of(
+				new GaiaSpawnMob<Gaia>(spawnTicks)
 		), ExtraBotanyMemoryTypes.MOB_SPAWN_TICKS);
 	}
 }

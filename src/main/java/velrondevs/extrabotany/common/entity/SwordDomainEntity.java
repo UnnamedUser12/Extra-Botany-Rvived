@@ -1,5 +1,8 @@
 package velrondevs.extrabotany.common.entity;
 
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import velrondevs.extrabotany.registry.ExtraBotanyEntities;
 
 import net.minecraft.core.BlockPos;
@@ -168,9 +171,9 @@ public class SwordDomainEntity extends Entity {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag tag) {
+	protected void addAdditionalSaveData(ValueOutput tag) {
 		if (target != null) {
-			tag.putUUID(TAG_TARGET, target);
+			tag.store(TAG_TARGET, UUIDUtil.CODEC, target);
 		}
 		tag.putLong(TAG_SOURCE, getSource().asLong());
 		tag.putInt(TAG_FLOOR_Y, floorY);
@@ -178,11 +181,11 @@ public class SwordDomainEntity extends Entity {
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundTag tag) {
-		target = tag.hasUUID(TAG_TARGET) ? tag.getUUID(TAG_TARGET) : null;
-		entityData.set(SOURCE, BlockPos.of(tag.getLong(TAG_SOURCE)));
-		floorY = tag.getInt(TAG_FLOOR_Y);
-		entityData.set(SWORD_TYPE, Math.floorMod(tag.getInt(TAG_TYPE), TYPES));
+	protected void readAdditionalSaveData(ValueInput tag) {
+		target = tag.read(TAG_TARGET, UUIDUtil.CODEC).orElse(null);
+		entityData.set(SOURCE, BlockPos.of(tag.getLongOr(TAG_SOURCE, 0L)));
+		floorY = tag.getIntOr(TAG_FLOOR_Y, 0);
+		entityData.set(SWORD_TYPE, Math.floorMod(tag.getIntOr(TAG_TYPE, 0), TYPES));
 	}
 
 	@Override
@@ -192,6 +195,11 @@ public class SwordDomainEntity extends Entity {
 
 	@Override
 	public boolean isPushedByFluid(FluidType type) {
+		return false;
+	}
+
+	@Override
+	public boolean hurtServer(net.minecraft.server.level.ServerLevel level, net.minecraft.world.damagesource.DamageSource source, float amount) {
 		return false;
 	}
 }

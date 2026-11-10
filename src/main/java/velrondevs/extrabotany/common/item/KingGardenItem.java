@@ -1,22 +1,27 @@
 package velrondevs.extrabotany.common.item;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -79,11 +84,11 @@ public class KingGardenItem extends Item {
 	 * Returns the weapon type numbers in the item, in the sequence that they were added.
 	 */
 	public static int[] getTypes(ItemStack stack) {
-		return data(stack).getIntArray(TAG_TYPES);
+		return data(stack).getIntArray(TAG_TYPES).orElse(new int[0]);
 	}
 
 	public static boolean isCharging(ItemStack stack) {
-		return data(stack).getBoolean(TAG_CHARGING);
+		return data(stack).getBooleanOr(TAG_CHARGING, false);
 	}
 
 	/**
@@ -124,17 +129,17 @@ public class KingGardenItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putBoolean(TAG_CHARGING, true));
 		player.startUsingItem(hand);
-		return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
 	public void onUseTick(Level level, LivingEntity living, ItemStack stack, int remainingTicks) {
 		int[] types = getTypes(stack);
-		int spawned = Math.max(0, data(stack).getInt(TAG_SPAWNED));
+		int spawned = Math.max(0, data(stack).getIntOr(TAG_SPAWNED, 0));
 		if (level.isClientSide() || remainingTicks == getUseDuration(stack, living) || spawned >= types.length) {
 			return;
 		}
@@ -176,18 +181,19 @@ public class KingGardenItem extends Item {
 	}
 
 	@Override
-	public void releaseUsing(ItemStack stack, Level level, LivingEntity living, int remainingTicks) {
+	public boolean releaseUsing(ItemStack stack, Level level, LivingEntity living, int remainingTicks) {
 		// 全部武器召唤完之后松开，蓄力结束，武器开始飞行。
 		// A release after all weapons are summoned ends the charge, and the weapons start to fly.
-		if (data(stack).getInt(TAG_SPAWNED) >= getTypes(stack).length) {
+		if (data(stack).getIntOr(TAG_SPAWNED, 0) >= getTypes(stack).length) {
 			resetCharge(stack);
 		}
+		return true;
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
-		super.inventoryTick(stack, level, entity, slot, selected);
-		if (!level.isClientSide() && !selected && isCharging(stack)
+	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		super.inventoryTick(stack, level, entity, eqSlot);
+		if (!level.isClientSide() && eqSlot != EquipmentSlot.MAINHAND && isCharging(stack)
 				&& !(entity instanceof LivingEntity living && living.getOffhandItem() == stack)) {
 			resetCharge(stack);
 		}
@@ -199,28 +205,28 @@ public class KingGardenItem extends Item {
 	}
 
 	@Override
-	public UseAnim getUseAnimation(ItemStack stack) {
-		return UseAnim.BOW;
+	public ItemUseAnimation getUseAnimation(ItemStack stack) {
+		return ItemUseAnimation.BOW;
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
 		int[] types = getTypes(stack);
-		tooltip.add(Component.translatable("tooltip.extrabotany.king_garden.configuration", types.length, MAX_FLOWERS)
+		tooltip.accept(Component.translatable("tooltip.extrabotany.king_garden.configuration", types.length, MAX_FLOWERS)
 				.withStyle(ChatFormatting.GRAY));
 		if (types.length == 0) {
 			return;
 		}
-		tooltip.add(Component.translatable("tooltip.extrabotany.king_garden.flowers").withStyle(ChatFormatting.DARK_GRAY));
+		tooltip.accept(Component.translatable("tooltip.extrabotany.king_garden.flowers").withStyle(ChatFormatting.DARK_GRAY));
 		for (int i = 0; i < Math.min(TOOLTIP_FLOWER_LINES, types.length); i++) {
 			int type = types[i];
 			Component name = type >= 0 && type < FLOWERS.length
-					? Component.translatable(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(FLOWERS[type])).getDescriptionId())
+					? Component.translatable(BuiltInRegistries.BLOCK.getValue(Identifier.parse(FLOWERS[type])).getDescriptionId())
 					: Component.literal("?");
-			tooltip.add(Component.literal(" - ").append(name).withStyle(ChatFormatting.DARK_GRAY));
+			tooltip.accept(Component.literal(" - ").append(name).withStyle(ChatFormatting.DARK_GRAY));
 		}
 		if (types.length > TOOLTIP_FLOWER_LINES) {
-			tooltip.add(Component.translatable("tooltip.extrabotany.king_garden.more", types.length - TOOLTIP_FLOWER_LINES)
+			tooltip.accept(Component.translatable("tooltip.extrabotany.king_garden.more", types.length - TOOLTIP_FLOWER_LINES)
 					.withStyle(ChatFormatting.DARK_GRAY));
 		}
 	}

@@ -1,6 +1,5 @@
 package velrondevs.extrabotany.integration.jei;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -14,14 +13,15 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import org.jetbrains.annotations.Nullable;
 
+import velrondevs.botania.client.core.helper.RenderHelper;
 import velrondevs.extrabotany.api.recipe.PedestalRecipe;
 import velrondevs.extrabotany.registry.ExtraBotanyBlocks;
 import velrondevs.extrabotany.common.lib.LibMisc;
@@ -42,7 +42,7 @@ public class PedestalRecipeCategory implements IRecipeCategory<PedestalRecipe> {
 	public PedestalRecipeCategory(IGuiHelper guiHelper) {
 		this.localizedName = Component.translatable("extrabotany.jei.pedestal");
 		this.background = guiHelper.createBlankDrawable(142, 60);
-		this.overlay = guiHelper.createDrawable(ResourceLocation.tryBuild("botania", "textures/gui/pure_daisy_overlay.png"),
+		this.overlay = guiHelper.createDrawable(Identifier.tryBuild("botania", "textures/gui/pure_daisy_overlay.png"),
 				0, 0, 64, 46);
 		this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, renderStack.copy());
 	}
@@ -55,12 +55,6 @@ public class PedestalRecipeCategory implements IRecipeCategory<PedestalRecipe> {
 	@Override
 	public Component getTitle() {
 		return localizedName;
-	}
-
-	@Override
-	@SuppressWarnings("removal")
-	public IDrawable getBackground() {
-		return background;
 	}
 
 	@Override
@@ -79,22 +73,17 @@ public class PedestalRecipeCategory implements IRecipeCategory<PedestalRecipe> {
 	}
 
 	@Override
-	public void draw(PedestalRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics gui, double mouseX, double mouseY) {
-		background.draw(gui, 0, 0);
+	public void draw(PedestalRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphicsExtractor gui, double mouseX, double mouseY) {
 		final int strikes = recipe.getStrike();
 		final int exp = recipe.getExp();
 		Component strikesComp = Component.translatable("extrabotany.jei.pedestal.tip_strikes", strikes);
 		Component expComp = Component.translatable("extrabotany.jei.pedestal.tip_exp", exp);
 
 		Font font = Minecraft.getInstance().font;
-		gui.drawString(font, strikesComp, 90, 50, 0x888888, false);
-		gui.drawString(font, expComp, 90, 3, 0x888888, false);
-
-		RenderSystem.enableBlend();
+		RenderHelper.drawString(gui, font, strikesComp, 90, 50, 0x888888, false);
+		RenderHelper.drawString(gui, font, expComp, 90, 3, 0x888888, false);
 
 		overlay.draw(gui, 40, 0);
-
-		RenderSystem.disableBlend();
 	}
 
 	@Override
@@ -103,9 +92,9 @@ public class PedestalRecipeCategory implements IRecipeCategory<PedestalRecipe> {
 				.addIngredients(recipe.getInput());
 		builder.addSlot(RecipeIngredientRole.OUTPUT, 93, 12)
 				.addItemStack(recipe.getResultItem(RegistryAccess.EMPTY));
-		builder.addSlot(RecipeIngredientRole.CATALYST, 62, 12)
+		builder.addSlot(RecipeIngredientRole.CRAFTING_STATION, 62, 12)
 				.addItemStack(renderStack);
-		builder.addSlot(RecipeIngredientRole.CATALYST, 62, 45)
+		builder.addSlot(RecipeIngredientRole.CRAFTING_STATION, 62, 45)
 				.addIngredients(recipe.getSmashTools());
 
 	}

@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "tag": "extrabotany:photonium_blocks"
-    }
+    "#extrabotany:photonium_blocks"
   ],
   "result": {
     "count": 9,

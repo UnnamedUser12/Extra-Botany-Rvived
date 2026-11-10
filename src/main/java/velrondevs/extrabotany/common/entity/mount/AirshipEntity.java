@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity.mount;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -141,7 +143,7 @@ public class AirshipEntity extends MountEntity {
 			ejectPassengers();
 			return;
 		}
-		if (!isControlledByLocalInstance()) {
+		if (!isLocalInstanceAuthoritative()) {
 			return;
 		}
 		if (isInputDown(INPUT_JUMP) && heightAboveGround() <= MAX_HEIGHT[getTier()]) {
@@ -157,7 +159,7 @@ public class AirshipEntity extends MountEntity {
 	private int heightAboveGround() {
 		BlockPos.MutableBlockPos pos = blockPosition().mutable();
 		int height = 0;
-		for (int i = 0; i < 255 && pos.getY() > level().getMinBuildHeight(); i++) {
+		for (int i = 0; i < 255 && pos.getY() > level().getMinY(); i++) {
 			height++;
 			if (!level().getBlockState(pos).isAir()) {
 				break;
@@ -168,14 +170,14 @@ public class AirshipEntity extends MountEntity {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag tag) {
+	protected void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putInt(TAG_TIER, getTier());
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundTag tag) {
+	protected void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		setTier(tag.getInt(TAG_TIER));
+		setTier(tag.getIntOr(TAG_TIER, 0));
 	}
 }

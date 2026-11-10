@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "F": {
-      "item": "extrabotany:spirit_fragment"
-    },
-    "P": {
-      "tag": "extrabotany:photonium_ingots"
-    },
-    "S": {
-      "tag": "extrabotany:shadowium_ingots"
-    }
+    "F": "extrabotany:spirit_fragment",
+    "P": "#extrabotany:photonium_ingots",
+    "S": "#extrabotany:shadowium_ingots"
   },
   "pattern": [
     " S ",
@@ -18,7 +12,6 @@
     " P "
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:the_chaos"
   }
 }

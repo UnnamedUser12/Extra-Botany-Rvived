@@ -11,9 +11,13 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+
+import velrondevs.botania.api.recipe.BotaniaRecipe;
+import velrondevs.botania.common.crafting.BotaniaRecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 
@@ -24,13 +28,17 @@ import velrondevs.extrabotany.api.recipe.PedestalRecipe;
  * The implementation of the pedestal hammer recipe: the input item, the hammers that can be used, the number of hits, the product and the experience.
  */
 public class PedestalsRecipe implements PedestalRecipe {
-	private final ItemStack output;
+	private final ItemStackTemplate output;
 	private final Ingredient smashTools;
 	private final Ingredient input;
 	private final int strike;
 	private final int exp;
 
 	public PedestalsRecipe(ItemStack output, Ingredient smashTools, Ingredient input, int strike, int exp) {
+		this(ItemStackTemplate.fromNonEmptyStack(output), smashTools, input, strike, exp);
+	}
+
+	public PedestalsRecipe(ItemStackTemplate output, Ingredient smashTools, Ingredient input, int strike, int exp) {
 		this.output = output;
 		this.input = input;
 		this.smashTools = smashTools;
@@ -45,7 +53,7 @@ public class PedestalsRecipe implements PedestalRecipe {
 
 	@Override
 	public ItemStack assemble(RecipeInput input, HolderLookup.Provider registries) {
-		return output.copy();
+		return output.create();
 	}
 
 	@Override
@@ -55,7 +63,7 @@ public class PedestalsRecipe implements PedestalRecipe {
 
 	@Override
 	public ItemStack getResultItem(HolderLookup.Provider registries) {
-		return output;
+		return output.create();
 	}
 
 	@Override
@@ -70,7 +78,7 @@ public class PedestalsRecipe implements PedestalRecipe {
 
 	@Override
 	public ItemStack getOutput() {
-		return output;
+		return output.create();
 	}
 
 	@Override
@@ -89,21 +97,21 @@ public class PedestalsRecipe implements PedestalRecipe {
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<? extends BotaniaRecipe> getSerializer() {
 		return ExtraBotanyRecipeTypes.PEDESTAL_SMASH_SERIALIZER;
 	}
 
-	public static class Serializer implements RecipeSerializer<PedestalsRecipe> {
+	public static class Serializer implements BotaniaRecipeSerializer<PedestalsRecipe> {
 		private static final MapCodec<PedestalsRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-				ItemStack.STRICT_CODEC.fieldOf("output").forGetter(PedestalsRecipe::getOutput),
-				Ingredient.CODEC_NONEMPTY.fieldOf("smash_tools").forGetter(PedestalsRecipe::getSmashTools),
-				Ingredient.CODEC_NONEMPTY.fieldOf("input").forGetter(PedestalsRecipe::getInput),
+				ItemStackTemplate.CODEC.fieldOf("output").forGetter(recipe -> recipe.output),
+				Ingredient.CODEC.fieldOf("smash_tools").forGetter(PedestalsRecipe::getSmashTools),
+				Ingredient.CODEC.fieldOf("input").forGetter(PedestalsRecipe::getInput),
 				Codec.INT.fieldOf("strike").forGetter(PedestalsRecipe::getStrike),
 				Codec.INT.fieldOf("exp").forGetter(PedestalsRecipe::getExp)
 		).apply(instance, PedestalsRecipe::new));
 
 		private static final StreamCodec<RegistryFriendlyByteBuf, PedestalsRecipe> STREAM_CODEC = StreamCodec.composite(
-				ItemStack.STREAM_CODEC, PedestalsRecipe::getOutput,
+				ItemStackTemplate.STREAM_CODEC, recipe -> recipe.output,
 				Ingredient.CONTENTS_STREAM_CODEC, PedestalsRecipe::getSmashTools,
 				Ingredient.CONTENTS_STREAM_CODEC, PedestalsRecipe::getInput,
 				ByteBufCodecs.VAR_INT, PedestalsRecipe::getStrike,

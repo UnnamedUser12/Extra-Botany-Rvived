@@ -3,14 +3,14 @@ package velrondevs.extrabotany.gametest;
 import velrondevs.extrabotany.registry.ExtraBotanyMobEffects;
 import velrondevs.extrabotany.common.entity.*;
 import velrondevs.extrabotany.common.handler.DamageHandler;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 @GameTestHolder("extrabotany")
 @PrefixGameTestTemplate(false)
@@ -36,10 +36,10 @@ public final class UpstreamParityGameTests {
     }
     @GameTest(template="empty", timeoutTicks=30)
     public static void timeLockSlowsFallingMotionWithoutReplacingMoveAttribute(GameTestHelper h) {
-        var mob=EntityType.HUSK.create(h.getLevel());mob.setDeltaMovement(.4,-1,.2);
-        ExtraBotanyMobEffects.TIMELOCK.value().applyEffectTick(mob,0);
+        var mob=EntityType.HUSK.create(h.getLevel(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);mob.setDeltaMovement(.4,-1,.2);
+        ExtraBotanyMobEffects.TIMELOCK.value().applyEffectTick(h.getLevel(),mob,0);
         h.assertTrue(mob.getDeltaMovement().distanceTo(new Vec3(.012,-.03,.006))<1E-8,"Time lock fall-motion semantics missing");
-        mob.setDeltaMovement(0,1,0);ExtraBotanyMobEffects.TIMELOCK.value().applyEffectTick(mob,0);
+        mob.setDeltaMovement(0,1,0);ExtraBotanyMobEffects.TIMELOCK.value().applyEffectTick(h.getLevel(),mob,0);
         h.assertTrue(mob.getDeltaMovement().y==1,"Time lock destroys initial upward launch");h.succeed();
     }
     @GameTest(template="empty", timeoutTicks=30)
@@ -49,19 +49,19 @@ public final class UpstreamParityGameTests {
         velrondevs.extrabotany.common.handler.DamageHandler.INSTANCE.dealTrueDamage(attacker, target, 10);
         h.assertTrue(target.getHealth()==health,"Creative player lost health without a hurt event");h.succeed();
     }
-    @net.minecraft.gametest.framework.GameTest(template="empty")
-    public static void effect_holders_survive_serialization(net.minecraft.gametest.framework.GameTestHelper h) {
+    @GameTest(template="empty")
+    public static void effect_holders_survive_serialization(GameTestHelper h) {
         var effects=java.util.List.of(ExtraBotanyMobEffects.ETERNITY,ExtraBotanyMobEffects.INCANDESCENCE,
                 ExtraBotanyMobEffects.FLAMESCION,ExtraBotanyMobEffects.WITCH_CURSE,ExtraBotanyMobEffects.TIMELOCK,
                 ExtraBotanyMobEffects.IMMOBILIZE,ExtraBotanyMobEffects.LINK,ExtraBotanyMobEffects.HEAL_REVERSE,
                 ExtraBotanyMobEffects.DISCOUNT,ExtraBotanyMobEffects.WARM,ExtraBotanyMobEffects.THIRROR);
         for(var effect:effects) {
-            var canonical=net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.getHolderOrThrow(effect.unwrapKey().orElseThrow());
+            var canonical=net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.getOrThrow(effect.unwrapKey().orElseThrow());
             h.assertTrue(effect==canonical,"Effect proxy differs from network holder: "+effect.unwrapKey());
             var instance=new net.minecraft.world.effect.MobEffectInstance(effect,80);
             var encoded=net.minecraft.world.effect.MobEffectInstance.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE,instance).getOrThrow();
             var decoded=net.minecraft.world.effect.MobEffectInstance.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE,encoded).getOrThrow();
-            var mob=net.minecraft.world.entity.EntityType.VILLAGER.create(h.getLevel());
+            var mob=net.minecraft.world.entity.EntityType.VILLAGER.create(h.getLevel(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
             mob.addEffect(decoded);h.assertTrue(mob.hasEffect(effect),"Saved effect cannot be queried after decode");
             h.assertTrue(mob.removeEffect(effect),"Decoded effect cannot be removed through its registered constant");
         }

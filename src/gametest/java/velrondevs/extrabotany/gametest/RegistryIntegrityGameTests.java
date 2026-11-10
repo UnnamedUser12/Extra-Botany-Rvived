@@ -6,12 +6,13 @@ import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.CreativeModeTab;
@@ -23,8 +24,8 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.extrabotany.common.lib.LibMisc;
 import velrondevs.extrabotany.registry.ExtraBotanyCreativeTabs;
@@ -50,11 +51,11 @@ public final class RegistryIntegrityGameTests {
 
 	private RegistryIntegrityGameTests() {}
 
-	private static boolean ours(ResourceLocation id) {
+	private static boolean ours(Identifier id) {
 		return LibMisc.MOD_ID.equals(id.getNamespace());
 	}
 
-	private static boolean isInvalidTexture(ResourceLocation id) {
+	private static boolean isInvalidTexture(Identifier id) {
 		return ours(id) && !ModResources.exists("assets/" + id.getNamespace() + "/textures/" + id.getPath() + ".png");
 	}
 
@@ -62,7 +63,7 @@ public final class RegistryIntegrityGameTests {
 	 * Follows a model of this mod and the models that it refers to, and collects the problems: a parent that does not exist
 	 * and a texture without a file.
 	 */
-	private static void checkModel(ResourceLocation model, Set<ResourceLocation> seen, List<String> problems) {
+	private static void checkModel(Identifier model, Set<Identifier> seen, List<String> problems) {
 		if (!ours(model) || !seen.add(model)) {
 			return;
 		}
@@ -73,7 +74,7 @@ public final class RegistryIntegrityGameTests {
 		}
 		JsonObject json = ModResources.json(file);
 		if (json.has("parent")) {
-			checkModel(ResourceLocation.parse(json.get("parent").getAsString()), seen, problems);
+			checkModel(Identifier.parse(json.get("parent").getAsString()), seen, problems);
 		}
 		if (json.has("textures")) {
 			for (Map.Entry<String, JsonElement> texture : json.getAsJsonObject("textures").entrySet()) {
@@ -81,7 +82,7 @@ public final class RegistryIntegrityGameTests {
 				if (value.startsWith("#")) {
 					continue;
 				}
-				ResourceLocation id = ResourceLocation.parse(value);
+				Identifier id = Identifier.parse(value);
 				if (isInvalidTexture(id)) {
 					problems.add("model " + model + " needs the texture " + id + " but it has no file");
 				}
@@ -89,11 +90,11 @@ public final class RegistryIntegrityGameTests {
 		}
 	}
 
-	private static void collectModels(JsonElement element, Set<ResourceLocation> models) {
+	private static void collectModels(JsonElement element, Set<Identifier> models) {
 		if (element.isJsonObject()) {
 			for (Map.Entry<String, JsonElement> entry : element.getAsJsonObject().entrySet()) {
 				if (entry.getKey().equals("model") && entry.getValue().isJsonPrimitive()) {
-					models.add(ResourceLocation.parse(entry.getValue().getAsString()));
+					models.add(Identifier.parse(entry.getValue().getAsString()));
 				} else {
 					collectModels(entry.getValue(), models);
 				}
@@ -110,10 +111,10 @@ public final class RegistryIntegrityGameTests {
 	public static void everyItemHasModelTextureAndName(GameTestHelper helper) {
 		JsonObject english = ModResources.json("assets/extrabotany/lang/en_us.json");
 		List<String> problems = new ArrayList<>();
-		Set<ResourceLocation> seen = new HashSet<>();
+		Set<Identifier> seen = new HashSet<>();
 		int checked = 0;
 		for (Item item : BuiltInRegistries.ITEM) {
-			ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+			Identifier id = BuiltInRegistries.ITEM.getKey(item);
 			if (!ours(id)) {
 				continue;
 			}
@@ -121,9 +122,13 @@ public final class RegistryIntegrityGameTests {
 			if (!english.has(item.getDescriptionId())) {
 				problems.add("item " + id + " has no name " + item.getDescriptionId());
 			}
-			ResourceLocation model = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "item/" + id.getPath());
-			if (!ModResources.exists("assets/extrabotany/models/item/" + id.getPath() + ".json")) {
-				problems.add("item " + id + " has no model file");
+			Identifier model = Identifier.fromNamespaceAndPath(id.getNamespace(), "item/" + id.getPath());
+			if (ModResources.exists("assets/extrabotany/items/" + id.getPath() + ".json")) {
+				if (ModResources.exists("assets/extrabotany/models/item/" + id.getPath() + ".json")) {
+					checkModel(model, seen, problems);
+				}
+			} else if (!ModResources.exists("assets/extrabotany/models/item/" + id.getPath() + ".json")) {
+				problems.add("item " + id + " has no item definition or model file");
 			} else {
 				checkModel(model, seen, problems);
 			}
@@ -140,10 +145,10 @@ public final class RegistryIntegrityGameTests {
 	public static void everyBlockHasStateModelTextureAndName(GameTestHelper helper) {
 		JsonObject english = ModResources.json("assets/extrabotany/lang/en_us.json");
 		List<String> problems = new ArrayList<>();
-		Set<ResourceLocation> seen = new HashSet<>();
+		Set<Identifier> seen = new HashSet<>();
 		int checked = 0;
 		for (Block block : BuiltInRegistries.BLOCK) {
-			ResourceLocation id = BuiltInRegistries.BLOCK.getKey(block);
+			Identifier id = BuiltInRegistries.BLOCK.getKey(block);
 			if (!ours(id)) {
 				continue;
 			}
@@ -156,12 +161,12 @@ public final class RegistryIntegrityGameTests {
 				problems.add("block " + id + " has no block state file");
 				continue;
 			}
-			Set<ResourceLocation> models = new HashSet<>();
+			Set<Identifier> models = new HashSet<>();
 			collectModels(ModResources.json(state), models);
 			if (models.isEmpty()) {
 				problems.add("block state " + id + " names no model");
 			}
-			for (ResourceLocation model : models) {
+			for (Identifier model : models) {
 				checkModel(model, seen, problems);
 			}
 		}
@@ -178,7 +183,7 @@ public final class RegistryIntegrityGameTests {
 		JsonObject sounds = ModResources.json("assets/extrabotany/sounds.json");
 		List<String> problems = new ArrayList<>();
 		for (var soundEvent : BuiltInRegistries.SOUND_EVENT) {
-			ResourceLocation id = BuiltInRegistries.SOUND_EVENT.getKey(soundEvent);
+			Identifier id = BuiltInRegistries.SOUND_EVENT.getKey(soundEvent);
 			if (ours(id) && !sounds.has(id.getPath())) {
 				problems.add("sound event " + id + " is not in sounds.json");
 			}
@@ -186,7 +191,7 @@ public final class RegistryIntegrityGameTests {
 		for (Map.Entry<String, JsonElement> entry : sounds.entrySet()) {
 			for (JsonElement sound : entry.getValue().getAsJsonObject().getAsJsonArray("sounds")) {
 				String name = sound.isJsonObject() ? sound.getAsJsonObject().get("name").getAsString() : sound.getAsString();
-				ResourceLocation id = ResourceLocation.parse(name);
+				Identifier id = Identifier.parse(name);
 				if (ours(id) && !ModResources.exists("assets/extrabotany/sounds/" + id.getPath() + ".ogg")) {
 					problems.add("sound " + entry.getKey() + " has no file for " + id);
 				}
@@ -206,7 +211,7 @@ public final class RegistryIntegrityGameTests {
 		List<String> problems = new ArrayList<>();
 		int checked = 0;
 		for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
-			ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+			Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
 			if (!ours(id)) {
 				continue;
 			}
@@ -215,7 +220,7 @@ public final class RegistryIntegrityGameTests {
 				problems.add("entity " + id + " has no name " + type.getDescriptionId());
 			}
 			try {
-				Entity entity = type.create(helper.getLevel());
+				Entity entity = type.create(helper.getLevel(), EntitySpawnReason.LOAD);
 				if (entity == null) {
 					problems.add("entity " + id + " cannot be created");
 					continue;
@@ -224,12 +229,14 @@ public final class RegistryIntegrityGameTests {
 					problems.add("living entity " + id + " has no attributes");
 				}
 				entity.setPos(helper.absoluteVec(CENTER.getCenter()));
-				CompoundTag saved = entity.saveWithoutId(new CompoundTag());
-				Entity copy = type.create(helper.getLevel());
-				copy.load(saved);
-				CompoundTag again = copy.saveWithoutId(new CompoundTag());
+				CompoundTag saved = TestNbt.saveEntity(helper.getLevel().registryAccess(), entity);
+				Entity copy = type.create(helper.getLevel(), EntitySpawnReason.LOAD);
+				TestNbt.loadEntity(helper.getLevel().registryAccess(), copy, saved);
+				CompoundTag again = TestNbt.saveEntity(helper.getLevel().registryAccess(), copy);
 				saved.remove("UUID");
 				again.remove("UUID");
+				saved.remove("neoforge:attachments");
+				again.remove("neoforge:attachments");
 				if (!saved.equals(again)) {
 					problems.add("entity " + id + " changed in a save and load: " + saved + " -> " + again);
 				}
@@ -260,7 +267,7 @@ public final class RegistryIntegrityGameTests {
 		int checked = 0;
 		var registries = helper.getLevel().registryAccess();
 		for (Block block : BuiltInRegistries.BLOCK) {
-			ResourceLocation id = BuiltInRegistries.BLOCK.getKey(block);
+			Identifier id = BuiltInRegistries.BLOCK.getKey(block);
 			if (!ours(id) || !(block instanceof EntityBlock)) {
 				continue;
 			}
@@ -295,7 +302,7 @@ public final class RegistryIntegrityGameTests {
 			}
 		}
 		for (BlockEntityType<?> type : BuiltInRegistries.BLOCK_ENTITY_TYPE) {
-			ResourceLocation id = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(type);
+			Identifier id = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(type);
 			if (ours(id) && !used.contains(type)) {
 				problems.add("block entity type " + id + " is created by no block of this mod");
 			}
@@ -355,18 +362,18 @@ public final class RegistryIntegrityGameTests {
 			effects++;
 			@SuppressWarnings("unchecked")
 			Holder<net.minecraft.world.effect.MobEffect> holder = (Holder<net.minecraft.world.effect.MobEffect>) field.get(null);
-			ResourceLocation id = holder.unwrapKey().orElseThrow().location();
-			helper.assertTrue(holder.kind() == Holder.Kind.REFERENCE && BuiltInRegistries.MOB_EFFECT.getHolder(id).orElseThrow() == holder,
+			Identifier id = holder.unwrapKey().orElseThrow().identifier();
+			helper.assertTrue(holder.kind() == Holder.Kind.REFERENCE && BuiltInRegistries.MOB_EFFECT.get(id).orElseThrow() == holder,
 					"The field " + field.getName() + " does not hold the holder of the registry");
 			helper.assertTrue(english.has("effect." + id.getNamespace() + "." + id.getPath()), "The effect " + id + " has no name");
 			helper.assertTrue(ModResources.exists("assets/extrabotany/textures/mob_effect/" + id.getPath() + ".png"),
 					"The effect " + id + " has no icon");
 		}
 		helper.assertTrue(effects >= 17, "Too few effects: " + effects);
-		helper.assertTrue(BuiltInRegistries.MENU.containsKey(ResourceLocation.fromNamespaceAndPath("extrabotany", "mini_handbag")),
+		helper.assertTrue(BuiltInRegistries.MENU.containsKey(Identifier.fromNamespaceAndPath("extrabotany", "mini_handbag")),
 				"The menu of the Mini Handbag is not registered");
 		helper.assertTrue(ExtraBotanyMenuTypes.MINI_HANDBAG != null, "The menu type field is empty");
-		helper.assertTrue(BuiltInRegistries.CREATIVE_MODE_TAB.containsKey(ExtraBotanyCreativeTabs.EXTRA_BOTANY_TAB_KEY.location()),
+		helper.assertTrue(BuiltInRegistries.CREATIVE_MODE_TAB.containsKey(ExtraBotanyCreativeTabs.EXTRA_BOTANY_TAB_KEY.identifier()),
 				"The creative tab is not registered");
 		helper.succeed();
 	}
@@ -378,7 +385,7 @@ public final class RegistryIntegrityGameTests {
 	public static void creativeTabShowsEveryItemOnce(GameTestHelper helper) {
 		var level = helper.getLevel();
 		CreativeModeTabs.tryRebuildTabContents(level.enabledFeatures(), true, level.registryAccess());
-		CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.get(ExtraBotanyCreativeTabs.EXTRA_BOTANY_TAB_KEY);
+		CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.getValue(ExtraBotanyCreativeTabs.EXTRA_BOTANY_TAB_KEY);
 		helper.assertTrue(tab != null, "The creative tab is missing");
 		Set<Item> shown = new HashSet<>();
 		List<String> problems = new ArrayList<>();
@@ -389,7 +396,7 @@ public final class RegistryIntegrityGameTests {
 			}
 		}
 		for (Item item : BuiltInRegistries.ITEM) {
-			ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+			Identifier id = BuiltInRegistries.ITEM.getKey(item);
 			if (ours(id) && !shown.contains(item)) {
 				problems.add(id.toString());
 			}

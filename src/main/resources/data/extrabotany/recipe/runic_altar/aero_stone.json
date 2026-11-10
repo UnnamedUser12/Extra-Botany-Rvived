@@ -2,28 +2,16 @@
   "type": "botania:runic_altar",
   "catalysts": [],
   "ingredients": [
-    {
-      "item": "botania:rune_air"
-    },
-    {
-      "item": "botania:rune_air"
-    },
-    {
-      "item": "botania:mana_diamond"
-    },
-    {
-      "item": "minecraft:lapis_lazuli"
-    },
-    {
-      "item": "minecraft:quartz"
-    }
+    "botania:rune_air",
+    "botania:rune_air",
+    "botania:mana_diamond",
+    "minecraft:lapis_lazuli",
+    "minecraft:quartz"
   ],
   "mana": 2000,
   "output": {
     "count": 1,
     "id": "extrabotany:aero_stone"
   },
-  "reagent": {
-    "item": "botania:livingrock"
-  }
+  "reagent": "botania:livingrock"
 }

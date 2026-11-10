@@ -2,15 +2,10 @@
   "type": "extrabotany:copy_brew_from_mana_cocktail",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "extrabotany:mana_cocktail"
-    },
-    {
-      "item": "extrabotany:hero_medal"
-    }
+    "extrabotany:mana_cocktail",
+    "extrabotany:hero_medal"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:infinite_wine"
   }
 }

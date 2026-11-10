@@ -181,6 +181,7 @@ public final class OriginalArmorMeshes {
         var bone120=shoeLeft.addOrReplaceChild("bone120",CubeListBuilder.create().texOffs(47, 27).mirror(true).addBox(0.01F, -0.5F, -3.5F, 3.0F, 1.0F, 4.0F, new CubeDeformation(0.0F)),PartPose.offsetAndRotation(0.1F, 9.5F, 2.5F, 0.1745F, 0.0F, 0.0F));
         var bone121=shoeLeft.addOrReplaceChild("bone121",CubeListBuilder.create().texOffs(10, 30).mirror(true).addBox(2.8F, 0.5F, -3.5F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)),PartPose.offsetAndRotation(0.1F, 9.5F, 2.5F, -0.3491F, 0.0F, 0.0F));
         var helmet=root.addOrReplaceChild("head",CubeListBuilder.create(),PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0F, 0F, 0F));
+        helmet.addOrReplaceChild("hat",CubeListBuilder.create(),PartPose.ZERO);
         var bone233=helmet.addOrReplaceChild("bone233",CubeListBuilder.create().texOffs(22, 25).mirror(false).addBox(-3.0F, -2.5F, 0.0F, 3.0F, 3.0F, 0.0F, new CubeDeformation(0.01F)),PartPose.offsetAndRotation(0.0F, 0.0F, -5.0F, 0.0F, 0.2618F, 0.0F));
         var bone244=helmet.addOrReplaceChild("bone244",CubeListBuilder.create().texOffs(19, 0).mirror(false).addBox(0.0F, -2.5F, 0.0F, 3.0F, 3.0F, 0.0F, new CubeDeformation(0.01F)),PartPose.offsetAndRotation(0.0F, 0.0F, -5.0F, 0.0F, -0.2618F, 0.0F));
         var bone344=helmet.addOrReplaceChild("bone344",CubeListBuilder.create().texOffs(0, 20).mirror(false).addBox(-5.0F, -31.0F, -4.3F, 10.0F, 7.0F, 1.0F, new CubeDeformation(0.01F)),PartPose.offsetAndRotation(0.0F, 24.0F, 0.0F, 0F, 0F, 0F));

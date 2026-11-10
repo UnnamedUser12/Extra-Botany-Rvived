@@ -1,0 +1,39 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "cases": [
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "extrabotany:item/candy_eins_christmas"
+        },
+        "when": [
+          "12-16",
+          "12-17",
+          "12-18",
+          "12-19",
+          "12-20",
+          "12-21",
+          "12-22",
+          "12-23",
+          "12-24",
+          "12-25",
+          "12-26",
+          "12-27",
+          "12-28",
+          "12-29",
+          "12-30",
+          "12-31",
+          "01-01",
+          "01-02"
+        ]
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "extrabotany:item/candy_eins"
+    },
+    "pattern": "MM-dd",
+    "property": "minecraft:local_time"
+  }
+}

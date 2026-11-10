@@ -7,20 +7,27 @@ import velrondevs.extrabotany.common.block.flower.generating.EdelweissBlockEntit
 import velrondevs.extrabotany.registry.ExtraBotanyMobEffects;
 import velrondevs.extrabotany.common.crafting.EdelweissRecipes;
 import velrondevs.extrabotany.registry.ExtraBotanyRecipeTypes;
-import net.minecraft.advancements.critereon.EntityTypePredicate;
+import net.minecraft.advancements.criterion.EntityTypePredicate;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeMap;
 import velrondevs.botania.api.block_entity.RadiusDescriptor;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,48 +37,62 @@ import java.util.Map;
 @PrefixGameTestTemplate(false)
 public final class FlowerHotPathGameTests {
     private static RecipeHolder<EdelweissRecipe> cowRecipe(String id, int mana) {
-        return new RecipeHolder<>(ResourceLocation.fromNamespaceAndPath("extrabotany", "hotpath/" + id),
-                new EdelweissRecipes(EntityTypePredicate.of(EntityType.COW), mana));
+        return new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath("extrabotany", "hotpath/" + id)),
+                new EdelweissRecipes(EntityTypePredicate.of(BuiltInRegistries.ENTITY_TYPE, EntityType.COW), mana));
+    }
+
+    private static void setRecipes(RecipeManager manager, RecipeMap recipes) {
+        try {
+            Field field = RecipeManager.class.getDeclaredField("recipes");
+            field.setAccessible(true);
+            field.set(manager, recipes);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static void replaceRecipes(RecipeManager manager, RecipeHolder<?>... holders) {
+        setRecipes(manager, RecipeMap.create(List.of(holders)));
     }
 
     @GameTest(template = "projectile_arena", timeoutTicks = 20)
     public static void typedRecipesKeepPriorityAndObserveReplacement(GameTestHelper h) {
-        var manager = h.getLevel().getRecipeManager();
-        var original = new ArrayList<>(manager.getRecipes());
+        var manager = h.getLevel().recipeAccess();
+        var original = manager.recipeMap();
         var first = cowRecipe("first", 301);
         var second = cowRecipe("second", 709);
-        var cow = EntityType.COW.create(h.getLevel());
+        var cow = EntityType.COW.create(h.getLevel(), EntitySpawnReason.COMMAND);
         var flower = new EdelweissBlockEntity(h.absolutePos(new BlockPos(32, 5, 32)), ExtraBotanyFlowerBlocks.edelweiss.defaultBlockState());
         flower.setLevel(h.getLevel());
         try {
-            manager.replaceRecipes(List.of(first, second));
+            replaceRecipes(manager, first, second);
             var holders = ExtraBotanyRecipeTypes.getRecipeHolders(h.getLevel(), ExtraBotanyRecipeTypes.EDELWEISS_RECIPE_TYPE);
             h.assertTrue(holders.stream().map(RecipeHolder::value).toList().equals(
                     new ArrayList<>(ExtraBotanyRecipeTypes.getRecipes(h.getLevel(), ExtraBotanyRecipeTypes.EDELWEISS_RECIPE_TYPE).values())),
                     "Typed iteration changed the public map API priority");
             h.assertTrue(flower.getManaFromEntity(cow) == 301, "First matching recipe lost priority");
-            manager.replaceRecipes(List.of(second, first));
+            replaceRecipes(manager, second, first);
             h.assertTrue(flower.getManaFromEntity(cow) == 709, "Public lookup retained a stale recipe after replacement");
             h.assertTrue(ExtraBotanyRecipeTypes.getRecipeHolders(h.getLevel(), ExtraBotanyRecipeTypes.EDELWEISS_RECIPE_TYPE).getFirst() == second,
                     "Typed recipe lookup retained the old manager list");
         } finally {
-            manager.replaceRecipes(original);
+            setRecipes(manager, original);
         }
         h.succeed();
     }
 
     @GameTest(template = "projectile_arena", timeoutTicks = 20)
     public static void edelweissPreservesVirtualSelectionAndSecondLookup(GameTestHelper h) {
-        var manager = h.getLevel().getRecipeManager();
-        var original = new ArrayList<>(manager.getRecipes());
+        var manager = h.getLevel().recipeAccess();
+        var original = manager.recipeMap();
         var pos = h.absolutePos(new BlockPos(32, 5, 32));
         var flower = new CountingEdelweiss(pos);
         flower.setLevel(h.getLevel());
         List<Entity> cows = new ArrayList<>();
         try {
-            manager.replaceRecipes(List.of(cowRecipe("selection", 301)));
+            replaceRecipes(manager, cowRecipe("selection", 301));
             for (int i = 0; i < 3; i++) {
-                var cow = EntityType.COW.create(h.getLevel());
+                var cow = EntityType.COW.create(h.getLevel(), EntitySpawnReason.COMMAND);
                 cow.setPos(pos.getX() + .3 + i * .2, pos.getY(), pos.getZ() + .5);
                 cow.setNoAi(true);
                 h.getLevel().addFreshEntity(cow);
@@ -85,41 +106,41 @@ public final class FlowerHotPathGameTests {
                     "Virtual lookup must run for each entity, then once more for the selected entity");
             h.assertTrue(flower.getMana() == 308, "Subclass mana adjustment was bypassed");
             h.assertTrue(flower.getCooldown() == flower.getAfterWorkCooldown(), "Work cooldown changed");
-            manager.replaceRecipes(List.of(cowRecipe("after_tick", 607)));
+            replaceRecipes(manager, cowRecipe("after_tick", 607));
             h.assertTrue(flower.getManaFromEntity(cows.get(1)) == 614, "Completed tick retained its recipe snapshot");
         } finally {
             cows.forEach(Entity::discard);
-            manager.replaceRecipes(original);
+            setRecipes(manager, original);
         }
         h.succeed();
     }
 
     @GameTest(template = "projectile_arena", timeoutTicks = 20)
     public static void edelweissReleasesSnapshotAfterOverrideFailure(GameTestHelper h) {
-        var manager = h.getLevel().getRecipeManager();
-        var original = new ArrayList<>(manager.getRecipes());
+        var manager = h.getLevel().recipeAccess();
+        var original = manager.recipeMap();
         var pos = h.absolutePos(new BlockPos(32, 5, 32));
         var flower = new CountingEdelweiss(pos);
         flower.setLevel(h.getLevel());
-        var cow = EntityType.COW.create(h.getLevel());
+        var cow = EntityType.COW.create(h.getLevel(), EntitySpawnReason.COMMAND);
         cow.setPos(pos.getX() + .5, pos.getY(), pos.getZ() + .5);
         cow.setNoAi(true);
         h.getLevel().addFreshEntity(cow);
         try {
-            manager.replaceRecipes(List.of(cowRecipe("before_failure", 301)));
+            replaceRecipes(manager, cowRecipe("before_failure", 301));
             flower.throwOnLookup = true;
             boolean failed = false;
             try { flower.tickFlower(); }
             catch (LookupFailure expected) { failed = true; }
             h.assertTrue(failed && !cow.isRemoved() && flower.getMana() == 0, "Lookup exception changed consumption semantics");
             flower.throwOnLookup = false;
-            manager.replaceRecipes(List.of(cowRecipe("after_failure", 809)));
+            replaceRecipes(manager, cowRecipe("after_failure", 809));
             h.assertTrue(flower.getManaFromEntity(cow) == 816, "Failed tick leaked the old recipe snapshot");
             flower.tickFlower();
             h.assertTrue(cow.isRemoved() && flower.getMana() == 816, "Next tick did not use the replaced recipe");
         } finally {
             cow.discard();
-            manager.replaceRecipes(original);
+            setRecipes(manager, original);
         }
         h.succeed();
     }
@@ -132,7 +153,7 @@ public final class FlowerHotPathGameTests {
         List<Villager> spawned = new ArrayList<>();
         try {
             for (int x : new int[] { 1, 2, 3, 4, 10, 15 }) {
-                var villager = EntityType.VILLAGER.create(h.getLevel());
+                var villager = EntityType.VILLAGER.create(h.getLevel(), EntitySpawnReason.COMMAND);
                 // Rectangle.square has a zero-height Y plane; the entity box must cross it.
                 villager.setPos(pos.getX() + x + .5, pos.getY() - .25, pos.getZ() + .5);
                 villager.setNoAi(true);

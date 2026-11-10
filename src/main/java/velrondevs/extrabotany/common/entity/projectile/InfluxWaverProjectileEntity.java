@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity.projectile;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -107,7 +109,7 @@ public class InfluxWaverProjectileEntity extends TargetedProjectileEntity {
 			return;
 		}
 		LivingEntity target = targets.getFirst();
-		target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1));
+		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 1));
 		if (thrower instanceof Player) {
 			DamageHandler.INSTANCE.dmg(target, thrower, 12F, DamageKind.NEUTRAL);
 		} else {
@@ -152,7 +154,7 @@ public class InfluxWaverProjectileEntity extends TargetedProjectileEntity {
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
+	public void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putInt(TAG_STRIKES, strikes);
 		tag.putInt(TAG_REMOVE_AT, hitTick);
@@ -162,10 +164,10 @@ public class InfluxWaverProjectileEntity extends TargetedProjectileEntity {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
+	public void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		strikes = tag.getInt(TAG_STRIKES);
-		hitTick = tag.contains(TAG_REMOVE_AT) ? tag.getInt(TAG_REMOVE_AT) : NOT_SCHEDULED;
-		nextTarget = tag.contains(TAG_NEXT) ? BlockPos.of(tag.getLong(TAG_NEXT)) : null;
+		strikes = tag.getIntOr(TAG_STRIKES, 0);
+		hitTick = tag.getIntOr(TAG_REMOVE_AT, NOT_SCHEDULED);
+		nextTarget = tag.getLong(TAG_NEXT).map(BlockPos::of).orElse(null);
 	}
 }

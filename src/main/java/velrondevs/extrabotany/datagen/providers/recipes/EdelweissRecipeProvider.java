@@ -1,10 +1,10 @@
 package velrondevs.extrabotany.datagen.providers.recipes;
 
-import net.minecraft.advancements.critereon.EntityTypePredicate;
+import net.minecraft.advancements.criterion.EntityTypePredicate;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 
 import velrondevs.extrabotany.common.crafting.EdelweissRecipes;
@@ -26,11 +26,11 @@ public class EdelweissRecipeProvider extends ExtraBotanyRecipeProvider {
 	@Override
 	public void buildRecipes(RecipeOutput consumer) {
 		consumer.accept(id("snow_golem"),
-				new EdelweissRecipes(EntityTypePredicate.of(EntityType.SNOW_GOLEM), 3200), null);
+				new EdelweissRecipes(EntityTypePredicate.of(lookup().lookupOrThrow(net.minecraft.core.registries.Registries.ENTITY_TYPE), EntityType.SNOW_GOLEM), 3200), null);
 	}
 
-	private static ResourceLocation id(String id) {
-		return prefix("edelweiss/" + id);
+	private static net.minecraft.resources.ResourceKey<net.minecraft.world.item.crafting.Recipe<?>> id(String id) {
+		return key(prefix("edelweiss/" + id));
 	}
 
 	@Override

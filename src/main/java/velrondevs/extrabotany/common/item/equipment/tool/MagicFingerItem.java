@@ -47,7 +47,7 @@ public class MagicFingerItem extends Item {
 			int mana = Math.min(getSupportManaMax(), pool.getMaxMana() - pool.getCurrentMana());
 			if (ManaItemHandler.instance().requestManaExact(player.getItemInHand(context.getHand()), player, mana, true)) {
 				pool.receiveMana(mana);
-				return InteractionResult.sidedSuccess(world.isClientSide());
+				return InteractionResult.SUCCESS;
 			}
 		}
 		return InteractionResult.PASS;
@@ -62,10 +62,9 @@ public class MagicFingerItem extends Item {
 	}
 
 	@Override
-	public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+	public void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		if (!attacker.level().isClientSide()) {
 			target.addEffect(new MobEffectInstance(ExtraBotanyMobEffects.HEAL_REVERSE, getDenyHealTime()), target);
 		}
-		return true;
 	}
 }

@@ -32,8 +32,6 @@ public class NightmareFuelItem extends Item {
 		super.finishUsingItem(stack, level, livingEntity);
 
 		if (livingEntity instanceof ServerPlayer serverPlayer) {
-			CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, stack);
-			serverPlayer.awardStat(Stats.ITEM_USED.get(this));
 			UseItemSuccessTrigger.INSTANCE.trigger(serverPlayer, stack, (ServerLevel) level, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ());
 		}
 

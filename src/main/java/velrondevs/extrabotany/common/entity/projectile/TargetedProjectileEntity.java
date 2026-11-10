@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity.projectile;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Mth;
@@ -108,7 +110,7 @@ public abstract class TargetedProjectileEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
+	public void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putDouble(TAG_TARGET_X, targetPos.x);
 		tag.putDouble(TAG_TARGET_Y, targetPos.y);
@@ -116,8 +118,8 @@ public abstract class TargetedProjectileEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
+	public void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		targetPos = new Vec3(tag.getDouble(TAG_TARGET_X), tag.getDouble(TAG_TARGET_Y), tag.getDouble(TAG_TARGET_Z));
+		targetPos = new Vec3(tag.getDoubleOr(TAG_TARGET_X, 0.0D), tag.getDoubleOr(TAG_TARGET_Y, 0.0D), tag.getDoubleOr(TAG_TARGET_Z, 0.0D));
 	}
 }

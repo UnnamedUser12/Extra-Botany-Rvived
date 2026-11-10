@@ -1,6 +1,6 @@
 package velrondevs.extrabotany.datagen.providers.patchouli.page.patchouli;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.datagen.providers.patchouli.page.AbstractPage;
 
@@ -17,7 +17,7 @@ public class LinkPage extends AbstractPage<LinkPage> {
 	}
 
 	@Override
-	public ResourceLocation getType() {
-		return ResourceLocation.tryParse("patchouli:link");
+	public Identifier getType() {
+		return Identifier.tryParse("patchouli:link");
 	}
 }

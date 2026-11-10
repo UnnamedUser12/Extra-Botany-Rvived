@@ -2,9 +2,8 @@ package velrondevs.extrabotany.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.LivingEntity;
@@ -12,6 +11,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
+import velrondevs.botania.client.core.helper.RenderHelper;
 import velrondevs.botania.client.render.AccessoryRenderRegistry;
 import velrondevs.botania.client.render.AccessoryRenderer;
 
@@ -58,14 +58,14 @@ public final class AccessoryRenderers {
 
 		@Override
 		public void doRender(HumanoidModel<?> bipedModel, ItemStack stack, LivingEntity living, PoseStack ms,
-				MultiBufferSource buffers, int light, float limbSwing, float limbSwingAmount, float partialTicks,
+				SubmitNodeCollector collector, int light, float limbSwing, float limbSwingAmount, float partialTicks,
 				float ageInTicks, float netHeadYaw, float headPitch) {
 			ms.pushPose();
 			(onHead ? bipedModel.head : bipedModel.body).translateAndRotate(ms);
 			ms.translate(x, y, z);
 			ms.scale(scaleX, scaleY, scaleZ);
-			Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemDisplayContext.NONE,
-					light, OverlayTexture.NO_OVERLAY, ms, buffers, living.level(), 0);
+			RenderHelper.renderItem(stack, ItemDisplayContext.NONE, ms, collector,
+					light, OverlayTexture.NO_OVERLAY, living.level(), 0);
 			ms.popPose();
 		}
 	}

@@ -1,36 +1,18 @@
 {
   "type": "botania:petal_apothecary",
   "ingredients": [
-    {
-      "tag": "botania:petals/purple"
-    },
-    {
-      "tag": "botania:petals/purple"
-    },
-    {
-      "tag": "botania:petals/purple"
-    },
-    {
-      "tag": "botania:petals/magenta"
-    },
-    {
-      "tag": "botania:petals/magenta"
-    },
-    {
-      "item": "botania:rune_envy"
-    },
-    {
-      "item": "botania:rune_pride"
-    },
-    {
-      "item": "botania:life_essence"
-    }
+    "#botania:petals/purple",
+    "#botania:petals/purple",
+    "#botania:petals/purple",
+    "#botania:petals/magenta",
+    "#botania:petals/magenta",
+    "botania:rune_envy",
+    "botania:rune_pride",
+    "botania:life_essence"
   ],
   "output": {
     "count": 1,
     "id": "extrabotany:stardustlotus"
   },
-  "reagent": {
-    "tag": "botania:seed_apothecary_reagent"
-  }
+  "reagent": "#botania:seed_apothecary_reagent"
 }

@@ -1,6 +1,6 @@
 package velrondevs.extrabotany.datagen.providers.patchouli.page.patchouli;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 
 import velrondevs.extrabotany.common.helper.RegistryHelper;
@@ -51,7 +51,7 @@ public class EntityPage extends AbstractPage<EntityPage> {
 	}
 
 	@Override
-	public ResourceLocation getType() {
-		return ResourceLocation.tryParse("patchouli:entity");
+	public Identifier getType() {
+		return Identifier.tryParse("patchouli:entity");
 	}
 }

@@ -30,7 +30,7 @@ public class ChallangeTicketItem extends Item {
 		if (stack.is(ExtraBotanyItems.challengeTicket)) {
 			if (GaiaIII.spawn(ctx.getPlayer(), stack, ctx.getLevel(), ctx.getClickedPos())) {
 				stack.shrink(player.isCreative() ? 0 : 1);
-				return InteractionResult.sidedSuccess(ctx.getLevel().isClientSide());
+				return InteractionResult.SUCCESS;
 			}
 			return InteractionResult.CONSUME;
 		}

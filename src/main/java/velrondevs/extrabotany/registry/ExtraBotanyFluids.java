@@ -36,7 +36,7 @@ public final class ExtraBotanyFluids {
 	public static final LiquidBlock MANA_BLOCK = new LiquidBlock(MANA, BlockBehaviour.Properties.of()
 			.mapColor(MapColor.COLOR_PURPLE)
 			.replaceable()
-			.noCollission()
+			.noCollision()
 			.strength(100)
 			.lightLevel(state -> MANA_LIGHT_LEVEL)
 			.pushReaction(PushReaction.DESTROY)

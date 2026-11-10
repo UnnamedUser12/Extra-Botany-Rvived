@@ -146,8 +146,8 @@ public final class DamageHandler {
 
 		DamageSources sources = target.damageSources();
 		return switch (kind) {
-			case NEUTRAL -> target.hurt(attackSource(sources, source), amount);
-			case MAGIC -> target.hurt(magicSource(sources, source), amount);
+			case NEUTRAL -> target.hurtOrSimulate(attackSource(sources, source), amount);
+			case MAGIC -> target.hurtOrSimulate(magicSource(sources, source), amount);
 			case NEUTRAL_PIERCING -> {
 				target.invulnerableTime = 0;
 				// 原版在攻击者不是生物时退回普通伤害。这里保持一致。
@@ -155,11 +155,11 @@ public final class DamageHandler {
 				DamageSource damageSource = source instanceof LivingEntity
 						? ExtraBotanyDamageTypes.Sources.piercingDamage(target.level().registryAccess(), source)
 						: sources.generic();
-				yield target.hurt(damageSource, amount);
+				yield target.hurtOrSimulate(damageSource, amount);
 			}
 			case MAGIC_PIERCING -> {
 				target.invulnerableTime = 0;
-				yield target.hurt(
+				yield target.hurtOrSimulate(
 						ExtraBotanyDamageTypes.Sources.magicPiercingDamage(target.level().registryAccess(), source),
 						amount);
 			}
@@ -198,7 +198,7 @@ public final class DamageHandler {
 		DamageSource source = ExtraBotanyDamageTypes.Sources.magicPiercingDamage(target.level().registryAccess(), attacker);
 		// 先造成一次极小的伤害。它触发受击动画，并把攻击者记到目标身上。
 		// Apply a very small hit first. The hit starts the hurt animation and records the attacker on the target.
-		target.hurt(source, 0.01F);
+		target.hurtOrSimulate(source, 0.01F);
 
 		float health = target.getHealth();
 		if (health <= 0) {
@@ -211,10 +211,10 @@ public final class DamageHandler {
 		target.setHealth(healthAfter);
 		if (health <= amount) {
 			if (target instanceof Player) {
-				target.kill();
+				target.kill((net.minecraft.server.level.ServerLevel) target.level());
 			} else {
 				target.invulnerableTime = 0;
-				target.hurt(source, Float.MAX_VALUE);
+				target.hurtOrSimulate(source, Float.MAX_VALUE);
 			}
 		}
 		return health - healthAfter;
@@ -256,7 +256,7 @@ public final class DamageHandler {
 		if (!Float.isFinite(amount) || amount <= 0 || !checkPassable(target, attacker)) {
 			return false;
 		}
-		return target.hurt(ExtraBotanyDamageTypes.Sources.withoutDirectEntity(target.level().registryAccess(), type, attacker), amount);
+		return target.hurtOrSimulate(ExtraBotanyDamageTypes.Sources.withoutDirectEntity(target.level().registryAccess(), type, attacker), amount);
 	}
 
 	/**
@@ -279,7 +279,7 @@ public final class DamageHandler {
 			return false;
 		}
 		target.invulnerableTime = 0;
-		return target.hurt(ExtraBotanyDamageTypes.Sources.withoutDirectEntity(
+		return target.hurtOrSimulate(ExtraBotanyDamageTypes.Sources.withoutDirectEntity(
 				target.level().registryAccess(), ExtraBotanyDamageTypes.FLAMESCION_FLAME_DAMAGE, attacker), amount);
 	}
 
@@ -300,7 +300,7 @@ public final class DamageHandler {
 			return false;
 		}
 		target.invulnerableTime = 0;
-		return target.hurt(ExtraBotanyDamageTypes.Sources.withoutDirectEntity(
+		return target.hurtOrSimulate(ExtraBotanyDamageTypes.Sources.withoutDirectEntity(
 				target.level().registryAccess(), ExtraBotanyDamageTypes.PIERCING_FIRE_DAMAGE, attacker), amount);
 	}
 
@@ -341,6 +341,6 @@ public final class DamageHandler {
 	}
 
 	private static boolean isBoss(Entity entity) {
-		return entity.getType().is(Tags.EntityTypes.BOSSES);
+		return entity.getType().builtInRegistryHolder().is(Tags.EntityTypes.BOSSES);
 	}
 }

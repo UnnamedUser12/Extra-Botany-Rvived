@@ -2,7 +2,7 @@ package velrondevs.extrabotany.client.patchouli.processor;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 
 import velrondevs.botania.client.patchouli.PatchouliUtils;
@@ -24,7 +24,7 @@ public class PedestalSmashProcessor implements IComponentProcessor {
 
 	@Override
 	public void setup(Level level, IVariableProvider variables) {
-		ResourceLocation id = ResourceLocation.tryParse(variables.get("recipe", level.registryAccess()).asString());
+		Identifier id = Identifier.tryParse(variables.get("recipe", level.registryAccess()).asString());
 		this.recipe = PatchouliUtils.getRecipe(level, ExtraBotanyRecipeTypes.PEDESTAL_SMASH_TYPE, id);
 	}
 
@@ -34,10 +34,10 @@ public class PedestalSmashProcessor implements IComponentProcessor {
 			return null;
 		}
 		return switch (key) {
-			case "output" -> IVariable.from(recipe.getResultItem(level.registryAccess()), level.registryAccess());
+			case "output" -> IVariable.from(recipe.getOutput(), level.registryAccess());
 			case "input" -> PatchouliUtils.interweaveIngredients(List.of(recipe.getInput()), level.registryAccess());
 			case "smash_tools" -> PatchouliUtils.interweaveIngredients(List.of(recipe.getSmashTools()), level.registryAccess());
-			case "heading" -> IVariable.from(recipe.getResultItem(level.registryAccess()).getHoverName(), level.registryAccess());
+			case "heading" -> IVariable.from(recipe.getOutput().getHoverName(), level.registryAccess());
 			case "operate" -> {
 				Component q = Component.literal("(?)").withStyle(ChatFormatting.BOLD);
 				yield IVariable.from(Component.translatable("extrabotany.patchouli.template.pedestal_smash.operate").append(" ").append(q), level.registryAccess());

@@ -1,8 +1,14 @@
 package velrondevs.extrabotany.common.item;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
 import velrondevs.extrabotany.registry.ExtraBotanyItems;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -10,7 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -59,7 +65,7 @@ public class SupplyBagItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		if (level instanceof ServerLevel serverLevel) {
 			ItemStack reward = PoolData.get(serverLevel).draw(player.getUUID(), player.getRandom());
@@ -69,13 +75,13 @@ public class SupplyBagItem extends Item {
 				PlayerHelper.grantCriterion(serverPlayer, prefix("main/" + LibAdvancementNames.LUCKY_DRAW), "code_triggered");
 			}
 			stack.consume(1, player);
-			ItemEntity drop = player.spawnAtLocation(reward);
+			ItemEntity drop = player.spawnAtLocation(serverLevel, reward);
 			if (drop != null) {
 				drop.setNoPickUpDelay();
 			}
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), ExtraBotanySounds.REWARD_BAG_OPEN, SoundSource.PLAYERS, 0.8F, 1F);
 		}
-		return InteractionResultHolder.success(stack);
+		return InteractionResult.SUCCESS;
 	}
 
 	/**
@@ -122,9 +128,11 @@ public class SupplyBagItem extends Item {
 
 		private final Map<UUID, int[]> pools = new HashMap<>();
 
+		public static final Codec<PoolData> CODEC = CompoundTag.CODEC.xmap(PoolData::load, data -> data.save(new CompoundTag(), null));
+		public static final SavedDataType<PoolData> TYPE = new SavedDataType<>(Identifier.withDefaultNamespace(DATA_NAME), PoolData::new, CODEC);
+
 		public static PoolData get(ServerLevel level) {
-			return level.getServer().overworld().getDataStorage().computeIfAbsent(
-					new SavedData.Factory<>(PoolData::new, (tag, registries) -> load(tag), null), DATA_NAME);
+			return level.getServer().overworld().getDataStorage().computeIfAbsent(TYPE);
 		}
 
 		private static int[] createPool(RandomSource random) {
@@ -173,25 +181,25 @@ public class SupplyBagItem extends Item {
 
 		public static PoolData load(CompoundTag tag) {
 			PoolData data = new PoolData();
-			if (tag.getInt("Version") != VERSION) {
+			if (tag.getIntOr("Version", 0) != VERSION) {
 				return data;
 			}
-			for (Tag entry : tag.getList("Pools", Tag.TAG_COMPOUND)) {
+			for (Tag entry : tag.getListOrEmpty("Pools")) {
 				CompoundTag saved = (CompoundTag) entry;
-				int[] pool = saved.getIntArray("Pool");
-				if (saved.hasUUID("UUID") && pool.length == POOL_SIZE) {
-					data.pools.put(saved.getUUID("UUID"), pool);
+				int[] pool = saved.getIntArray("Pool").orElse(new int[0]);
+				var uuid = saved.read("UUID", UUIDUtil.CODEC);
+				if (uuid.isPresent() && pool.length == POOL_SIZE) {
+					data.pools.put(uuid.get(), pool);
 				}
 			}
 			return data;
 		}
 
-		@Override
 		public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
 			ListTag list = new ListTag();
 			pools.forEach((uuid, pool) -> {
 				CompoundTag entry = new CompoundTag();
-				entry.putUUID("UUID", uuid);
+				entry.store("UUID", UUIDUtil.CODEC, uuid);
 				entry.putIntArray("Pool", pool);
 				list.add(entry);
 			});

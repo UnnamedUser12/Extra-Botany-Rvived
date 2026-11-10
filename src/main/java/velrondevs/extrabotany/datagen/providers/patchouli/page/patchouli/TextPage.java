@@ -2,7 +2,7 @@ package velrondevs.extrabotany.datagen.providers.patchouli.page.patchouli;
 
 import com.demonwav.mcdev.annotations.Translatable;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.datagen.providers.patchouli.page.AbstractPage;
 
@@ -22,7 +22,7 @@ public class TextPage extends AbstractPage<TextPage> {
 	}
 
 	@Override
-	public ResourceLocation getType() {
-		return ResourceLocation.tryParse("patchouli:text");
+	public Identifier getType() {
+		return Identifier.tryParse("patchouli:text");
 	}
 }

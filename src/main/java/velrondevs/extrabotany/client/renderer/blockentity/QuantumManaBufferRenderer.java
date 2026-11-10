@@ -4,10 +4,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.resources.Identifier;
+
+import org.jspecify.annotations.Nullable;
+
+import velrondevs.botania.client.render.block_entity.BotaniaBlockEntityRenderer;
 
 import velrondevs.extrabotany.common.block.block_entity.ManaBufferBlockEntity;
 
@@ -20,21 +24,20 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>来源：ExtraMeteorP 1.12 {@code RenderQuantumManaBuffer}。
  * <p>Source: ExtraMeteorP 1.12 {@code RenderQuantumManaBuffer}.
  */
-public class QuantumManaBufferRenderer implements BlockEntityRenderer<ManaBufferBlockEntity> {
-	private static final ResourceLocation TEXTURE = prefix("textures/model/quantummanabuffer.png");
+public class QuantumManaBufferRenderer extends BotaniaBlockEntityRenderer<ManaBufferBlockEntity> {
+	private static final Identifier TEXTURE = prefix("textures/model/quantummanabuffer.png");
 
 	private final ModelPart model = QuantumManaBufferModel.create();
 
 	public QuantumManaBufferRenderer(BlockEntityRendererProvider.Context context) {}
 
 	@Override
-	public void render(ManaBufferBlockEntity buffer, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
+	protected void render(@Nullable ManaBufferBlockEntity buffer, float partialTick, PoseStack poseStack, MultiBufferSource buffers,
+			SubmitNodeCollector collector, int packedLight, int packedOverlay) {
 		poseStack.pushPose();
-		// 旧式模型的原点在方块上方 1.5 格，并且上下颠倒。
-		// The origin of the old model format is 1.5 blocks above the block, and the model is upside down.
 		poseStack.translate(0.5F, 1.5F, 0.5F);
 		poseStack.scale(1F, -1F, -1F);
-		model.render(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), packedLight, packedOverlay);
+		model.render(poseStack, buffers.getBuffer(RenderTypes.entityCutout(TEXTURE)), packedLight, packedOverlay);
 		poseStack.popPose();
 	}
 }

@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity.subspace;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
@@ -107,16 +109,16 @@ public class SubspaceSpearEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
+	public void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putFloat(TAG_DAMAGE, damage);
 		tag.putInt(TAG_LIFE, life);
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
+	public void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		damage = tag.getFloat(TAG_DAMAGE);
-		life = tag.getInt(TAG_LIFE);
+		damage = tag.getFloatOr(TAG_DAMAGE, 0.0F);
+		life = tag.getIntOr(TAG_LIFE, 0);
 	}
 }

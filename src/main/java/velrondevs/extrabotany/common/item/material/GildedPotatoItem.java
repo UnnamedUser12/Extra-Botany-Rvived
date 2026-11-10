@@ -1,5 +1,8 @@
 package velrondevs.extrabotany.common.item.material;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
@@ -27,8 +30,8 @@ public class GildedPotatoItem extends Item {
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
-		super.inventoryTick(stack, level, entity, slotId, isSelected);
+	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		super.inventoryTick(stack, level, entity, eqSlot);
 		if (!(entity instanceof ServerPlayer serverPlayer)) {
 			return;
 		}

@@ -1,19 +1,23 @@
 package velrondevs.extrabotany.common.item.equipment.tool;
 
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
@@ -64,7 +68,7 @@ import java.util.List;
  * The ignition only throws the mobs that the player can damage.</li>
  * </ul>
  */
-public class FlamescionWeaponItem extends SwordItem implements LeftClickItem {
+public class FlamescionWeaponItem extends Item implements LeftClickItem {
 	private static final int ATTACK_DAMAGE_BONUS = 5;
 	private static final float ATTACK_SPEED = -1.6F;
 	private static final float IGNITE_RANGE = 3F;
@@ -82,7 +86,7 @@ public class FlamescionWeaponItem extends SwordItem implements LeftClickItem {
 	private static final String LEGACY_TAG_OVERLOADED = "flamescion_overloaded";
 
 	public FlamescionWeaponItem(Properties props) {
-		super(Tiers.NETHERITE, props.attributes(SwordItem.createAttributes(Tiers.NETHERITE, ATTACK_DAMAGE_BONUS, ATTACK_SPEED)));
+		super(props.sword(ToolMaterial.NETHERITE, ATTACK_DAMAGE_BONUS, ATTACK_SPEED));
 	}
 
 	@Override
@@ -112,15 +116,15 @@ public class FlamescionWeaponItem extends SwordItem implements LeftClickItem {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
-		if (player.isSpectator() || FlamescionHandler.isOverloaded(player) || player.getCooldowns().isOnCooldown(this)) {
-			return InteractionResultHolder.pass(stack);
+		if (player.isSpectator() || FlamescionHandler.isOverloaded(player) || player.getCooldowns().isOnCooldown(new ItemStack(this))) {
+			return InteractionResult.PASS;
 		}
 		boolean inMode = FlamescionHandler.isFlamescionMode(player);
 		if (player.isShiftKeyDown() && !inMode) {
 			ignite(level, player);
-			return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+			return InteractionResult.SUCCESS;
 		}
 		if (inMode) {
 			if (!level.isClientSide()) {
@@ -130,10 +134,10 @@ public class FlamescionWeaponItem extends SwordItem implements LeftClickItem {
 				level.addFreshEntity(flameVoid);
 				player.addEffect(new MobEffectInstance(ExtraBotanyMobEffects.INCANDESCENCE, VOID_EFFECT_TICKS));
 			}
-			player.getCooldowns().addCooldown(this, VOID_COOLDOWN_TICKS);
-			return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+			player.getCooldowns().addCooldown(new ItemStack(this), VOID_COOLDOWN_TICKS);
+			return InteractionResult.SUCCESS;
 		}
-		return InteractionResultHolder.pass(stack);
+		return InteractionResult.PASS;
 	}
 
 	private void ignite(Level level, Player player) {
@@ -191,8 +195,8 @@ public class FlamescionWeaponItem extends SwordItem implements LeftClickItem {
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
-		super.inventoryTick(stack, level, entity, slot, selected);
+	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		super.inventoryTick(stack, level, entity, eqSlot);
 		if (level.isClientSide()) {
 			return;
 		}
@@ -206,9 +210,9 @@ public class FlamescionWeaponItem extends SwordItem implements LeftClickItem {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		tooltip.add(Component.translatable("tooltip.extrabotany.flamescion_weapon.controls").withStyle(ChatFormatting.GRAY));
-		tooltip.add(Component.translatable("tooltip.extrabotany.flamescion_weapon.ultimate_key",
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		tooltip.accept(Component.translatable("tooltip.extrabotany.flamescion_weapon.controls").withStyle(ChatFormatting.GRAY));
+		tooltip.accept(Component.translatable("tooltip.extrabotany.flamescion_weapon.ultimate_key",
 				Component.keybind("key.extrabotany.legacy_skill")).withStyle(ChatFormatting.GRAY));
 	}
 }

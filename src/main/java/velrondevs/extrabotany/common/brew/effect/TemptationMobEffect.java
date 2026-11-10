@@ -1,5 +1,6 @@
 package velrondevs.extrabotany.common.brew.effect;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,7 +24,7 @@ public class TemptationMobEffect extends MobEffect {
 	}
 
 	@Override
-	public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+	public boolean applyEffectTick(ServerLevel level, LivingEntity entity, int amplifier) {
 		double range = 7 + 2 * amplifier;
 		AABB area = entity.getBoundingBox().inflate(range);
 		for (Mob mob : entity.level().getEntitiesOfClass(Mob.class, area)) {

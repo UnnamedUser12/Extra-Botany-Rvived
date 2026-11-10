@@ -1,12 +1,14 @@
 package velrondevs.extrabotany.common.entity.gaia;
 
-import com.mojang.serialization.Dynamic;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.particles.ParticleTypes;
+import com.mojang.serialization.Codec;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -28,7 +30,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -243,7 +245,7 @@ public class VoidHerrscher extends Gaia {
 			boss.getAttribute(Attributes.MAX_HEALTH).setBaseValue(HEALTH_PER_PLAYER * boss.playerCount);
 			boss.setHealth(boss.getMaxHealth());
 
-			EventHooks.finalizeMobSpawn(boss, serverLevel, serverLevel.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null);
+			EventHooks.finalizeMobSpawn(boss, serverLevel, serverLevel.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
 			serverLevel.addFreshEntity(boss);
 			serverLevel.playSound(null, pos, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 10F, 0.1F);
 			for (Player nearby : players) {
@@ -260,12 +262,12 @@ public class VoidHerrscher extends Gaia {
 	// ---------------------------------------------------------------------
 
 	@Override
-	protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-		return ScriptedBossAI.makeBrain(dynamic);
+	protected Brain<?> makeBrain(Brain.Packed packed) {
+		return ScriptedBossAI.makeBrain(this, packed);
 	}
 
 	@Override
-	protected void initMemories(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData) {}
+	protected void initMemories(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason, @Nullable SpawnGroupData spawnData) {}
 
 	@Override
 	protected void updateAI() {
@@ -335,8 +337,8 @@ public class VoidHerrscher extends Gaia {
 	// ---------------------------------------------------------------------
 
 	@Override
-	protected void customServerAiStep() {
-		super.customServerAiStep();
+	protected void customServerAiStep(ServerLevel level) {
+		super.customServerAiStep(level);
 		if (level().getDifficulty() == Difficulty.PEACEFUL) {
 			discard();
 			return;
@@ -632,7 +634,7 @@ public class VoidHerrscher extends Gaia {
 	private void smite(Player player) {
 		player.sendSystemMessage(Component.translatable("extrabotany.message.herrscher.smite").withStyle(ChatFormatting.RED));
 		if (!player.getMainHandItem().isEmpty()) {
-			player.getCooldowns().addCooldown(player.getMainHandItem().getItem(), 120);
+			player.getCooldowns().addCooldown(player.getMainHandItem(), 120);
 		}
 		DamageHandler.INSTANCE.dealTrueDamage(this, player, player.getMaxHealth() * 0.2F + 6);
 		spawnLanceAbove(player.blockPosition());
@@ -750,7 +752,7 @@ public class VoidHerrscher extends Gaia {
 	}
 
 	@Override
-	public boolean hurt(DamageSource source, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
 		if (!(source.getEntity() instanceof Player player) || !PlayerHelper.isTruePlayer(player) || getInvulTime() > 0 || !Float.isFinite(amount)) {
 			return false;
 		}
@@ -797,7 +799,7 @@ public class VoidHerrscher extends Gaia {
 			hitsToAbsorb--;
 			dealt = 0F;
 		}
-		boolean hurt = super.hurt(source, dealt);
+		boolean hurt = super.hurtServer(level, source, dealt);
 		setInvulTime(getInvulTime() + HIT_INVUL_TICKS);
 		return hurt;
 	}
@@ -814,8 +816,8 @@ public class VoidHerrscher extends Gaia {
 	}
 
 	@Override
-	protected void actuallyHurt(DamageSource source, float amount) {
-		super.actuallyHurt(source, amount);
+	protected void actuallyHurt(ServerLevel level, DamageSource source, float amount) {
+		super.actuallyHurt(level, source, amount);
 		if (source.getDirectEntity() != null && getHealth() > 0) {
 			teleportDelay = Math.max(teleportDelay - 4, 0);
 		}
@@ -831,9 +833,9 @@ public class VoidHerrscher extends Gaia {
 	}
 
 	@Override
-	public void kill() {
+	public void kill(ServerLevel level) {
 		killed = true;
-		super.kill();
+		super.kill(level);
 	}
 
 	private void teleportRandomly() {
@@ -893,7 +895,7 @@ public class VoidHerrscher extends Gaia {
 	// ---------------------------------------------------------------------
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
+	public void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putInt(TAG_HITS_TO_ABSORB, hitsToAbsorb);
 		tag.putInt(TAG_SHIELDS, getShields());
@@ -906,37 +908,31 @@ public class VoidHerrscher extends Gaia {
 		tag.putInt(TAG_SKILL, skill.ordinal());
 		tag.putInt(TAG_SUPPORT_COOLDOWN, supportCooldown);
 		tag.putBoolean(TAG_FIRST_LANCE_DONE, firstLanceDone);
-		ListTag names = new ListTag();
-		for (String supporter : supporters) {
-			names.add(StringTag.valueOf(supporter));
-		}
-		tag.put(TAG_SUPPORTERS, names);
+		tag.store(TAG_SUPPORTERS, Codec.STRING.listOf(), List.copyOf(supporters));
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
+	public void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
 		// 用命令召唤的 Boss 没有这些键。这时保留默认值。
 		// A boss from a command does not have these keys. Then the defaults stay.
-		if (!tag.contains(TAG_SKILL_COOLDOWN, Tag.TAG_ANY_NUMERIC)) {
+		if (tag.getInt(TAG_SKILL_COOLDOWN).isEmpty()) {
 			return;
 		}
-		hitsToAbsorb = tag.getInt(TAG_HITS_TO_ABSORB);
-		setShields(tag.getInt(TAG_SHIELDS));
-		rankIII = tag.getBoolean(TAG_RANK_III);
-		entityData.set(RANK_II, tag.getBoolean(TAG_RANK_II) || rankIII);
-		damageTaken = tag.getFloat(TAG_DAMAGE_TAKEN);
-		teleportDelay = tag.getInt(TAG_TELEPORT_DELAY);
-		dodgeCooldown = tag.getInt(TAG_DODGE_COOLDOWN);
-		skillCooldown = tag.getInt(TAG_SKILL_COOLDOWN);
-		skill = Skill.byId(tag.getInt(TAG_SKILL));
-		supportCooldown = tag.getInt(TAG_SUPPORT_COOLDOWN);
-		firstLanceDone = tag.getBoolean(TAG_FIRST_LANCE_DONE);
-		if (tag.contains(TAG_SUPPORTERS, Tag.TAG_LIST)) {
+		hitsToAbsorb = tag.getIntOr(TAG_HITS_TO_ABSORB, 0);
+		setShields(tag.getIntOr(TAG_SHIELDS, 0));
+		rankIII = tag.getBooleanOr(TAG_RANK_III, false);
+		entityData.set(RANK_II, tag.getBooleanOr(TAG_RANK_II, false) || rankIII);
+		damageTaken = tag.getFloatOr(TAG_DAMAGE_TAKEN, 0.0F);
+		teleportDelay = tag.getIntOr(TAG_TELEPORT_DELAY, 0);
+		dodgeCooldown = tag.getIntOr(TAG_DODGE_COOLDOWN, 0);
+		skillCooldown = tag.getIntOr(TAG_SKILL_COOLDOWN, 0);
+		skill = Skill.byId(tag.getIntOr(TAG_SKILL, 0));
+		supportCooldown = tag.getIntOr(TAG_SUPPORT_COOLDOWN, 0);
+		firstLanceDone = tag.getBooleanOr(TAG_FIRST_LANCE_DONE, false);
+		tag.read(TAG_SUPPORTERS, Codec.STRING.listOf()).ifPresent(names -> {
 			supporters.clear();
-			for (Tag name : tag.getList(TAG_SUPPORTERS, Tag.TAG_STRING)) {
-				supporters.add(name.getAsString());
-			}
-		}
+			supporters.addAll(names);
+		});
 	}
 }

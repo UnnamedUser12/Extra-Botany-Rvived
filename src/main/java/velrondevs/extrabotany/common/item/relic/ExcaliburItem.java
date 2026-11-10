@@ -1,5 +1,10 @@
 package velrondevs.extrabotany.common.item.relic;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
@@ -76,7 +81,7 @@ public class ExcaliburItem extends ManasteelSwordItem implements LensEffectItem 
 
 	public static void attackEntity(AttackEntityEvent event) {
 		Player player = event.getEntity();
-		if (!player.level().isClientSide && player.getMainHandItem().getItem() instanceof ExcaliburItem) {
+		if (!player.level().isClientSide() && player.getMainHandItem().getItem() instanceof ExcaliburItem) {
 			trySpawnBurst(player, player.getAttackStrengthScale(0F));
 		}
 	}
@@ -176,7 +181,7 @@ public class ExcaliburItem extends ManasteelSwordItem implements LensEffectItem 
 			}
 			burst.setMana(mana - cost);
 
-			float damage = 5F + ItemTiers.EXCALIBUR.getAttackDamageBonus();
+			float damage = 5F + ItemTiers.EXCALIBUR.attackDamageBonus();
 			//DamageSource source1 = ((DamageSourceAccessor)player.damageSources()).source(DamageTypes.PLAYER_ATTACK, player);
 			DamageSource source = ExtraBotanyDamageTypes.Sources.excaliburDamage(player.level().registryAccess(), player);
 			entity.hurt(source, damage);
@@ -245,25 +250,20 @@ public class ExcaliburItem extends ManasteelSwordItem implements LensEffectItem 
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
-		if (!world.isClientSide && entity instanceof Player player) {
+	public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		if (!world.isClientSide() && entity instanceof Player player) {
 			var relic = velrondevs.extrabotany.xplat.EXplatAbstractions.INSTANCE.findRelic(stack);
 			if (relic != null) {
 				relic.tickBinding(player);
 			}
 		}
-		super.inventoryTick(stack, world, entity, slot, selected);
+		super.inventoryTick(stack, world, entity, eqSlot);
 	}
 
 	@Override
-	public boolean isValidRepairItem(ItemStack toRepair, ItemStack repair) {
-		return super.isValidRepairItem(toRepair, repair);
-	}
-
-	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		tooltip.add(Component.translatable("tooltip.extrabotany.excalibur").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
-		tooltip.add(Component.literal(""));
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		tooltip.accept(Component.translatable("tooltip.extrabotany.excalibur").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
+		tooltip.accept(Component.literal(""));
 		RelicImpl.addDefaultTooltip(stack, tooltip);
 	}
 

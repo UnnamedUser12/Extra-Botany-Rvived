@@ -2,9 +2,11 @@ package velrondevs.extrabotany.common.advancements;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.criterion.MinMaxBounds;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -18,7 +20,18 @@ public final class MinMaxBoundsExtension {
 
 	public record Longs(Optional<Long> min, Optional<Long> max) implements MinMaxBounds<Long> {
 		public static final Longs ANY = new Longs(Optional.empty(), Optional.empty());
-		public static final Codec<Longs> CODEC = MinMaxBounds.createCodec(Codec.LONG, Longs::new);
+		private static final Codec<Longs> RANGE_CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.LONG.optionalFieldOf("min").forGetter(Longs::min),
+				Codec.LONG.optionalFieldOf("max").forGetter(Longs::max)
+		).apply(i, Longs::new));
+		public static final Codec<Longs> CODEC = Codec.either(RANGE_CODEC, Codec.LONG).xmap(
+				either -> either.map(v -> v, Longs::exactly),
+				value -> value.min.isPresent() && value.min.equals(value.max) ? Either.right(value.min.get()) : Either.left(value));
+
+		@Override
+		public MinMaxBounds.Bounds<Long> bounds() {
+			return new MinMaxBounds.Bounds<>(min, max);
+		}
 
 		public static Longs exactly(long value) {
 			return new Longs(Optional.of(value), Optional.of(value));
@@ -47,16 +60,14 @@ public final class MinMaxBoundsExtension {
 
 		public static Longs fromReader(StringReader reader, Function<Long, Long> formatter)
 				throws CommandSyntaxException {
-			return MinMaxBounds.<Long, Longs>fromReader(reader, Longs::create, Long::parseLong,
-					CommandSyntaxException.BUILT_IN_EXCEPTIONS::readerInvalidLong, formatter);
-		}
-
-		private static Longs create(StringReader reader, Optional<Long> min, Optional<Long> max)
-				throws CommandSyntaxException {
-			if (min.isPresent() && max.isPresent() && min.get() > max.get()) {
+			int start = reader.getCursor();
+			MinMaxBounds.Bounds<Long> bounds = MinMaxBounds.Bounds.fromReader(reader, Long::parseLong,
+					CommandSyntaxException.BUILT_IN_EXCEPTIONS::readerInvalidLong);
+			if (bounds.areSwapped()) {
+				reader.setCursor(start);
 				throw MinMaxBounds.ERROR_SWAPPED.createWithContext(reader);
 			}
-			return new Longs(min, max);
+			return new Longs(bounds.min().map(formatter), bounds.max().map(formatter));
 		}
 	}
 }

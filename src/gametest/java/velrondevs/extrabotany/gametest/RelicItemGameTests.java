@@ -2,24 +2,24 @@ package velrondevs.extrabotany.gametest;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.Husk;
+import net.minecraft.world.entity.monster.zombie.Husk;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import top.theillusivec4.curios.api.CuriosApi;
 
@@ -70,7 +70,7 @@ public final class RelicItemGameTests {
 	}
 
 	private static Item item(String id) {
-		return BuiltInRegistries.ITEM.get(ResourceLocation.parse(id));
+		return BuiltInRegistries.ITEM.getValue(Identifier.parse(id));
 	}
 
 	/**
@@ -83,7 +83,7 @@ public final class RelicItemGameTests {
 		if (relic != null) {
 			relic.bindToUUID(player.getUUID());
 		}
-		var inventory = CuriosApi.getCuriosInventory(player).orElseThrow();
+		var inventory = CuriosTestHelper.inventory(player);
 		var handler = inventory.getCurios().values().stream()
 				.filter(candidate -> candidate.getStacks().getSlots() > 0)
 				.findFirst().orElseThrow();
@@ -170,7 +170,7 @@ public final class RelicItemGameTests {
 			helper.assertTrue(weapon.isRemoved(), "The weapon did not go away after its hit");
 			float lost = husk.getMaxHealth() - husk.getHealth();
 			helper.assertTrue(Math.abs(lost - 5F) < 1.0E-4F, "Expected 5 magic damage, found " + lost);
-			helper.assertTrue(player.hasEffect(MobEffects.DAMAGE_BOOST), "The weapon did not give Strength to the player");
+			helper.assertTrue(player.hasEffect(MobEffects.STRENGTH), "The weapon did not give Strength to the player");
 			helper.succeed();
 		});
 	}

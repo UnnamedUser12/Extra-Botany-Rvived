@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "C": {
-      "item": "extrabotany:the_chaos"
-    },
-    "P": {
-      "item": "botania:pixie_dust"
-    },
-    "T": {
-      "item": "botania:livingwood_twig"
-    }
+    "C": "extrabotany:the_chaos",
+    "P": "botania:pixie_dust",
+    "T": "botania:livingwood_twig"
   },
   "pattern": [
     " PC",

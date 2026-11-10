@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "A": {
-      "tag": "extrabotany:orichalcos_ingots"
-    },
-    "B": {
-      "item": "extrabotany:shadow_katana"
-    }
+    "A": "#extrabotany:orichalcos_ingots",
+    "B": "extrabotany:shadow_katana"
   },
   "pattern": [
     "  A",

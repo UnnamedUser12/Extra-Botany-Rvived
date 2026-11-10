@@ -4,7 +4,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -32,7 +32,7 @@ public class StonesiaProvider extends ExtraBotanyRecipeProvider {
 
 	@Override
 	public void buildRecipes(RecipeOutput recipeOutput) {
-		Consumer<Result> consumer = result -> recipeOutput.accept(result.id(),
+		Consumer<Result> consumer = result -> recipeOutput.accept(key(result.id()),
 				new StonesiasRecipe(result.input(), result.outputMana()), null);
 		//Stone
 		consumer.accept(new Result(id("stone"), forTag(BlockTags.BASE_STONE_OVERWORLD), 20));
@@ -73,7 +73,7 @@ public class StonesiaProvider extends ExtraBotanyRecipeProvider {
 		//consumer.accept(new Result(id("mithril_ore"), ore("mithril"), 1300));//秘银
 	}
 
-	protected ResourceLocation id(String id) {
+	protected Identifier id(String id) {
 		return prefix("stonesia/" + id);
 	}
 
@@ -81,7 +81,7 @@ public class StonesiaProvider extends ExtraBotanyRecipeProvider {
 		return StateIngredientHelper.of(block);
 	}
 
-	protected static StateIngredient forTag(ResourceLocation tag) {
+	protected static StateIngredient forTag(Identifier tag) {
 		return StateIngredientHelper.of(TagKey.create(Registries.BLOCK, tag));
 	}
 
@@ -102,7 +102,7 @@ public class StonesiaProvider extends ExtraBotanyRecipeProvider {
 		));
 	}
 
-	private record Result(ResourceLocation id, StateIngredient input, int outputMana) {}
+	private record Result(Identifier id, StateIngredient input, int outputMana) {}
 
 	@Override
 	public String getName() {

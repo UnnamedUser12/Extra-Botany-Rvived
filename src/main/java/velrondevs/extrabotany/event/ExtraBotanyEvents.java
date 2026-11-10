@@ -18,7 +18,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import velrondevs.extrabotany.api.item.BlockChangedListenerBauble;
 import velrondevs.extrabotany.api.item.LeftClickItem;
@@ -217,7 +216,7 @@ public final class ExtraBotanyEvents {
         // 这个事件只在客户端触发。服务端不知道玩家挥了空，所以要发包通知。
         // This event only occurs on the client. The server does not know that the player made a swing at nothing, so the client sends a packet.
         if (event.getItemStack().getItem() instanceof LeftClickItem) {
-            PacketDistributor.sendToServer(LeftClickEmptyPacket.INSTANCE);
+            net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(LeftClickEmptyPacket.INSTANCE);
         }
         ExcaliburItem.leftClick(event);
         FeatherOfJingweiItem.leftClick(event);

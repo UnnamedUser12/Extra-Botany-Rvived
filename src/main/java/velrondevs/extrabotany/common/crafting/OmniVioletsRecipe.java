@@ -11,6 +11,9 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+
+import velrondevs.botania.api.recipe.BotaniaRecipe;
+import velrondevs.botania.common.crafting.BotaniaRecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 
 import velrondevs.extrabotany.api.recipe.OmnivioletRecipe;
@@ -39,7 +42,7 @@ public class OmniVioletsRecipe implements OmnivioletRecipe {
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<? extends BotaniaRecipe> getSerializer() {
 		return ExtraBotanyRecipeTypes.OMNIVIOLET_SERIALIZER;
 	}
 
@@ -48,9 +51,9 @@ public class OmniVioletsRecipe implements OmnivioletRecipe {
 		return ExtraBotanyRecipeTypes.OMNIVIOLET_RECIPE_TYPE;
 	}
 
-	public static class Serializer implements RecipeSerializer<OmniVioletsRecipe> {
+	public static class Serializer implements BotaniaRecipeSerializer<OmniVioletsRecipe> {
 		private static final MapCodec<OmniVioletsRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-				Ingredient.CODEC_NONEMPTY.fieldOf("input").forGetter(OmniVioletsRecipe::getInput),
+				Ingredient.CODEC.fieldOf("input").forGetter(OmniVioletsRecipe::getInput),
 				Codec.INT.fieldOf("burnTime").forGetter(OmniVioletsRecipe::getBurnTime)
 		).apply(instance, OmniVioletsRecipe::new));
 

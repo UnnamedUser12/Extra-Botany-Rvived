@@ -5,10 +5,11 @@ import com.mojang.blaze3d.platform.Window;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
 
+import velrondevs.botania.client.core.helper.RenderHelper;
 import velrondevs.botania.api.block_entity.BindableSpecialFlowerBlockEntity;
 
 import velrondevs.extrabotany.common.block.flower.functional.ManalinkBlockEntity;
@@ -25,7 +26,7 @@ public class ManalinkWandHud extends BindableSpecialFlowerBlockEntity.BindableFl
 	}
 
 	@Override
-	public void renderHUD(GuiGraphics gui, Minecraft mc, int minLeft, int minRight, int minDown) {
+	public void renderHUD(GuiGraphicsExtractor gui, Minecraft mc, int minLeft, int minRight, int minDown) {
 		Window window = mc.getWindow();
 		Font font = mc.font;
 		GlobalPos pos = flower.getLinkPos().orElse(null);
@@ -35,7 +36,7 @@ public class ManalinkWandHud extends BindableSpecialFlowerBlockEntity.BindableFl
 		}
 
 		Component levelComponent = Component.translatable("message.extrabotany.actionbar.bind_to_pos",
-				pos.dimension().location() + String.format(" %d, %d, %d", pos.pos().getX(), pos.pos().getY(), pos.pos().getZ()));
+				pos.dimension().identifier() + String.format(" %d, %d, %d", pos.pos().getX(), pos.pos().getY(), pos.pos().getZ()));
 
 		int halfWidth = (int) (((float) (font.width(levelComponent) + 24) / 2) * TEXT_SCALE);
 		int centerX = window.getGuiScaledWidth() / 2;
@@ -43,9 +44,9 @@ public class ManalinkWandHud extends BindableSpecialFlowerBlockEntity.BindableFl
 
 		super.renderHUD(gui, mc, halfWidth + 2, halfWidth + 2, 48);
 
-		gui.pose().pushPose();
-		gui.pose().scale(TEXT_SCALE, TEXT_SCALE, 1.0F);
-		gui.drawString(font, levelComponent, (int) ((centerX - halfWidth + 12) / TEXT_SCALE), (int) ((centerY + 34) / TEXT_SCALE), ChatFormatting.GREEN.getColor());
-		gui.pose().popPose();
+		gui.pose().pushMatrix();
+		gui.pose().scale(TEXT_SCALE, TEXT_SCALE);
+		RenderHelper.drawString(gui, font, levelComponent, (int) ((centerX - halfWidth + 12) / TEXT_SCALE), (int) ((centerY + 34) / TEXT_SCALE), ChatFormatting.GREEN.getColor());
+		gui.pose().popMatrix();
 	}
 }

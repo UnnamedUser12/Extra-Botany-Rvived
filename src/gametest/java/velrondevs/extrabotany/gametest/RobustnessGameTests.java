@@ -6,16 +6,15 @@ import velrondevs.extrabotany.common.crafting.recipe.DasRheingoldChangeSoulBound
 import velrondevs.extrabotany.common.helper.ItemNBTHelper;
 import velrondevs.extrabotany.registry.ExtraBotanyItems;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import java.util.List;
 import java.util.UUID;
@@ -51,7 +50,7 @@ public final class RobustnessGameTests {
         flower.getSoundHeard().put(sound, Integer.MAX_VALUE);
         var saved = flower.saveWithoutMetadata(h.getLevel().registryAccess());
         var restored = flower(h);
-        restored.loadWithComponents(saved, h.getLevel().registryAccess());
+        restored.loadWithComponents(TestNbt.input(h.getLevel().registryAccess(), saved));
         for (int i = 0; i < 2; i++) {
             restored.onSoundHeard(sound);
             h.assertTrue(restored.getMana() == 0 && restored.getSoundHeard().get(sound) == Integer.MAX_VALUE,
@@ -64,8 +63,8 @@ public final class RobustnessGameTests {
     public static void resoncundIgnoresInvalidSavedSoundsWithoutLosingValidCounts(GameTestHelper h) {
         var sounds = new CompoundTag();
         var valid = SoundEvents.NOTE_BLOCK_HARP.value();
-        sounds.putInt(valid.getLocation().toString(), 7);
-        sounds.putInt(SoundEvents.NOTE_BLOCK_BASS.value().getLocation().toString(), -1);
+        sounds.putInt(valid.location().toString(), 7);
+        sounds.putInt(SoundEvents.NOTE_BLOCK_BASS.value().location().toString(), -1);
         sounds.putInt("not a valid sound ID", 4);
         sounds.putInt("extrabotany:nonexistent_robustness_sound", 5);
         var saved = new CompoundTag();
@@ -81,7 +80,7 @@ public final class RobustnessGameTests {
 
     @GameTest(template = "empty", timeoutTicks = 20)
     public static void rheingoldChangesOnlyOneRelicAndRejectsForeignSlots(GameTestHelper h) {
-        var recipe = new DasRheingoldChangeSoulBoundRecipe(CraftingBookCategory.EQUIPMENT);
+        var recipe = new DasRheingoldChangeSoulBoundRecipe();
         var oldOwner = UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
         var newOwner = UUID.fromString("11111111-2222-3333-4444-555555555555");
         for (boolean bound : new boolean[] {true, false}) {
@@ -94,7 +93,7 @@ public final class RobustnessGameTests {
             var beforeRelic = relic.copy();
             var input = CraftingInput.of(2, 2, List.of(relic, ItemStack.EMPTY, gold, ItemStack.EMPTY));
             h.assertTrue(recipe.matches(input, h.getLevel()), "Valid relic and Rheingold were rejected");
-            var output = recipe.assemble(input, h.getLevel().registryAccess());
+            var output = recipe.assemble(input);
             h.assertTrue(output.is(ExtraBotanyItems.excalibur) && output.getCount() == 1
                     && ItemNBTHelper.getInt(output, "robustness_marker", 0) == 73,
                     "Binding changed the relic data or duplicated an overstacked input");
@@ -112,7 +111,7 @@ public final class RobustnessGameTests {
                     List.of(relic, ItemStack.EMPTY, relic.copy()))) {
                 var invalid = CraftingInput.of(3, 1, stacks);
                 h.assertTrue(!recipe.matches(invalid, h.getLevel())
-                        && recipe.assemble(invalid, h.getLevel().registryAccess()).isEmpty(),
+                        && recipe.assemble(invalid).isEmpty(),
                         "Foreign, duplicate or missing input was accepted by the binding recipe");
             }
         }

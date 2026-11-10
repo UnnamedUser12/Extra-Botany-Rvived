@@ -1,7 +1,7 @@
 package velrondevs.extrabotany.common.proxy;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 
 import velrondevs.botania.xplat.XplatAbstractions;
@@ -38,7 +38,7 @@ public interface Proxy extends velrondevs.botania.common.proxy.Proxy {
 	 * 本机玩家是不是已经完成了这个进度。服务端上总是 {@code false}。
 	 * Tells if the local player completed this advancement. Always {@code false} on a server.
 	 */
-	default boolean hasAdvancementOnClient(ResourceLocation id) {
+	default boolean hasAdvancementOnClient(Identifier id) {
 		return false;
 	}
 }

@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.item.equipment.bauble;
 
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -115,7 +117,7 @@ public class NatureOrbItem extends BaubleItem implements CustomCreativeTabConten
 			// 两端都取消这次右键，这样信标的界面不会打开。
 			// The use is cancelled on the two sides, so that the beacon screen does not open.
 			event.setCanceled(true);
-			event.setCancellationResult(InteractionResult.sidedSuccess(level.isClientSide()));
+			event.setCancellationResult(InteractionResult.SUCCESS);
 			player.swing(event.getHand());
 		}
 	}
@@ -154,18 +156,18 @@ public class NatureOrbItem extends BaubleItem implements CustomCreativeTabConten
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		super.appendHoverText(stack, context, tooltip, flags);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		super.appendHoverText(stack, context, tooltipDisplay, tooltip, flags);
 		var natureItem = EXplatAbstractions.INSTANCE.findNatureEnergyItem(stack);
 
-		tooltip.add(Component.translatable("tooltip.extrabotany.nature_orb.tier1")
+		tooltip.accept(Component.translatable("tooltip.extrabotany.nature_orb.tier1")
 				.withStyle(getTier(stack) >= 1 ? ChatFormatting.AQUA : ChatFormatting.GRAY));
-		tooltip.add(Component.translatable("tooltip.extrabotany.nature_orb.tier2")
+		tooltip.accept(Component.translatable("tooltip.extrabotany.nature_orb.tier2")
 				.withStyle(getTier(stack) >= 3 ? ChatFormatting.RED : ChatFormatting.GRAY));
-		tooltip.add(Component.translatable("tooltip.extrabotany.nature_orb.tier3")
+		tooltip.accept(Component.translatable("tooltip.extrabotany.nature_orb.tier3")
 				.withStyle(getTier(stack) >= 4 ? ChatFormatting.GREEN : ChatFormatting.GRAY));
-		tooltip.add(Component.empty());
-		tooltip.add(Component.translatable("tooltip.extrabotany.nature_orb.energy", natureItem.getEnergy() + "/" + natureItem.getMaxEnergy())
+		tooltip.accept(Component.empty());
+		tooltip.accept(Component.translatable("tooltip.extrabotany.nature_orb.energy", natureItem.getEnergy() + "/" + natureItem.getMaxEnergy())
 				.withStyle(ChatFormatting.GRAY));
 	}
 

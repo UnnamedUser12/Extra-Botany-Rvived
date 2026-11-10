@@ -1,11 +1,14 @@
 package velrondevs.extrabotany.common.item.relic.void_archives.variants;
 
+import net.minecraft.server.level.ServerLevel;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -13,7 +16,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.level.Level;
 
 import org.jetbrains.annotations.Nullable;
@@ -43,15 +46,15 @@ public class InfiniteWine implements VoidArchivesVariant, BrewItem {
 	private static final String ID = "infinite_wine";
 	private static final String TAG_BREW_KEY = "brewKey";
 
-	private static final ResourceLocation DEFAULT_BREW = prefix(LibBrewNames.ALL_IN_ONE);
+	private static final Identifier DEFAULT_BREW = prefix(LibBrewNames.ALL_IN_ONE);
 	private static final int MANA_PER_USE = 20_000;
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		var relic = velrondevs.extrabotany.xplat.EXplatAbstractions.INSTANCE.findRelic(stack);
 		if (relic == null || !relic.isRightPlayer(player)) {
-			return InteractionResultHolder.pass(stack);
+			return InteractionResult.PASS;
 		}
 
 		return ItemUtils.startUsingInstantly(level, player, hand);
@@ -72,13 +75,13 @@ public class InfiniteWine implements VoidArchivesVariant, BrewItem {
 			for (MobEffectInstance effect : getBrew(stack).getPotionEffects(stack)) {
 				MobEffectInstance newEffect = new MobEffectInstance(effect.getEffect(), (int) ((float) effect.getDuration() * (1.0 + getDurationMultiplier())), effect.getAmplifier() + getAmplifierAddition(), true, true);
 				if (effect.getEffect().value().isInstantenous()) {
-					effect.getEffect().value().applyInstantenousEffect(living, living, living, newEffect.getAmplifier(), 1F);
+					effect.getEffect().value().applyInstantenousEffect((ServerLevel) level, living, living, living, newEffect.getAmplifier(), 1F);
 				} else {
 					living.addEffect(newEffect);
 				}
 			}
 
-			if (level.random.nextBoolean()) {
+			if (level.getRandom().nextBoolean()) {
 				level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 1F, 1F);
 			}
 		}
@@ -87,8 +90,8 @@ public class InfiniteWine implements VoidArchivesVariant, BrewItem {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
-		tooltipComponents.add(Component.empty());
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipComponents, TooltipFlag isAdvanced) {
+		tooltipComponents.accept(Component.empty());
 		addPotionTooltip(getBrew(stack).getPotionEffects(stack), tooltipComponents,
 				(float) (1.0D + getDurationMultiplier()), getAmplifierAddition(), context.tickRate());
 	}
@@ -101,8 +104,8 @@ public class InfiniteWine implements VoidArchivesVariant, BrewItem {
 	}
 
 	@Override
-	public UseAnim getUseAnimation(ItemStack stack) {
-		return UseAnim.DRINK;
+	public ItemUseAnimation getUseAnimation(ItemStack stack) {
+		return ItemUseAnimation.DRINK;
 	}
 
 	@Override
@@ -119,7 +122,7 @@ public class InfiniteWine implements VoidArchivesVariant, BrewItem {
 		return MANA_PER_USE;
 	}
 
-	public static ResourceLocation getDefaultBrew() {
+	public static Identifier getDefaultBrew() {
 		return DEFAULT_BREW;
 	}
 

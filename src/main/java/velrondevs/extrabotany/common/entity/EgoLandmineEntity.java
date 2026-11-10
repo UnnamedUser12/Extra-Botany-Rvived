@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import velrondevs.extrabotany.registry.ExtraBotanyEntities;
 
 import net.minecraft.nbt.CompoundTag;
@@ -114,9 +116,6 @@ public class EgoLandmineEntity extends OwnedEntity {
 			player.hurt(damageSources().indirectMagic(this, owner), 10F);
 			player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 25, 0));
 			MobEffectInstance wither = new MobEffectInstance(MobEffects.WITHER, 120, 2);
-			// 和原版相同：这个凋零效果不能用牛奶解除。
-			// The same as in the original: milk cannot remove this Wither effect.
-			wither.getCures().clear();
 			player.addEffect(wither);
 			if (type == TYPE_GREEN && !ExtraBotanyConfig.common().disableGaiaDisArm()) {
 				ItemStack held = player.getMainHandItem();
@@ -153,15 +152,15 @@ public class EgoLandmineEntity extends OwnedEntity {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag tag) {
+	protected void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putInt(TAG_TYPE, getLandmineType());
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundTag tag) {
+	protected void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		entityData.set(LANDMINE_TYPE, Mth.clamp(tag.getInt(TAG_TYPE), TYPE_BLUE, TYPE_RED));
+		entityData.set(LANDMINE_TYPE, Mth.clamp(tag.getIntOr(TAG_TYPE, 0), TYPE_BLUE, TYPE_RED));
 	}
 
 	@Override

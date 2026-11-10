@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "extrabotany:shadow_warrior"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "extrabotany:shadow_warrior"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "extrabotany:shadow_warrior"
+      }
+    ]
+  }
+}

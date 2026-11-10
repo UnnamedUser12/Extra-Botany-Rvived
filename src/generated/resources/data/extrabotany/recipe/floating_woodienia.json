@@ -3,15 +3,10 @@
   "category": "misc",
   "group": "extrabotany:floating_flower",
   "ingredients": [
-    {
-      "tag": "botania:floating_flowers"
-    },
-    {
-      "item": "extrabotany:woodienia"
-    }
+    "#botania:floating_flowers",
+    "extrabotany:woodienia"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:floating_woodienia"
   }
 }

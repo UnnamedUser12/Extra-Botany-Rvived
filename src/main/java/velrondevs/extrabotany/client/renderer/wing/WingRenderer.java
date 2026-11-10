@@ -2,18 +2,18 @@ package velrondevs.extrabotany.client.renderer.wing;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+
+import velrondevs.botania.client.core.helper.RenderHelper;
+
+import velrondevs.extrabotany.client.renderer.IconModelRenderer;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ public interface WingRenderer {
 	 * 这种翅膀使用的全部模型。
 	 * All models that these wings use.
 	 */
-	List<ResourceLocation> models();
+	List<Identifier> models();
 
 	void render(HumanoidModel<?> bipedModel, ItemStack stack, LivingEntity living, PoseStack ms,
 			MultiBufferSource buffers, int light, float partialTicks);
@@ -49,13 +49,14 @@ public interface WingRenderer {
 	 * 用物品渲染器画出一个翅膀模型。资源包里没有这个模型时什么也不画。
 	 * Draws one wing model with the item renderer. When the resource packs do not have this model, nothing is drawn.
 	 */
-	static void drawModel(ResourceLocation modelId, ItemStack stack, PoseStack ms, MultiBufferSource buffers, int light) {
-		Minecraft minecraft = Minecraft.getInstance();
-		ModelManager modelManager = minecraft.getModelManager();
-		BakedModel model = modelManager.getModel(ModelResourceLocation.standalone(modelId));
-		if (model == modelManager.getMissingModel()) {
+	static void drawModel(Identifier modelId, ItemStack stack, PoseStack ms, MultiBufferSource buffers, int light) {
+		BlockStateModelPart model = IconModelRenderer.get(modelId);
+		if (model == null) {
 			return;
 		}
-		minecraft.getItemRenderer().render(stack, ItemDisplayContext.NONE, false, ms, buffers, light, OverlayTexture.NO_OVERLAY, model);
+		ms.pushPose();
+		ms.translate(-0.5F, -0.5F, -0.5F);
+		RenderHelper.renderModelPart(model, ms, buffers, light, OverlayTexture.NO_OVERLAY);
+		ms.popPose();
 	}
 }

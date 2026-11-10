@@ -8,7 +8,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
@@ -76,7 +75,7 @@ public class BlockLootProvider extends BlockLootSubProvider {
 
 	@SuppressWarnings("deprecation")
 	private LootTable.Builder createFlowerDataTable(Block block, String... tags) {
-		CopyCustomDataFunction.Builder copyData = CopyCustomDataFunction.copyData(ContextNbtProvider.BLOCK_ENTITY);
+		CopyCustomDataFunction.Builder copyData = CopyCustomDataFunction.copyData(ContextNbtProvider.INLINE_CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, new com.google.gson.JsonPrimitive("block_entity")).getOrThrow());
 		for (String tag : tags) {
 			copyData.copy(tag, tag);
 		}
@@ -90,7 +89,7 @@ public class BlockLootProvider extends BlockLootSubProvider {
 		// Blocks with no loot table (for example Fluided Mana) are not included: the base class does not permit a loot table for them.
 		return BuiltInRegistries.BLOCK.stream()
 				.filter(block -> LibMisc.MOD_ID.equals(BuiltInRegistries.BLOCK.getKey(block).getNamespace()))
-				.filter(block -> block.getLootTable() != BuiltInLootTables.EMPTY)
+				.filter(block -> block.getLootTable().isPresent())
 				.toList();
 	}
 }

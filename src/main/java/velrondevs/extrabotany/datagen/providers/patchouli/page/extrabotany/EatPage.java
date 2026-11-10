@@ -2,7 +2,7 @@ package velrondevs.extrabotany.datagen.providers.patchouli.page.extrabotany;
 
 import com.demonwav.mcdev.annotations.Translatable;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ItemLike;
 
 import velrondevs.extrabotany.datagen.providers.patchouli.page.AbstractPage;
@@ -31,7 +31,7 @@ public class EatPage extends AbstractPage<EatPage> {
 	}
 
 	@Override
-	public ResourceLocation getType() {
-		return ResourceLocation.tryParse("extrabotany:eat");
+	public Identifier getType() {
+		return Identifier.tryParse("extrabotany:eat");
 	}
 }

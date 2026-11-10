@@ -4,7 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -29,7 +29,7 @@ public class AeroStoneItem extends BaubleItem {
 
 	@Override
 	public Multimap<Holder<Attribute>, AttributeModifier> getEquippedAttributeModifiers(ItemStack stack) {
-		ResourceLocation slotId = getBaubleModifierId(stack);
+		Identifier slotId = getBaubleModifierId(stack);
 		Multimap<Holder<Attribute>, AttributeModifier> attributes = HashMultimap.create();
 		addSpeedModifiers(attributes, slotId);
 		return attributes;
@@ -39,7 +39,7 @@ public class AeroStoneItem extends BaubleItem {
 	 * 把风之符石的属性加到表里。四元归一石也使用这个方法。
 	 * Adds the attributes of the Aero Stone to the map. The Community also uses this method.
 	 */
-	static void addSpeedModifiers(Multimap<Holder<Attribute>, AttributeModifier> attributes, ResourceLocation slotId) {
+	static void addSpeedModifiers(Multimap<Holder<Attribute>, AttributeModifier> attributes, Identifier slotId) {
 		attributes.put(Attributes.MOVEMENT_SPEED,
 				new AttributeModifier(slotId, SPEED_BONUS, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		// 玩家没有飞行速度属性。这一条只对有该属性的生物生效，和原版一致。

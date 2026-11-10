@@ -3,5 +3,8 @@
   "flower": {
     "parent": "extrabotany:block/mirrowtunia"
   },
-  "loader": "botania:floating_flower"
+  "loader": "botania:floating_flower",
+  "textures": {
+    "particle": "extrabotany:block/mirrowtunia"
+  }
 }

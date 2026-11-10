@@ -1,13 +1,13 @@
 package velrondevs.extrabotany.api.item;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -69,7 +69,7 @@ public interface ArmorSet {
 		ItemStack[] stacks = getArmorSetStacks();
 		for (ItemStack armor : stacks) {
 			MutableComponent cmp = Component.literal(" - ").append(armor.getHoverName());
-			EquipmentSlot slot = ((ArmorItem) armor.getItem()).getEquipmentSlot();
+			EquipmentSlot slot = armor.get(DataComponents.EQUIPPABLE).slot();
 			cmp.withStyle(hasArmorSetItem(player, slot) ? ChatFormatting.GREEN : ChatFormatting.GRAY);
 			list.add(cmp);
 		}

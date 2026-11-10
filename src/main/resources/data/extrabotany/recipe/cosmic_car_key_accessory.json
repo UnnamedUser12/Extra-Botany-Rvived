@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "equipment",
   "ingredients": [
-    {
-      "item": "extrabotany:cosmic_car_key"
-    }
+    "extrabotany:cosmic_car_key"
   ],
   "result": {
     "count": 1,

@@ -15,13 +15,15 @@ import velrondevs.extrabotany.common.item.VoidCallerItem;
 import velrondevs.extrabotany.common.item.WalkingCaneItem;
 import velrondevs.extrabotany.common.item.ZadkielItem;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
 import velrondevs.botania.common.item.lens.LensItem;
@@ -75,6 +77,7 @@ import velrondevs.extrabotany.registry.ExtraBotanyJukeboxSongs;
 import velrondevs.extrabotany.common.lib.LibItemNames;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -91,7 +94,7 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>The items are registered in the sequence of their declarations, and the creative tab shows them in this sequence.
  */
 public final class ExtraBotanyItems {
-	public static final Map<ResourceLocation, Item> ALL = new LinkedHashMap<>();
+	public static final Map<Identifier, Item> ALL = new LinkedHashMap<>();
 
 	// 这些注册 ID 来自旧版本。它们保持不变，这样旧存档里的物品不会消失。
 	// These registry IDs come from old versions. They stay as they are, so that the items in old saves do not go away.
@@ -99,7 +102,7 @@ public final class ExtraBotanyItems {
 	public static final Item universalPetal = make(prefix("universal_petal"), new Item(defaultBuilder()));
 	public static final Item emptyCoreOfTheVoid = make(prefix("empty_core_of_the_void"), new Item(unstackable().rarity(Rarity.EPIC)));
 	public static final Item manaDrink = make(prefix("mana_drink"), new ManaDrinkItem(defaultBuilder()
-			.food(new FoodProperties.Builder().nutrition(1).saturationModifier(0.1F).alwaysEdible().build())));
+			.food(new FoodProperties.Builder().nutrition(1).saturationModifier(0.1F).alwaysEdible().build(), Consumables.DEFAULT_DRINK)));
 	public static final Item lensSuperconductor = make(prefix("lens_superconductor"), new LensItem(stackTo16(), new SuperconductorLens(), LensItem.PROP_POWER));
 
 	//Mana Item
@@ -183,31 +186,31 @@ public final class ExtraBotanyItems {
 	// 来自原版（ExtraMeteorP）的三套盔甲和银翼射手。
 	// The three armor sets and the Silver Bullet from the original (ExtraMeteorP).
 	public static final Item mikuHelm = make(prefix("miku_helm"),
-			new MikuArmorItem(ArmorItem.Type.HELMET, armorProperties(ArmorItem.Type.HELMET, ExtraBotanyArmorMaterials.MIKU_DURABILITY_FACTOR)));
+			new MikuArmorItem(ArmorType.HELMET, unstackableCustomDamage()));
 	public static final Item mikuChest = make(prefix("miku_chest"),
-			new MikuArmorItem(ArmorItem.Type.CHESTPLATE, armorProperties(ArmorItem.Type.CHESTPLATE, ExtraBotanyArmorMaterials.MIKU_DURABILITY_FACTOR)));
+			new MikuArmorItem(ArmorType.CHESTPLATE, unstackableCustomDamage()));
 	public static final Item mikuLegs = make(prefix("miku_legs"),
-			new MikuArmorItem(ArmorItem.Type.LEGGINGS, armorProperties(ArmorItem.Type.LEGGINGS, ExtraBotanyArmorMaterials.MIKU_DURABILITY_FACTOR)));
+			new MikuArmorItem(ArmorType.LEGGINGS, unstackableCustomDamage()));
 	public static final Item mikuBoots = make(prefix("miku_boots"),
-			new MikuArmorItem(ArmorItem.Type.BOOTS, armorProperties(ArmorItem.Type.BOOTS, ExtraBotanyArmorMaterials.MIKU_DURABILITY_FACTOR)));
+			new MikuArmorItem(ArmorType.BOOTS, unstackableCustomDamage()));
 
 	public static final Item shootingGuardianHelm = make(prefix("shootingguardian_helm"),
-			new ShootingGuardianHelmetItem(armorProperties(ArmorItem.Type.HELMET, ExtraBotanyArmorMaterials.SHOOTING_GUARDIAN_DURABILITY_FACTOR)));
+			new ShootingGuardianHelmetItem(unstackableCustomDamage()));
 	public static final Item shootingGuardianChest = make(prefix("shootingguardian_chest"),
-			new ShootingGuardianArmorItem(ArmorItem.Type.CHESTPLATE, armorProperties(ArmorItem.Type.CHESTPLATE, ExtraBotanyArmorMaterials.SHOOTING_GUARDIAN_DURABILITY_FACTOR)));
+			new ShootingGuardianArmorItem(ArmorType.CHESTPLATE, unstackableCustomDamage()));
 	public static final Item shootingGuardianLegs = make(prefix("shootingguardian_legs"),
-			new ShootingGuardianArmorItem(ArmorItem.Type.LEGGINGS, armorProperties(ArmorItem.Type.LEGGINGS, ExtraBotanyArmorMaterials.SHOOTING_GUARDIAN_DURABILITY_FACTOR)));
+			new ShootingGuardianArmorItem(ArmorType.LEGGINGS, unstackableCustomDamage()));
 	public static final Item shootingGuardianBoots = make(prefix("shootingguardian_boots"),
-			new ShootingGuardianArmorItem(ArmorItem.Type.BOOTS, armorProperties(ArmorItem.Type.BOOTS, ExtraBotanyArmorMaterials.SHOOTING_GUARDIAN_DURABILITY_FACTOR)));
+			new ShootingGuardianArmorItem(ArmorType.BOOTS, unstackableCustomDamage()));
 
 	public static final Item silentSagesHelm = make(prefix("silentsages_helm"),
-			new SilentSagesArmorItem(ArmorItem.Type.HELMET, armorProperties(ArmorItem.Type.HELMET, ExtraBotanyArmorMaterials.SILENT_SAGES_DURABILITY_FACTOR)));
+			new SilentSagesArmorItem(ArmorType.HELMET, unstackableCustomDamage()));
 	public static final Item silentSagesChest = make(prefix("silentsages_chest"),
-			new SilentSagesArmorItem(ArmorItem.Type.CHESTPLATE, armorProperties(ArmorItem.Type.CHESTPLATE, ExtraBotanyArmorMaterials.SILENT_SAGES_DURABILITY_FACTOR)));
+			new SilentSagesArmorItem(ArmorType.CHESTPLATE, unstackableCustomDamage()));
 	public static final Item silentSagesLegs = make(prefix("silentsages_legs"),
-			new SilentSagesArmorItem(ArmorItem.Type.LEGGINGS, armorProperties(ArmorItem.Type.LEGGINGS, ExtraBotanyArmorMaterials.SILENT_SAGES_DURABILITY_FACTOR)));
+			new SilentSagesArmorItem(ArmorType.LEGGINGS, unstackableCustomDamage()));
 	public static final Item silentSagesBoots = make(prefix("silentsages_boots"),
-			new SilentSagesArmorItem(ArmorItem.Type.BOOTS, armorProperties(ArmorItem.Type.BOOTS, ExtraBotanyArmorMaterials.SILENT_SAGES_DURABILITY_FACTOR)));
+			new SilentSagesArmorItem(ArmorType.BOOTS, unstackableCustomDamage()));
 
 	public static final Item silverBullet = make(prefix("silver_bullet"), new SilverBulletItem(unstackable()));
 	public static final Item flamescionWeapon = make(prefix("flamescion_weapon"),
@@ -252,42 +255,42 @@ public final class ExtraBotanyItems {
 
 	//Armor
 	public static final Item starryIdolHeadgear = make(prefix(LibItemNames.STARRY_IDOL_HEADGEAR),
-			new StarryIdolHeadgearItem(armorProperties(ArmorItem.Type.HELMET, ExtraBotanyArmorMaterials.STARRY_IDOL_DURABILITY_FACTOR)));
+			new StarryIdolHeadgearItem(unstackableCustomDamage()));
 	public static final Item starryIdolSuit = make(prefix(LibItemNames.STARRY_IDOL_SUIT),
-			new StarryIdolArmorItem(ArmorItem.Type.CHESTPLATE, armorProperties(ArmorItem.Type.CHESTPLATE, ExtraBotanyArmorMaterials.STARRY_IDOL_DURABILITY_FACTOR)));
+			new StarryIdolArmorItem(ArmorType.CHESTPLATE, unstackableCustomDamage()));
 	public static final Item starryIdolSkirt = make(prefix(LibItemNames.STARRY_IDOL_SKIRT),
-			new StarryIdolArmorItem(ArmorItem.Type.LEGGINGS, armorProperties(ArmorItem.Type.LEGGINGS, ExtraBotanyArmorMaterials.STARRY_IDOL_DURABILITY_FACTOR)));
+			new StarryIdolArmorItem(ArmorType.LEGGINGS, unstackableCustomDamage()));
 	public static final Item starryIdolBoots = make(prefix(LibItemNames.STARRY_IDOL_BOOTS),
-			new StarryIdolArmorItem(ArmorItem.Type.BOOTS, armorProperties(ArmorItem.Type.BOOTS, ExtraBotanyArmorMaterials.STARRY_IDOL_DURABILITY_FACTOR)));
+			new StarryIdolArmorItem(ArmorType.BOOTS, unstackableCustomDamage()));
 
 	public static final Item pleiadesCombatMaidHeadgear = make(prefix(LibItemNames.PLEIADES_COMBAT_MAID_HEADGEAR),
-			new PleiadesCombatMaidArmorItem(ArmorItem.Type.HELMET, armorProperties(ArmorItem.Type.HELMET, ExtraBotanyArmorMaterials.PLEIADS_MAID_COMBAT_DURABILITY_FACTOR)));
+			new PleiadesCombatMaidArmorItem(ArmorType.HELMET, unstackableCustomDamage()));
 	public static final Item pleiadesCombatMaidSuit = make(prefix(LibItemNames.PLEIADES_COMBAT_MAID_SUIT),
-			new PleiadesCombatMaidSuitItem(armorProperties(ArmorItem.Type.CHESTPLATE, ExtraBotanyArmorMaterials.PLEIADS_MAID_COMBAT_DURABILITY_FACTOR)));
+			new PleiadesCombatMaidSuitItem(unstackableCustomDamage()));
 	public static final Item pleiadesCombatMaidSkirt = make(prefix(LibItemNames.PLEIADES_COMBAT_MAID_SKIRT),
-			new PleiadesCombatMaidArmorItem(ArmorItem.Type.LEGGINGS, armorProperties(ArmorItem.Type.LEGGINGS, ExtraBotanyArmorMaterials.PLEIADS_MAID_COMBAT_DURABILITY_FACTOR)));
+			new PleiadesCombatMaidArmorItem(ArmorType.LEGGINGS, unstackableCustomDamage()));
 	public static final Item pleiadesCombatMaidBoots = make(prefix(LibItemNames.PLEIADES_COMBAT_MAID_BOOTS),
-			new PleiadesCombatMaidArmorItem(ArmorItem.Type.BOOTS, armorProperties(ArmorItem.Type.BOOTS, ExtraBotanyArmorMaterials.PLEIADS_MAID_COMBAT_DURABILITY_FACTOR)));
+			new PleiadesCombatMaidArmorItem(ArmorType.BOOTS, unstackableCustomDamage()));
 	public static final Item sanguinePleiadesCombatMaidSuit = make(prefix(LibItemNames.SANGUINE_PLEIADES_COMBAT_MAID_SUIT),
-			new SanguinePleiadesCombatMaidSuitItem(armorProperties(ArmorItem.Type.CHESTPLATE, ExtraBotanyArmorMaterials.PLEIADS_MAID_COMBAT_DURABILITY_FACTOR)));
+			new SanguinePleiadesCombatMaidSuitItem(unstackableCustomDamage()));
 
 	public static final Item goblinSlayerHelmet = make(prefix(LibItemNames.GOBLIN_SLAYER_HELMET),
-			new GoblinSlayerHelmetItem(armorProperties(ArmorItem.Type.HELMET, ExtraBotanyArmorMaterials.GOBLIN_SLAYER_DURABILITY_FACTOR)));
+			new GoblinSlayerHelmetItem(unstackableCustomDamage()));
 	public static final Item goblinSlayerChestplate = make(prefix(LibItemNames.GOBLIN_SLAYER_CHESTPLATE),
-			new GoblinSlayerArmorItem(ArmorItem.Type.CHESTPLATE, armorProperties(ArmorItem.Type.CHESTPLATE, ExtraBotanyArmorMaterials.GOBLIN_SLAYER_DURABILITY_FACTOR)));
+			new GoblinSlayerArmorItem(ArmorType.CHESTPLATE, unstackableCustomDamage()));
 	public static final Item goblinSlayerLeggings = make(prefix(LibItemNames.GOBLIN_SLAYER_LEGGINGS),
-			new GoblinSlayerArmorItem(ArmorItem.Type.LEGGINGS, armorProperties(ArmorItem.Type.LEGGINGS, ExtraBotanyArmorMaterials.GOBLIN_SLAYER_DURABILITY_FACTOR)));
+			new GoblinSlayerArmorItem(ArmorType.LEGGINGS, unstackableCustomDamage()));
 	public static final Item goblinSlayerBoots = make(prefix(LibItemNames.GOBLIN_SLAYER_BOOTS),
-			new GoblinSlayerArmorItem(ArmorItem.Type.BOOTS, armorProperties(ArmorItem.Type.BOOTS, ExtraBotanyArmorMaterials.GOBLIN_SLAYER_DURABILITY_FACTOR)));
+			new GoblinSlayerArmorItem(ArmorType.BOOTS, unstackableCustomDamage()));
 
 	public static final Item shadowWarriorHelmet = make(prefix(LibItemNames.SHADOW_WARRIOR_HELMET),
-			new ShadowWarriorHelmetItem(armorProperties(ArmorItem.Type.HELMET, ExtraBotanyArmorMaterials.SHADOW_WARRIOR_DURABILITY_FACTOR)));
+			new ShadowWarriorHelmetItem(unstackableCustomDamage()));
 	public static final Item shadowWarriorChestplate = make(prefix(LibItemNames.SHADOW_WARRIOR_CHESTPLATE),
-			new ShadowWarriorArmorItem(ArmorItem.Type.CHESTPLATE, armorProperties(ArmorItem.Type.CHESTPLATE, ExtraBotanyArmorMaterials.SHADOW_WARRIOR_DURABILITY_FACTOR)));
+			new ShadowWarriorArmorItem(ArmorType.CHESTPLATE, unstackableCustomDamage()));
 	public static final Item shadowWarriorLeggings = make(prefix(LibItemNames.SHADOW_WARRIOR_LEGGINGS),
-			new ShadowWarriorArmorItem(ArmorItem.Type.LEGGINGS, armorProperties(ArmorItem.Type.LEGGINGS, ExtraBotanyArmorMaterials.SHADOW_WARRIOR_DURABILITY_FACTOR)));
+			new ShadowWarriorArmorItem(ArmorType.LEGGINGS, unstackableCustomDamage()));
 	public static final Item shadowWarriorBoots = make(prefix(LibItemNames.SHADOW_WARRIOR_BOOTS),
-			new ShadowWarriorArmorItem(ArmorItem.Type.BOOTS, armorProperties(ArmorItem.Type.BOOTS, ExtraBotanyArmorMaterials.SHADOW_WARRIOR_DURABILITY_FACTOR)));
+			new ShadowWarriorArmorItem(ArmorType.BOOTS, unstackableCustomDamage()));
 
 	//Relic
 	public static final Item camera = make(prefix(LibItemNames.CAMERA), new CameraItem(unstackable().rarity(Rarity.UNCOMMON).fireResistant()));
@@ -333,24 +336,22 @@ public final class ExtraBotanyItems {
 	public static final Item heroMedal = make(prefix(LibItemNames.HERO_MEDAL), new Item(defaultBuilder().rarity(Rarity.UNCOMMON)));//OT
 	public static final Item challengeTicket = make(prefix(LibItemNames.CHALLENGE_TICKET), new ChallangeTicketItem(defaultBuilder()));
 	public static final Item nightmareFuel = make(prefix(LibItemNames.NIGHTMARE_FUEL), new NightmareFuelItem(defaultBuilder()
-			.food(new FoodProperties.Builder().nutrition(0).saturationModifier(0.3F).alwaysEdible()
-					.effect(() -> new MobEffectInstance(MobEffects.HARM, 1, 1), 1.0F)
-					.effect(() -> new MobEffectInstance(MobEffects.BLINDNESS, 500, 1), 1.0F)
-					.effect(() -> new MobEffectInstance(MobEffects.WEAKNESS, 500, 1), 1.0F)
-					.effect(() -> new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 500, 1), 1.0F)
-					.effect(() -> new MobEffectInstance(MobEffects.UNLUCK, 500, 1), 1.0F)
-					.build()
-			)
+			.food(new FoodProperties.Builder().nutrition(0).saturationModifier(0.3F).alwaysEdible().build(),
+					Consumables.defaultFood().onConsume(new ApplyStatusEffectsConsumeEffect(List.of(
+							new MobEffectInstance(MobEffects.INSTANT_DAMAGE, 1, 1),
+							new MobEffectInstance(MobEffects.BLINDNESS, 500, 1),
+							new MobEffectInstance(MobEffects.WEAKNESS, 500, 1),
+							new MobEffectInstance(MobEffects.SLOWNESS, 500, 1),
+							new MobEffectInstance(MobEffects.UNLUCK, 500, 1)))).build())
 	));
 	public static final Item spiritFuel = make(prefix(LibItemNames.SPIRIT_FUEL), new SpiritFuelItem(defaultBuilder()
-			.food(new FoodProperties.Builder().nutrition(4).saturationModifier(0.3F).alwaysEdible()
-					.effect(() -> new MobEffectInstance(MobEffects.HEAL, 1, 1), 1.0F)
-					.effect(() -> new MobEffectInstance(MobEffects.NIGHT_VISION, 500, 1), 1.0F)
-					.effect(() -> new MobEffectInstance(MobEffects.DAMAGE_BOOST, 500, 1), 1.0F)
-					.effect(() -> new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 500, 1), 1.0F)
-					.effect(() -> new MobEffectInstance(MobEffects.LUCK, 500, 1), 1.0F)
-					.build()
-			)
+			.food(new FoodProperties.Builder().nutrition(4).saturationModifier(0.3F).alwaysEdible().build(),
+					Consumables.defaultFood().onConsume(new ApplyStatusEffectsConsumeEffect(List.of(
+							new MobEffectInstance(MobEffects.INSTANT_HEALTH, 1, 1),
+							new MobEffectInstance(MobEffects.NIGHT_VISION, 500, 1),
+							new MobEffectInstance(MobEffects.STRENGTH, 500, 1),
+							new MobEffectInstance(MobEffects.SPEED, 500, 1),
+							new MobEffectInstance(MobEffects.LUCK, 500, 1)))).build())
 	));
 	public static final Item spiritFragment = make(prefix(LibItemNames.SPIRIT_FRAGMENT), new Item(defaultBuilder()));
 	public static final Item manaGlassBottle = make(prefix(LibItemNames.MANA_GLASS_BOTTLE), new ManaGlassBottleItem(defaultBuilder()));
@@ -368,9 +369,9 @@ public final class ExtraBotanyItems {
 	public static final Item sinRune = make(prefix("sin_rune"), new Item(defaultBuilder()));
 	public static final Item recordHerrscherOfTheVoid = make(prefix("music_disc_herrscher_of_the_void"),
 			new Item(unstackable().rarity(Rarity.EPIC).jukeboxPlayable(ExtraBotanyJukeboxSongs.HERRSCHER_OF_THE_VOID)));
-	public static final Item candyEins = make(prefix("candy_eins"), new CandyItem(defaultBuilder(), MobEffects.MOVEMENT_SPEED));
-	public static final Item candyZwei = make(prefix("candy_zwei"), new CandyItem(defaultBuilder(), MobEffects.JUMP));
-	public static final Item candyDrei = make(prefix("candy_drei"), new CandyItem(defaultBuilder(), MobEffects.DIG_SPEED));
+	public static final Item candyEins = make(prefix("candy_eins"), new CandyItem(defaultBuilder(), MobEffects.SPEED));
+	public static final Item candyZwei = make(prefix("candy_zwei"), new CandyItem(defaultBuilder(), MobEffects.JUMP_BOOST));
+	public static final Item candyDrei = make(prefix("candy_drei"), new CandyItem(defaultBuilder(), MobEffects.HASTE));
 	public static final Item zweiRewardBag = make(prefix(LibItemNames.ZWEI_REWARD_BAG), new RewardBagItem(defaultBuilder(), prefix("zwei")));
 	public static final Item dreiRewardBag = make(prefix(LibItemNames.DREI_REWARD_BAG), new RewardBagItem(defaultBuilder(), prefix("drei")));
 	public static final Item vierRewardBag = make(prefix(LibItemNames.VIER_REWARD_BAG), new RewardBagItem(defaultBuilder(), prefix("vier")));
@@ -386,8 +387,8 @@ public final class ExtraBotanyItems {
 			new Item(unstackable().rarity(Rarity.EPIC).jukeboxPlayable(ExtraBotanyJukeboxSongs.EGO)));
 
 	//Brews
-	public static final Item manaCocktail = make(prefix(LibItemNames.MANA_COCKTAIL), new ManaCocktailItem(unstackable().craftRemainder(manaGlassBottle), 8, 32, () -> manaGlassBottle));
-	public static final Item infiniteWine = make(prefix(LibItemNames.INFINITE_WINE), new InfiniteWineItem(unstackable().rarity(Rarity.RARE).craftRemainder(manaGlassBottle), 12, 18, () -> manaGlassBottle));
+	public static final Item manaCocktail = make(prefix(LibItemNames.MANA_COCKTAIL), new ManaCocktailItem(unstackable(), 8, 32, () -> manaGlassBottle));
+	public static final Item infiniteWine = make(prefix(LibItemNames.INFINITE_WINE), new InfiniteWineItem(unstackable().rarity(Rarity.RARE), 12, 18, () -> manaGlassBottle));
 	public static final Item holyWaterGrenade = make(prefix(LibItemNames.HOLY_WATER_GRENADE), new HolyWaterGrenadeItem(stackTo4()));
 	public static final Item voidCaller = make(prefix("voidcaller"), new VoidCallerItem(defaultBuilder().rarity(Rarity.EPIC)));
 
@@ -452,7 +453,7 @@ public final class ExtraBotanyItems {
 			peaceAmulet, aeroStone, aquaStone, earthStone, ignisStone, theCommunity, powerGlove, silentEternity
 	};
 
-	private static <T extends Item> T make(ResourceLocation id, T item) {
+	private static <T extends Item> T make(Identifier id, T item) {
 		var old = ALL.put(id, item);
 		if (old != null) {
 			throw new IllegalArgumentException("Typo? Duplicate id " + id);
@@ -466,10 +467,6 @@ public final class ExtraBotanyItems {
 
 	public static Item.Properties unstackableCustomDamage() {
 		return defaultBuilderCustomDamage().stacksTo(1);
-	}
-
-	private static Item.Properties armorProperties(ArmorItem.Type type, int durabilityFactor) {
-		return unstackableCustomDamage().durability(type.getDurability(durabilityFactor));
 	}
 
 	public static Item.Properties defaultBuilder() {
@@ -496,7 +493,7 @@ public final class ExtraBotanyItems {
 		return unstackable().rarity(Rarity.EPIC).fireResistant();
 	}
 
-	public static void registerItems(BiConsumer<Item, ResourceLocation> r) {
+	public static void registerItems(BiConsumer<Item, Identifier> r) {
 		for (var e : ALL.entrySet()) {
 			r.accept(e.getValue(), e.getKey());
 		}

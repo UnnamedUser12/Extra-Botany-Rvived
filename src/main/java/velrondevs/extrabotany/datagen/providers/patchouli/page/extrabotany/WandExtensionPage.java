@@ -1,6 +1,6 @@
 package velrondevs.extrabotany.datagen.providers.patchouli.page.extrabotany;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ItemLike;
 import velrondevs.extrabotany.common.helper.RegistryHelper;
 import velrondevs.extrabotany.datagen.providers.patchouli.page.AbstractPage;
@@ -20,7 +20,7 @@ public final class WandExtensionPage extends AbstractPage<WandExtensionPage> {
     }
 
     @Override
-    public ResourceLocation getType() {
-        return ResourceLocation.parse("extrabotany:craft_manual");
+    public Identifier getType() {
+        return Identifier.parse("extrabotany:craft_manual");
     }
 }

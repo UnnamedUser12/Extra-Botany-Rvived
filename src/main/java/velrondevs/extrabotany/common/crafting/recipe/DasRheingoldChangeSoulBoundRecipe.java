@@ -1,13 +1,12 @@
 package velrondevs.extrabotany.common.crafting.recipe;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.Level;
+
+import velrondevs.botania.common.crafting.recipe.RecipeUtils;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -27,11 +26,9 @@ public final class DasRheingoldChangeSoulBoundRecipe extends CustomRecipe {
 
 	private static final String TAG_SOULBIND_UUID = "soulbindUUID";
 	public static final RecipeSerializer<DasRheingoldChangeSoulBoundRecipe> SERIALIZER =
-			new SimpleCraftingRecipeSerializer<>(DasRheingoldChangeSoulBoundRecipe::new);
+			RecipeUtils.simpleSerializer(DasRheingoldChangeSoulBoundRecipe::new);
 
-	public DasRheingoldChangeSoulBoundRecipe(CraftingBookCategory category) {
-		super(category);
-	}
+	public DasRheingoldChangeSoulBoundRecipe() {}
 
 	@Override
 	public boolean matches(CraftingInput inv, Level level) {
@@ -62,7 +59,7 @@ public final class DasRheingoldChangeSoulBoundRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(CraftingInput container, HolderLookup.Provider registries) {
+	public ItemStack assemble(CraftingInput container) {
 		if (!matches(container, null)) {
 			return ItemStack.EMPTY;
 		}
@@ -131,12 +128,7 @@ public final class DasRheingoldChangeSoulBoundRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public boolean canCraftInDimensions(int width, int height) {
-		return width > 1 || height > 1;
-	}
-
-	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<? extends CustomRecipe> getSerializer() {
 		return SERIALIZER;
 	}
 }

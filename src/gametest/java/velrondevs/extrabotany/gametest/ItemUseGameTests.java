@@ -1,16 +1,16 @@
 package velrondevs.extrabotany.gametest;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 import velrondevs.botania.api.mana.ManaItem;
 import velrondevs.botania.registry.BotaniaItems;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -35,13 +35,13 @@ public final class ItemUseGameTests {
     public static void conquestHasUsableSlotAndRealCapability(GameTestHelper h) {
         var item = velrondevs.extrabotany.registry.ExtraBotanyItems.gemOfConquest;
         var stack = new ItemStack(item); var p = player(h, ItemStack.EMPTY);
-        h.assertTrue(stack.is(ItemTags.create(ResourceLocation.parse("curios:curio"))), "Conquest gem lacks a slot usable without third party charm slots");
+        h.assertTrue(stack.is(ItemTags.create(Identifier.parse("curios:curio"))), "Conquest gem lacks a slot usable without third party charm slots");
         var curio = CuriosApi.getCurio(stack).orElseThrow();
-        var inventory = CuriosApi.getCuriosInventory(p).orElseThrow();
+        var inventory = CuriosTestHelper.inventory(p);
         var entry = inventory.getCurios().entrySet().stream().filter(e -> e.getValue().getStacks().getSlots() > 0).findFirst().orElseThrow();
         var context = new top.theillusivec4.curios.api.SlotContext(entry.getKey(), p, 0, false, true);
         h.assertTrue(curio.canEquip(context), "Conquest gem Curios capability refused equip");
-        var modifiers = curio.getAttributeModifiers(context, ResourceLocation.parse("extrabotany:test_slot"));
+        var modifiers = curio.getAttributeModifiers(context, Identifier.parse("extrabotany:test_slot"));
         h.assertTrue(modifiers.isEmpty(), "The original gem gives no attribute modifier");
         entry.getValue().getStacks().setStackInSlot(0, stack);
         h.runAfterDelay(2, () -> {

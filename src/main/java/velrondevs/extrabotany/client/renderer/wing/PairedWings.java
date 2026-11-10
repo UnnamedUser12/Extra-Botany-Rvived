@@ -5,7 +5,7 @@ import com.mojang.math.Axis;
 
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
@@ -19,10 +19,10 @@ import java.util.List;
  * @param bodyY     翅膀根部在身体上的高度。数值越大，位置越低。 The height of the wing root on the body. A larger value is a lower position.
  * @param flapScale 扇动幅度的倍数。 The multiplier of the flap angle.
  */
-public record PairedWings(ResourceLocation model, double bodyY, float flapScale) implements WingRenderer {
+public record PairedWings(Identifier model, double bodyY, float flapScale) implements WingRenderer {
 
 	@Override
-	public List<ResourceLocation> models() {
+	public List<Identifier> models() {
 		return List.of(model);
 	}
 

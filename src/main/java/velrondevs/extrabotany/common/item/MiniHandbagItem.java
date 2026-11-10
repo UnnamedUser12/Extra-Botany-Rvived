@@ -4,7 +4,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.SlotAccess;
@@ -44,8 +44,8 @@ public class MiniHandbagItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-		if (!level.isClientSide) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
+		if (!level.isClientSide()) {
 			ItemStack stack = player.getItemInHand(hand);
 			XplatAbstractions.INSTANCE.openMenu((ServerPlayer) player, new MenuProvider() {
 				@Override
@@ -59,7 +59,7 @@ public class MiniHandbagItem extends Item {
 				}
 			}, buf -> buf.writeBoolean(hand == InteractionHand.MAIN_HAND));
 		}
-		return InteractionResultHolder.sidedSuccess(player.getItemInHand(hand), level.isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class MiniHandbagItem extends Item {
 				.mapToObj(container::getItem)
 				.filter(s -> !s.isEmpty())
 				.toList();
-		ItemUtils.onContainerDestroyed(entity, stacks);
+		ItemUtils.onContainerDestroyed(entity, stacks.stream());
 		container.clearContent();
 	}
 

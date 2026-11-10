@@ -6,7 +6,7 @@ import com.google.common.collect.Sets;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ItemLike;
 
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +33,7 @@ public abstract class PatchouliProvider implements DataProvider {
 
 	@Override
 	public CompletableFuture<?> run(CachedOutput cache) {
-		Set<ResourceLocation> checkDuplicates = Sets.newHashSet();
+		Set<Identifier> checkDuplicates = Sets.newHashSet();
 		List<CompletableFuture<?>> output = new ArrayList<>();
 		buildEntries((entry) -> {
 			if (!checkDuplicates.add(entry.getID())) {

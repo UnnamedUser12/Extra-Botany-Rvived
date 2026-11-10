@@ -1,14 +1,17 @@
 package velrondevs.extrabotany.common.item;
 
+import net.minecraft.world.entity.EquipmentSlot;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -33,21 +36,21 @@ public class RewardBagItem extends Item implements RewardBag {
 
 	public static final String TAG_LOOT_TABLE = "LootTable";
 
-	private final ResourceLocation lootTable;
+	private final Identifier lootTable;
 
-	public RewardBagItem(Properties properties, ResourceLocation lootTable) {
+	public RewardBagItem(Properties properties, Identifier lootTable) {
 		super(properties);
 		this.lootTable = lootTable;
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand usedHand) {
 		ItemStack stack = player.getItemInHand(usedHand);
 
 		if (!level.isClientSide()) {
-			ResourceLocation lootId = getLoot(stack);
+			Identifier lootId = getLoot(stack);
 			if (lootId == null) {
-				return InteractionResultHolder.fail(stack);
+				return InteractionResult.FAIL;
 			}
 			LootTable table = level.getServer().reloadableRegistries()
 					.getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootId));
@@ -62,24 +65,24 @@ public class RewardBagItem extends Item implements RewardBag {
 			}
 
 			table.getRandomItems(lootparams, player.getLootTableSeed(), itemStack -> {
-				var drop = player.spawnAtLocation(itemStack);
+				var drop = player.spawnAtLocation((ServerLevel) player.level(), itemStack);
 				if (drop != null) {
 					drop.setNoPickUpDelay();
 				}
 			});
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), getSound(), SoundSource.PLAYERS, 0.8F, 1);
 
-			return InteractionResultHolder.success(stack);
+			return InteractionResult.SUCCESS;
 		}
 
-		return InteractionResultHolder.fail(stack);
+		return InteractionResult.FAIL;
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		super.appendHoverText(stack, context, tooltip, flags);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		super.appendHoverText(stack, context, tooltipDisplay, tooltip, flags);
 		//TODO 显示概率
-		ResourceLocation tableKey = getLoot(stack);
+		Identifier tableKey = getLoot(stack);
 		if (tableKey == null) {
 			return;
 		}
@@ -89,16 +92,16 @@ public class RewardBagItem extends Item implements RewardBag {
 		}
 
 		for (var data : datas) {
-			tooltip.add(Component.literal(Component.translatable(data.item().getDescriptionId()).getString() + " " + data.chance() + "%"));
+			tooltip.accept(Component.literal(Component.translatable(data.item().getDescriptionId()).getString() + " " + data.chance() + "%"));
 		}
 	}
 
 	@Nullable
-	public static ResourceLocation getLoot(ItemStack stack) {
+	public static Identifier getLoot(ItemStack stack) {
 		if (stack.getItem() instanceof RewardBagItem bag) {
 			String tableKey = ItemNBTHelper.getString(stack, TAG_LOOT_TABLE, "");
 			if (!tableKey.isEmpty()) {
-				ResourceLocation parsed = ResourceLocation.tryParse(tableKey);
+				Identifier parsed = Identifier.tryParse(tableKey);
 				if (parsed != null) {
 					return parsed.withPrefix("reward_bags/");
 				}
@@ -109,7 +112,7 @@ public class RewardBagItem extends Item implements RewardBag {
 	}
 
 	@Override
-	public ResourceLocation getLootTable() {
+	public Identifier getLootTable() {
 		return this.lootTable;
 	}
 

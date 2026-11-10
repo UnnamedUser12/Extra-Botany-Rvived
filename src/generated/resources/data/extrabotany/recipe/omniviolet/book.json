@@ -1,7 +1,5 @@
 {
   "type": "extrabotany:omniviolet",
   "burnTime": 50,
-  "input": {
-    "item": "minecraft:book"
-  }
+  "input": "minecraft:book"
 }

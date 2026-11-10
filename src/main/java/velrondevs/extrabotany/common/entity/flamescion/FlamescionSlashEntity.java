@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity.flamescion;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -71,16 +73,16 @@ public class FlamescionSlashEntity extends FlamescionAreaEntity {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag tag) {
+	protected void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putFloat(TAG_ROTATION, getRotation());
 		tag.putFloat(TAG_PITCH, getPitch());
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundTag tag) {
+	protected void readAdditionalSaveData(ValueInput tag) {
 		super.readAdditionalSaveData(tag);
-		entityData.set(ROTATION, tag.getFloat(TAG_ROTATION));
-		entityData.set(PITCH, tag.getFloat(TAG_PITCH));
+		entityData.set(ROTATION, tag.getFloatOr(TAG_ROTATION, 0F));
+		entityData.set(PITCH, tag.getFloatOr(TAG_PITCH, 0F));
 	}
 }

@@ -29,7 +29,7 @@ public class GaiaEmerging<E extends Gaia> extends Behavior<E> {
 
 		if (invul > 0) {
 			if (invul < gaia.getEmergeTime()) {
-				if (invul > gaia.getEmergeTime() / 2 && gaia.level().random.nextInt(gaia.getEmergeTime() - invul + 1) == 0) {
+				if (invul > gaia.getEmergeTime() / 2 && gaia.level().getRandom().nextInt(gaia.getEmergeTime() - invul + 1) == 0) {
 					for (int i = 0; i < 2; i++) {
 						gaia.spawnAnim();
 					}

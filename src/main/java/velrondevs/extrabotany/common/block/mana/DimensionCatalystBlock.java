@@ -1,7 +1,7 @@
 package velrondevs.extrabotany.common.block.mana;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 
 import velrondevs.botania.api.mana.PoolOverlayProvider;
@@ -15,14 +15,14 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * Dimension Catalyst. When it is below a mana pool, the pool can do the dimension recipes of the mana infusion.
  */
 public class DimensionCatalystBlock extends ExtraBotanyBlock implements PoolOverlayProvider {
-	private static final ResourceLocation OVERLAY_ICON = prefix("block/dimension_catalyst_overlay");
+	private static final Identifier OVERLAY_ICON = prefix("block/dimension_catalyst_overlay");
 
 	public DimensionCatalystBlock(Properties builder) {
 		super(builder);
 	}
 
 	@Override
-	public ResourceLocation getIcon(Level world, BlockPos pos) {
+	public Identifier getIcon(Level world, BlockPos pos) {
 		return OVERLAY_ICON;
 	}
 }

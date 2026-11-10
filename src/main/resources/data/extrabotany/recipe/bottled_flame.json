@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "A": {
-      "tag": "botania:petals/red"
-    },
-    "B": {
-      "item": "minecraft:torch"
-    },
-    "C": {
-      "item": "botania:mana_glass"
-    }
+    "A": "#botania:petals/red",
+    "B": "minecraft:torch",
+    "C": "botania:mana_glass"
   },
   "pattern": [
     "AAA",

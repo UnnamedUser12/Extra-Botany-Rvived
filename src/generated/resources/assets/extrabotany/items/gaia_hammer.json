@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "extrabotany:item/gaia_hammer",
+    "tints": [
+      {
+        "type": "extrabotany:tint",
+        "kind": "hue_cycle"
+      }
+    ]
+  }
+}

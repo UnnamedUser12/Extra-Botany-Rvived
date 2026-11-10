@@ -3,11 +3,8 @@
   "category": "blocks",
   "cookingtime": 200,
   "experience": 0.1,
-  "ingredient": {
-    "item": "extrabotany:gaia_quartz_block"
-  },
+  "ingredient": "extrabotany:gaia_quartz_block",
   "result": {
-    "count": 1,
     "id": "extrabotany:smooth_gaia_quartz"
   }
 }

@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "I": {
-      "tag": "botania:terrasteel_ingots"
-    },
-    "S": {
-      "item": "minecraft:shield"
-    }
+    "I": "#botania:terrasteel_ingots",
+    "S": "minecraft:shield"
   },
   "pattern": [
     "I I",
@@ -15,7 +11,6 @@
     " I "
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:terrasteel_shield"
   }
 }

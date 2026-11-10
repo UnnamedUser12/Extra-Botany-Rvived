@@ -1,5 +1,8 @@
 package velrondevs.extrabotany.common.item.brew;
 
+import net.minecraft.world.item.ItemInstance;
+import net.minecraft.world.item.ItemStackTemplate;
+import org.jetbrains.annotations.Nullable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -25,6 +28,11 @@ public class ManaCocktailItem extends BaseBrewItem {
 
 	public ManaCocktailItem(Properties properties, int swigs, int drinkSpeed, Supplier<Item> baseItem) {
 		super(properties, swigs, drinkSpeed, baseItem);
+	}
+
+	@Override
+	public @Nullable ItemStackTemplate getCraftingRemainder(ItemInstance instance) {
+		return new ItemStackTemplate(getBaseStack().getItem());
 	}
 
 	@Override

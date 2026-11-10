@@ -1,14 +1,16 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.resources.Identifier;
 
 import org.joml.Matrix4f;
 
@@ -27,9 +29,9 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>来源：ExtraMeteorP 1.12 {@code RenderFlowerWeapon}。
  * <p>Source: ExtraMeteorP 1.12 {@code RenderFlowerWeapon}.
  */
-public class FlowerWeaponRenderer extends EntityRenderer<FlowerWeaponEntity> {
-	private static final ResourceLocation PORTAL_TEXTURE = prefix("textures/misc/flowerweapon.png");
-	private static final ResourceLocation[] MODELS = new ResourceLocation[KingGardenItem.WEAPON_TYPES];
+public class FlowerWeaponRenderer extends ExtraEntityRenderer<FlowerWeaponEntity> {
+	private static final Identifier PORTAL_TEXTURE = prefix("textures/misc/flowerweapon.png");
+	private static final Identifier[] MODELS = new Identifier[KingGardenItem.WEAPON_TYPES];
 	private static final float FADE_IN_TICKS = 10F;
 	private static final float ICON_SCALE = 1.5F;
 	private static final int FULL_BRIGHT = 0xF000F0;
@@ -48,12 +50,12 @@ public class FlowerWeaponRenderer extends EntityRenderer<FlowerWeaponEntity> {
 	 * 武器的图标模型。它必须在模型注册事件里登记。
 	 * The icon model of a weapon. The model registration event must register it.
 	 */
-	public static ResourceLocation model(int variety) {
+	public static Identifier model(int variety) {
 		return prefix("icon/flower_weapon_" + variety);
 	}
 
 	@Override
-	public void render(FlowerWeaponEntity weapon, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
+	protected void render(FlowerWeaponEntity weapon, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, SubmitNodeCollector collector, int light, CameraRenderState camera) {
 		int liveTicks = weapon.getLiveTicks();
 		int delay = weapon.getDelay();
 		float charge = Math.min(FADE_IN_TICKS, Math.max(liveTicks, weapon.getChargeTicks()) + partialTick);
@@ -95,11 +97,10 @@ public class FlowerWeaponRenderer extends EntityRenderer<FlowerWeaponEntity> {
 			buffer.addVertex(matrix, 1F, 0F, -1F).setUv(1F, 0F).setColor(1F, 1F, 1F, alpha);
 		}
 		pose.popPose();
-		super.render(weapon, yaw, partialTick, pose, buffers, light);
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(FlowerWeaponEntity weapon) {
-		return InventoryMenu.BLOCK_ATLAS;
+	public Identifier getTextureLocation(FlowerWeaponEntity weapon) {
+		return TextureAtlas.LOCATION_BLOCKS;
 	}
 }

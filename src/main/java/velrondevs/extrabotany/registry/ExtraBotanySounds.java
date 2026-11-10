@@ -3,7 +3,7 @@ package velrondevs.extrabotany.registry;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 
 import velrondevs.extrabotany.common.helper.RegistryHelper;
@@ -47,7 +47,7 @@ public class ExtraBotanySounds {
 	}
 
 	private static Holder<SoundEvent> makeSoundEventHolder(String name) {
-		ResourceLocation id = prefix(name);
+		Identifier id = prefix(name);
 		RegistryHelper.HolderProxy<SoundEvent> proxy = RegistryHelper.holderProxy(
 				Registries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id));
 		EVENTS.add(proxy);

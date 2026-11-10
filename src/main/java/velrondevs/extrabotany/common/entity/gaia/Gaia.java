@@ -1,10 +1,12 @@
 package velrondevs.extrabotany.common.entity.gaia;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Dynamic;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -25,6 +27,7 @@ import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Unit;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -121,8 +124,8 @@ public class Gaia extends Monster {
 	}
 
 	@Override
-	protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-		return GaiaAI.makeBrain(this, dynamic);
+	protected Brain<?> makeBrain(Brain.Packed packed) {
+		return GaiaAI.makeBrain(this, packed);
 	}
 
 	@Override
@@ -166,7 +169,7 @@ public class Gaia extends Monster {
 
 			gaia.playSound(BotaniaSounds.gaiaSummon, .1F, 1F);
 			EventHooks.finalizeMobSpawn(gaia, (ServerLevelAccessor) world,
-					world.getCurrentDifficultyAt(gaia.blockPosition()), MobSpawnType.EVENT, null);
+					((ServerLevel) world).getCurrentDifficultyAt(gaia.blockPosition()), EntitySpawnReason.EVENT, null);
 			world.addFreshEntity(gaia);
 
 			for (Player nearbyPlayer : playersAround) {
@@ -181,7 +184,7 @@ public class Gaia extends Monster {
 
 	@Override
 	@SuppressWarnings("deprecation") // Override-only hook; external callers use EventHooks.finalizeMobSpawn.
-	public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData) {
+	public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason, @Nullable SpawnGroupData spawnData) {
 		if (this.getHome().pos().equals(NO_HOME)) {
 			this.setHome(GlobalPos.of(level.getLevel().dimension(), this.findSafeHomePos()));
 		}
@@ -205,7 +208,7 @@ public class Gaia extends Monster {
 		return spawnPos;
 	}
 
-	protected void initMemories(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData) {
+	protected void initMemories(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason, @Nullable SpawnGroupData spawnData) {
 		GaiaAI.initMemories(this, level.getLevel(), getHome().pos());
 	}
 
@@ -216,12 +219,11 @@ public class Gaia extends Monster {
 	}
 
 	@Override
-	protected void customServerAiStep() {
-		ServerLevel serverlevel = (ServerLevel) this.level();
-		serverlevel.getProfiler().push("gaiaBrain");
+	protected void customServerAiStep(ServerLevel serverlevel) {
+		Profiler.get().push("gaiaBrain");
 		getBrain().tick(serverlevel, this);
-		this.level().getProfiler().pop();
-		super.customServerAiStep();
+		Profiler.get().pop();
+		super.customServerAiStep(serverlevel);
 
 		updateAI();
 
@@ -265,21 +267,21 @@ public class Gaia extends Monster {
 
 	///
 	@Override
-	public boolean hurt(@NotNull DamageSource source, float amount) {
+	public boolean hurtServer(ServerLevel level, @NotNull DamageSource source, float amount) {
 		Entity e = source.getEntity();
 		if (e instanceof Player player && isTruePlayer(e) && getInvulTime() == 0) {
 
 			markPlayerAttacked(player);
 
-			return super.hurt(source, Math.min(getDamageCap(), amount));
+			return super.hurtServer(level, source, Math.min(getDamageCap(), amount));
 		}
 
 		return false;
 	}
 
 	@Override
-	protected void actuallyHurt(@NotNull DamageSource source, float amount) {
-		super.actuallyHurt(source, Math.min(getDamageCap(), amount));
+	protected void actuallyHurt(ServerLevel level, @NotNull DamageSource source, float amount) {
+		super.actuallyHurt(level, source, Math.min(getDamageCap(), amount));
 
 		Entity attacker = source.getDirectEntity();
 		if (attacker != null && hopsAfterHit()) {
@@ -302,7 +304,7 @@ public class Gaia extends Monster {
 			arena.cleanup(this.level());
 		});
 
-		if (!level().isClientSide) {
+		if (!level().isClientSide()) {
 			for (UUID u : getPlayersWhoAttacked()) {
 				Player player = level().getPlayerByUUID(u);
 				if (!isTruePlayer(player)) {
@@ -316,12 +318,12 @@ public class Gaia extends Monster {
 			}
 		}
 
-		playSound(BotaniaSounds.gaiaDeath, 1F, (1F + (level().random.nextFloat() - level().random.nextFloat()) * 0.2F) * 0.7F);
+		playSound(BotaniaSounds.gaiaDeath, 1F, (1F + (level().getRandom().nextFloat() - level().getRandom().nextFloat()) * 0.2F) * 0.7F);
 		level().addParticle(ParticleTypes.EXPLOSION_EMITTER, getX(), getY(), getZ(), 1D, 0D, 0D);
 	}
 
 	@Override
-	protected void dropFromLootTable(@NotNull DamageSource source, boolean wasRecentlyHit) {
+	protected void dropFromLootTable(ServerLevel level, @NotNull DamageSource source, boolean wasRecentlyHit) {
 		// Save true killer, they get extra loot
 		//if (wasRecentlyHit && isTruePlayer(source.getEntity())) {
 		//    trueKiller = (Player) source.getEntity();
@@ -334,13 +336,13 @@ public class Gaia extends Monster {
 				continue;
 			}
 
-			Player saveLastAttacker = lastHurtByPlayer;
+			EntityReference<Player> saveLastAttacker = lastHurtByPlayer;
 			Vec3 savePos = position();
 
-			lastHurtByPlayer = player; // Fake attacking player as the killer
+			lastHurtByPlayer = EntityReference.of(player); // Fake attacking player as the killer
 			// Spoof pos so drops spawn at the player
 			setPos(player.getX(), player.getY(), player.getZ());
-			super.dropFromLootTable(player.damageSources().playerAttack(player), wasRecentlyHit);
+			super.dropFromLootTable(level, player.damageSources().playerAttack(player), wasRecentlyHit);
 			setPos(savePos.x(), savePos.y(), savePos.z());
 			lastHurtByPlayer = saveLastAttacker;
 		}
@@ -362,7 +364,7 @@ public class Gaia extends Monster {
 	}
 
 	@Override
-	public void kill() {
+	public void kill(ServerLevel level) {
 		//this.remove(Entity.RemovalReason.KILLED);
 		//this.gameEvent(GameEvent.ENTITY_DIE);
 		this.setHealth(0.0F);
@@ -399,7 +401,7 @@ public class Gaia extends Monster {
 	}
 
 	@Override
-	public boolean canChangeDimensions(Level oldLevel, Level newLevel) {
+	public boolean canTeleport(Level oldLevel, Level newLevel) {
 		return false;
 	}
 
@@ -418,10 +420,6 @@ public class Gaia extends Monster {
 		return false;
 	}
 
-	@Override
-	public boolean canDisableShield() {
-		return true;
-	}
 
 	///Getter setter
 	@Override
@@ -578,50 +576,31 @@ public class Gaia extends Monster {
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag cmp) {
+	public void addAdditionalSaveData(ValueOutput cmp) {
 		super.addAdditionalSaveData(cmp);
 		cmp.putInt(TAG_INVUL_TIME, getInvulTime());
 
-		GlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, getHome()).resultOrPartial(LOGGER::error).ifPresent((tag) -> {
-			cmp.put(TAG_HOME, tag);
-		});
+		cmp.store(TAG_HOME, GlobalPos.CODEC, getHome());
 
-		getArena().flatMap(arena -> GaiaArena.CODEC.encodeStart(NbtOps.INSTANCE, arena).resultOrPartial(LOGGER::error))
-				.ifPresent((tag) -> cmp.put(TAG_ARENA, tag));
+		getArena().ifPresent(arena -> cmp.store(TAG_ARENA, GaiaArena.CODEC, arena));
 
 		cmp.putInt(TAG_PLAYER_COUNT, playerCount);
 
 		if (!getPlayersWhoAttacked().isEmpty()) {
-			ListTag players = new ListTag();
-			for (var uuid : getPlayersWhoAttacked()) {
-				players.add(NbtUtils.createUUID(uuid));
-			}
-			cmp.put(TAG_PLAYER_ATTACKED, players);
+			cmp.store(TAG_PLAYER_ATTACKED, UUIDUtil.CODEC.listOf(), List.copyOf(getPlayersWhoAttacked()));
 		}
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag cmp) {
+	public void readAdditionalSaveData(ValueInput cmp) {
 		super.readAdditionalSaveData(cmp);
-		setInvulTime(cmp.getInt(TAG_INVUL_TIME));
+		setInvulTime(cmp.getIntOr(TAG_INVUL_TIME, 0));
 
-		if (cmp.contains(TAG_HOME)) {
-			this.setHome(GlobalPos.CODEC.parse(NbtOps.INSTANCE, cmp.get(TAG_HOME)).resultOrPartial(LOGGER::error)
-					.orElse(GlobalPos.of(this.level().dimension(), NO_HOME)));
-		} else {
-			this.setHome(GlobalPos.of(this.level().dimension(), NO_HOME));
-		}
+		this.setHome(cmp.read(TAG_HOME, GlobalPos.CODEC).orElse(GlobalPos.of(this.level().dimension(), NO_HOME)));
 
-		if (cmp.contains(TAG_ARENA)) {
-			this.setArena(GaiaArena.CODEC.parse(NbtOps.INSTANCE, cmp.get(TAG_ARENA)).resultOrPartial(LOGGER::error)
-					.orElse(null));
-		}
+		cmp.read(TAG_ARENA, GaiaArena.CODEC).ifPresent(this::setArena);
 
-		if (cmp.contains(TAG_PLAYER_COUNT)) {
-			playerCount = cmp.getInt(TAG_PLAYER_COUNT);
-		} else {
-			playerCount = 1;
-		}
+		playerCount = cmp.getIntOr(TAG_PLAYER_COUNT, 1);
 		// 血条也显示玩家数。不在这里设置的话，读档之后血条上的玩家数是 0，客户端就不显示它。
 		// The boss bar also shows the player count. Without this line the count of the bar is 0 after a load, and the client does not show it.
 		bossEvent.setPlayerCount(playerCount);
@@ -629,17 +608,10 @@ public class Gaia extends Monster {
 		// UUIDs are encoded by NbtUtils as four-int IntArrayTag entries. The old
 		// loader requested list entries of type TAG_LIST, so every saved attacker
 		// silently disappeared after a restart.
-		if (cmp.contains(TAG_PLAYER_ATTACKED, Tag.TAG_LIST)) {
-			ListTag uuids = cmp.getList(TAG_PLAYER_ATTACKED, Tag.TAG_INT_ARRAY);
+		cmp.read(TAG_PLAYER_ATTACKED, UUIDUtil.CODEC.listOf()).ifPresent(uuids -> {
 			getPlayersWhoAttacked().clear();
-			for (var uuid : uuids) {
-				try {
-					playersWhoAttacked.add(NbtUtils.loadUUID(uuid));
-				} catch (IllegalArgumentException ex) {
-					LOGGER.warn("Ignoring malformed Gaia attacker UUID in saved entity", ex);
-				}
-			}
-		}
+			playersWhoAttacked.addAll(uuids);
+		});
 
 		if (this.hasCustomName()) {
 			this.bossEvent.setName(getDisplayName());

@@ -1,13 +1,14 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.client.renderer.IconModelRenderer;
 import velrondevs.extrabotany.common.entity.projectile.ButterflyProjectileEntity;
@@ -21,12 +22,12 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>来源：ExtraMeteorP 1.16 {@code RenderButterflyProjectile}。
  * <p>Source: ExtraMeteorP 1.16 {@code RenderButterflyProjectile}.
  */
-public class ButterflyProjectileRenderer extends EntityRenderer<ButterflyProjectileEntity> {
+public class ButterflyProjectileRenderer extends ExtraEntityRenderer<ButterflyProjectileEntity> {
 	/**
 	 * 蝴蝶图标的模型。它必须在模型注册事件里登记。
 	 * The model of the butterfly icon. The model registration event must register it.
 	 */
-	public static final ResourceLocation BUTTERFLY_MODEL = prefix("icon/butterflyprojectile");
+	public static final Identifier BUTTERFLY_MODEL = prefix("icon/butterflyprojectile");
 	private static final float ALPHA = 0.9F;
 
 	public ButterflyProjectileRenderer(EntityRendererProvider.Context context) {
@@ -34,18 +35,17 @@ public class ButterflyProjectileRenderer extends EntityRenderer<ButterflyProject
 	}
 
 	@Override
-	public void render(ButterflyProjectileEntity entity, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
+	protected void render(ButterflyProjectileEntity entity, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, SubmitNodeCollector collector, int light, CameraRenderState camera) {
 		pose.pushPose();
-		pose.mulPose(entityRenderDispatcher.cameraOrientation());
+		pose.mulPose(camera.orientation);
 		pose.translate(-0.5, -0.5, 1F / 32);
-		IconModelRenderer.renderFlat(BUTTERFLY_MODEL, pose, buffers, ALPHA, LightTexture.FULL_BRIGHT);
+		IconModelRenderer.renderFlat(BUTTERFLY_MODEL, pose, buffers, ALPHA, LightCoordsUtil.FULL_BRIGHT);
 		pose.popPose();
 
-		super.render(entity, yaw, partialTick, pose, buffers, light);
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(ButterflyProjectileEntity entity) {
-		return InventoryMenu.BLOCK_ATLAS;
+	public Identifier getTextureLocation(ButterflyProjectileEntity entity) {
+		return TextureAtlas.LOCATION_BLOCKS;
 	}
 }

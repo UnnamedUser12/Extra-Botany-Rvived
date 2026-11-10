@@ -1,23 +1,15 @@
 package velrondevs.extrabotany.client.gui;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-import velrondevs.botania.client.core.helper.CoreShaders;
 import velrondevs.botania.client.core.helper.RenderHelper;
 import velrondevs.botania.client.lib.ResourcesLib;
 
@@ -25,13 +17,15 @@ import velrondevs.extrabotany.common.bossevents.GaiaBossEvent;
 import velrondevs.extrabotany.network.clientbound.ColorfulBossEventPacket;
 import velrondevs.extrabotany.network.clientbound.GaiaBossEventPacket;
 
+import org.joml.Matrix3x2fStack;
+
 import java.util.Map;
 import java.util.UUID;
 
 public class ColorfulBossBarOverlay {
 
-	public static final ResourceLocation BAR_TEXTURE = ResourceLocation.tryParse(ResourcesLib.GUI_BOSS_BAR);
-	private static final ResourceLocation GUI_BARS_LOCATION = ResourceLocation.tryParse("textures/gui/bars.png");
+	public static final Identifier BAR_TEXTURE = Identifier.tryParse(ResourcesLib.GUI_BOSS_BAR);
+	private static final Identifier GUI_BARS_LOCATION = Identifier.tryParse("textures/gui/bars.png");
 	private static final int BAR_WIDTH = 182;
 	private static final int BAR_HEIGHT = 5;
 	private static final int OVERLAY_OFFSET = 80;
@@ -42,7 +36,7 @@ public class ColorfulBossBarOverlay {
 		this.minecraft = minecraft;
 	}
 
-	public void render(GuiGraphics gui) {
+	public void render(GuiGraphicsExtractor gui) {
 		if (this.events.isEmpty()) {
 			return;
 		}
@@ -75,12 +69,11 @@ public class ColorfulBossBarOverlay {
 			int frameU = 0, frameV = 0;
 			int frameWidth = 185, frameHeight = 15;
 
-			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 
 			//Name
 			Component name = event.getName();
 			int centerX = minecraft.getWindow().getGuiScaledWidth() / 2;
-			gui.drawCenteredString(minecraft.font, name, centerX, y - 10, 0xA2018C);
+			RenderHelper.drawCenteredString(gui, minecraft.font, name, centerX, y - 10, 0xA2018C);
 
 			int healthU = 0, healthV = frameV + frameHeight;
 			int healthWidth = 181, healthHeight = 7;
@@ -111,19 +104,19 @@ public class ColorfulBossBarOverlay {
 		}
 	}
 
-	public static void drawPlayerCount(int playerCount, GuiGraphics gui, int x, int y) {
-		PoseStack ps = gui.pose();
-		ps.pushPose();
+	public static void drawPlayerCount(int playerCount, GuiGraphicsExtractor gui, int x, int y) {
+		Matrix3x2fStack ps = gui.pose();
+		ps.pushMatrix();
 
 		Minecraft mc = Minecraft.getInstance();
 		ItemStack stack = new ItemStack(Items.PLAYER_HEAD);
-		gui.renderItem(stack, x, y);
+		gui.item(stack, x, y);
 
-		gui.drawString(mc.font, Integer.toString(playerCount), x + 15, y + 4, 0xFFFFFF);
-		ps.popPose();
+		RenderHelper.drawString(gui, mc.font, Integer.toString(playerCount), x + 15, y + 4, 0xFFFFFF);
+		ps.popMatrix();
 	}
 
-	public static void drawBar(GuiGraphics guiGraphics, int x, int y, BossEvent bossEvent) {
+	public static void drawBar(GuiGraphicsExtractor guiGraphics, int x, int y, BossEvent bossEvent) {
 		drawBar(guiGraphics, x, y, bossEvent, BAR_WIDTH, 0);
 		int i = (int) (bossEvent.getProgress() * 183.0F);
 		if (i > 0) {
@@ -132,38 +125,15 @@ public class ColorfulBossBarOverlay {
 
 	}
 
-	public static void drawBar(GuiGraphics guiGraphics, int x, int y, BossEvent bossEvent, int width, int height) {
-		guiGraphics.blit(GUI_BARS_LOCATION, x, y, 0, bossEvent.getColor().ordinal() * 5 * 2 + height, width, 5);
+	public static void drawBar(GuiGraphicsExtractor guiGraphics, int x, int y, BossEvent bossEvent, int width, int height) {
+		guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_BARS_LOCATION, x, y, 0, bossEvent.getColor().ordinal() * 5 * 2 + height, width, 5, 256, 256);
 		if (bossEvent.getOverlay() != BossEvent.BossBarOverlay.PROGRESS) {
-			RenderSystem.enableBlend();
-			guiGraphics.blit(GUI_BARS_LOCATION, x, y, 0, OVERLAY_OFFSET + (bossEvent.getOverlay().ordinal() - 1) * 5 * 2 + height, width, 5);
-			RenderSystem.disableBlend();
+			guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_BARS_LOCATION, x, y, 0, OVERLAY_OFFSET + (bossEvent.getOverlay().ordinal() - 1) * 5 * 2 + height, width, 5, 256, 256);
 		}
 	}
 
-	public static void drawHealthBar(GuiGraphics gui, GaiaBossEvent bossEvent, int x, int y, int u, int v, int w, int h) {
-		BossEvent event = (BossEvent) bossEvent;
-		var shader = CoreShaders.dopplegangerBar();
-		if (shader != null) {
-			float grainIntensity = bossEvent.getGrainIntensity();
-			shader.safeGetUniform("BotaniaGrainIntensity").set(grainIntensity);
-			shader.safeGetUniform("BotaniaHpFract").set(event.getProgress());
-		}
-
-		RenderSystem.setShader(CoreShaders::dopplegangerBar);
-		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-		float minU = u / 256.0F;
-		float maxU = (u + w) / 256.0F;
-		float minV = v / 256.0F;
-		float maxV = (v + h) / 256.0F;
-		RenderSystem.setShaderTexture(0, BAR_TEXTURE);
-		var matrix = gui.pose().last().pose();
-		BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-		builder.addVertex(matrix, x, y + h, 0).setUv(minU, maxV);
-		builder.addVertex(matrix, x + w, y + h, 0).setUv(maxU, maxV);
-		builder.addVertex(matrix, x + w, y, 0).setUv(maxU, minV);
-		builder.addVertex(matrix, x, y, 0).setUv(minU, minV);
-		BufferUploader.drawWithShader(builder.buildOrThrow());
+	public static void drawHealthBar(GuiGraphicsExtractor gui, GaiaBossEvent bossEvent, int x, int y, int u, int v, int w, int h) {
+		RenderHelper.drawTexturedModalRect(gui, BAR_TEXTURE, x, y, u, v, w, h);
 	}
 
 	/**

@@ -5,7 +5,7 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.data.loot.LootTableSubProvider;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.storage.loot.LootTable;
 
@@ -59,7 +59,7 @@ public abstract class RewardBagLootSubProvider implements LootTableSubProvider {
 	}
 
 	public void add(String key, LootTable.Builder builder) {
-		ResourceLocation lootTableLocation = ResourceLocation.tryBuild(getNameSpace(), key).withPrefix("reward_bags/");
+		Identifier lootTableLocation = Identifier.tryBuild(getNameSpace(), key).withPrefix("reward_bags/");
 		this.add(ResourceKey.create(Registries.LOOT_TABLE, lootTableLocation), builder);
 	}
 }

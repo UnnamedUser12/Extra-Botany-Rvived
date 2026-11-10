@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "A": {
-      "item": "botania:life_essence"
-    },
-    "P": {
-      "item": "minecraft:gold_ingot"
-    },
-    "S": {
-      "item": "botania:manaweave_cloth"
-    }
+    "A": "botania:life_essence",
+    "P": "minecraft:gold_ingot",
+    "S": "botania:manaweave_cloth"
   },
   "pattern": [
     "ASA",
@@ -18,7 +12,6 @@
     "ASA"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:das_rheingold"
   }
 }

@@ -1,5 +1,8 @@
 package velrondevs.extrabotany.common.item.lens;
 
+import net.minecraft.world.item.Item;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -20,10 +23,12 @@ public class PotionLensItem extends LensItem {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> stacks, TooltipFlag flags) {
-		super.appendHoverText(stack, context, stacks, flags);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> stacks, TooltipFlag flags) {
+		super.appendHoverText(stack, context, tooltipDisplay, stacks, flags);
 		if (BrewUtil.getBrew(stack) != BrewUtil.EMPTY) {
-			BrewUtil.addPotionTooltip(BrewUtil.getBrew(stack), stacks, 1.0F, 0, context.tickRate());
+			java.util.List<Component> lines = new java.util.ArrayList<>();
+			BrewUtil.addPotionTooltip(BrewUtil.getBrew(stack), lines, 1.0F, 0, context.tickRate());
+			lines.forEach(stacks);
 		}
 	}
 }

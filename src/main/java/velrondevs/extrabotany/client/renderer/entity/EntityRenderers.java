@@ -1,6 +1,7 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
@@ -29,7 +30,7 @@ public final class EntityRenderers {
 	}
 
 	public interface BERConsumer {
-		<E extends BlockEntity> void register(BlockEntityType<E> type, BlockEntityRendererProvider<? super E> factory);
+		<E extends BlockEntity, S extends BlockEntityRenderState> void register(BlockEntityType<? extends E> type, BlockEntityRendererProvider<E, S> factory);
 	}
 
 	public static void registerEntityRenderers(EntityRendererConsumer consumer) {

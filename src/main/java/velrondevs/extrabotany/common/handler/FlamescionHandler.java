@@ -154,7 +154,7 @@ public final class FlamescionHandler {
 	 */
 	public static boolean dash(Player player) {
 		if (player.level().isClientSide() || player.isSpectator() || !isFlamescionMode(player)
-				|| player.getCooldowns().isOnCooldown(ExtraBotanyItems.flamescionWeapon)) {
+				|| player.getCooldowns().isOnCooldown(ExtraBotanyItems.flamescionWeapon.getDefaultInstance())) {
 			return false;
 		}
 		Vec3 start = player.position();
@@ -185,7 +185,7 @@ public final class FlamescionHandler {
 			player.addEffect(new MobEffectInstance(ExtraBotanyMobEffects.INCANDESCENCE, 80));
 			player.addEffect(new MobEffectInstance(ExtraBotanyMobEffects.FLAMESCION, 200));
 		}
-		player.getCooldowns().addCooldown(ExtraBotanyItems.flamescionWeapon, DASH_COOLDOWN_TICKS);
+		player.getCooldowns().addCooldown(ExtraBotanyItems.flamescionWeapon.getDefaultInstance(), DASH_COOLDOWN_TICKS);
 		return true;
 	}
 
@@ -232,13 +232,13 @@ public final class FlamescionHandler {
 	 */
 	public static void migrateLegacyState(Player player) {
 		CompoundTag data = player.getPersistentData();
-		if (!data.contains(LEGACY_STATE_KEY, Tag.TAG_COMPOUND)) {
+		if (!data.contains(LEGACY_STATE_KEY)) {
 			return;
 		}
-		CompoundTag legacy = data.getCompound(LEGACY_STATE_KEY);
+		CompoundTag legacy = data.getCompoundOrEmpty(LEGACY_STATE_KEY);
 		FlamescionState state = getState(player);
-		state.setEnergy(legacy.getInt("energy"));
-		state.setOverloaded(legacy.getBoolean("overloaded"));
+		state.setEnergy(legacy.getIntOr("energy", 0));
+		state.setOverloaded(legacy.getBooleanOr("overloaded", false));
 		data.remove(LEGACY_STATE_KEY);
 		sync(player);
 	}

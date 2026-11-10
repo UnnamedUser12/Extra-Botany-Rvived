@@ -1,14 +1,15 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import com.mojang.math.Axis;
 
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.client.renderer.IconModelRenderer;
 import velrondevs.extrabotany.common.entity.judah.JudahOathEntity;
@@ -23,8 +24,8 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>来源：ExtraMeteorP 1.12 {@code RenderJudahOath}。
  * <p>Source: ExtraMeteorP 1.12 {@code RenderJudahOath}.
  */
-public class JudahOathRenderer extends EntityRenderer<JudahOathEntity> {
-	private static final ResourceLocation[] MODELS = new ResourceLocation[Variant.values().length];
+public class JudahOathRenderer extends ExtraEntityRenderer<JudahOathEntity> {
+	private static final Identifier[] MODELS = new Identifier[Variant.values().length];
 	// 原版的缩放是 1.65 × (32 / 20)。
 	// The scale of the original is 1.65 × (32 / 20).
 	private static final float SCALE = 2.64F;
@@ -46,7 +47,7 @@ public class JudahOathRenderer extends EntityRenderer<JudahOathEntity> {
 	 * 誓约图案的图标模型。它必须在模型注册事件里登记。
 	 * The icon model of the oath picture. The model registration event must register it.
 	 */
-	public static ResourceLocation model(Variant variant) {
+	public static Identifier model(Variant variant) {
 		return prefix("icon/judahoath_" + variant.ordinal());
 	}
 
@@ -56,8 +57,8 @@ public class JudahOathRenderer extends EntityRenderer<JudahOathEntity> {
 	}
 
 	@Override
-	public void render(JudahOathEntity oath, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
-		ResourceLocation model = MODELS[oath.getVariant().ordinal()];
+	protected void render(JudahOathEntity oath, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, SubmitNodeCollector collector, int light, CameraRenderState camera) {
+		Identifier model = MODELS[oath.getVariant().ordinal()];
 		pose.pushPose();
 		pose.translate(0F, HEIGHT, 0F);
 		pose.mulPose(Axis.YP.rotationDegrees(oath.getRotation()));
@@ -72,11 +73,10 @@ public class JudahOathRenderer extends EntityRenderer<JudahOathEntity> {
 			pose.popPose();
 		}
 		pose.popPose();
-		super.render(oath, yaw, partialTick, pose, buffers, light);
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(JudahOathEntity oath) {
-		return InventoryMenu.BLOCK_ATLAS;
+	public Identifier getTextureLocation(JudahOathEntity oath) {
+		return TextureAtlas.LOCATION_BLOCKS;
 	}
 }

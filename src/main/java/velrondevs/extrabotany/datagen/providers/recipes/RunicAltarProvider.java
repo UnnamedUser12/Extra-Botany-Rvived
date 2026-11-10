@@ -4,7 +4,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -39,13 +39,13 @@ public class RunicAltarProvider extends ExtraBotanyRecipeProvider {
 
 	@Override
 	public void buildRecipes(RecipeOutput recipeOutput) {
-		Consumer<FinishedRecipe> consumer = recipe -> recipeOutput.accept(recipe.id,
+		Consumer<FinishedRecipe> consumer = recipe -> recipeOutput.accept(key(recipe.id),
 				new RunicAltarRecipe(recipe.output, recipe.mana, recipe.inputs), null);
 		final int costTier1 = 5200;
 		final int costTier2 = 8000;
 		final int costTier3 = 12000;
 
-		//Ingredient manaSteel = Ingredient.of(BotaniaTags.Items.INGOTS_MANASTEEL);
+		//Ingredient manaSteel = tag(BotaniaTags.Items.INGOTS_MANASTEEL);
 
 		//Zadkiel
 		consumer.accept(new FinishedRecipe(idFor("zadkiel"), new ItemStack(ExtraBotanyItems.zadkiel), 500000,
@@ -94,21 +94,21 @@ public class RunicAltarProvider extends ExtraBotanyRecipeProvider {
 
 	}
 
-	private static ResourceLocation idFor(String s) {
+	private static Identifier idFor(String s) {
 		return prefix("runic_altar/" + s);
 	}
 
-	private static ResourceLocation idFor(ItemLike itemLike) {
+	private static Identifier idFor(ItemLike itemLike) {
 		return prefix("runic_altar/" + BuiltInRegistries.ITEM.getKey(itemLike.asItem()).getPath());
 	}
 
 	protected static class FinishedRecipe {
-		private final ResourceLocation id;
+		private final Identifier id;
 		private final ItemStack output;
 		private final int mana;
 		private final Ingredient[] inputs;
 
-		protected FinishedRecipe(ResourceLocation id, ItemStack output, int mana, Ingredient... inputs) {
+		protected FinishedRecipe(Identifier id, ItemStack output, int mana, Ingredient... inputs) {
 			this.id = id;
 			this.output = output;
 			this.mana = mana;

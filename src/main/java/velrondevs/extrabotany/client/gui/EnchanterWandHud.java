@@ -1,11 +1,10 @@
 package velrondevs.extrabotany.client.gui;
 
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -31,7 +30,7 @@ public class EnchanterWandHud extends BindableSpecialFlowerBlockEntity.BindableF
 	}
 
 	@Override
-	public void renderHUD(GuiGraphics gui, Minecraft mc, int minLeft, int minRight, int minDown) {
+	public void renderHUD(GuiGraphicsExtractor gui, Minecraft mc, int minLeft, int minRight, int minDown) {
 		Window window = mc.getWindow();
 		Font font = mc.font;
 		String name = I18n.get(flower.getBlockState().getBlock().getDescriptionId());
@@ -52,14 +51,11 @@ public class EnchanterWandHud extends BindableSpecialFlowerBlockEntity.BindableF
 		BotaniaAPIClient.instance().drawComplexManaHUD(gui, color, flower.getConsumedMana(), flower.getTransformCost(),
 				name, flower.getHudIcon(), flower.isValidBinding());
 
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
 		// 箭头在植物魔法的魔力界面贴图里，位置是 (0, 38)，大小是 22×15。
 		// The arrow is in the mana HUD texture of Botania, at (0, 38), with a size of 22×15.
 		RenderHelper.drawTexturedModalRect(gui, HUDHandler.manaBar, centerX - 11, centerY + 34, 0, 38, 22, 15);
-		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 
-		gui.renderItem(new ItemStack(Items.GRASS_BLOCK), centerX - 31, centerY + 34);
-		gui.renderItem(new ItemStack(ExtraBotanyBlocks.enchantedSoil), centerX + 15, centerY + 34);
+		gui.item(new ItemStack(Items.GRASS_BLOCK), centerX - 31, centerY + 34);
+		gui.item(new ItemStack(ExtraBotanyBlocks.enchantedSoil), centerX + 15, centerY + 34);
 	}
 }

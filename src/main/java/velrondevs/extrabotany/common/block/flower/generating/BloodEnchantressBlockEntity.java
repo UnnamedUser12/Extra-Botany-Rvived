@@ -6,6 +6,7 @@ import com.google.common.cache.LoadingCache;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -94,7 +95,7 @@ public class BloodEnchantressBlockEntity extends ExtraGeneratingFlowerBlockEntit
 				break;
 			}
 
-			if (entity.hurt(getLevel().damageSources().generic(), 3F)) {
+			if (getLevel() instanceof ServerLevel serverLevel && entity.hurtServer(serverLevel, serverLevel.damageSources().generic(), 3F)) {
 				addMana((int) (22F * 12F * (1F - 0.04F * entityDamagedTime - 0.02F * inhibitionLevel)));
 				inhibitionEntityMap.put(entity.getUUID(), entityDamagedTime + 1);
 
@@ -159,7 +160,7 @@ public class BloodEnchantressBlockEntity extends ExtraGeneratingFlowerBlockEntit
 	@Override
 	public void readFromPacketNBT(CompoundTag cmp) {
 		super.readFromPacketNBT(cmp);
-		setBurnTime(cmp.getInt(TAG_BURN_TIME));
+		setBurnTime(cmp.getIntOr(TAG_BURN_TIME, 0));
 	}
 
 	public int getBurnTime() {

@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "R": {
-      "item": "botania:livingrock"
-    },
-    "W": {
-      "item": "botania:livingwood"
-    }
+    "R": "botania:livingrock",
+    "W": "botania:livingwood"
   },
   "pattern": [
     " W ",

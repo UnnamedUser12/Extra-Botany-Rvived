@@ -7,7 +7,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
+import velrondevs.botania.common.block.RecipeLookup;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -43,7 +44,7 @@ public class SmeltLens extends Lens {
 		Entity entity = burst.entity();
 		Level world = entity.level();
 
-		if (world.isClientSide || rtr.getType() != HitResult.Type.BLOCK) {
+		if (world.isClientSide() || rtr.getType() != HitResult.Type.BLOCK) {
 			return false;
 		}
 
@@ -102,11 +103,12 @@ public class SmeltLens extends Lens {
 						dropPosition = Vec3.atCenterOf(collidePos);
 					}
 
-					if (world.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) {
+					if (((ServerLevel) world).getGameRules().get(GameRules.BLOCK_DROPS)) {
 						for (ItemStack stack_ : items) {
-							var recipe = world.getRecipeManager().getRecipeFor(RecipeType.SMELTING, new SingleRecipeInput(stack_), world).orElse(null);
-							if (recipe != null && !recipe.value().getResultItem(world.registryAccess()).isEmpty()) {
-								stack_ = recipe.value().getResultItem(world.registryAccess()).copy();
+							var input = new SingleRecipeInput(stack_);
+							var recipe = RecipeLookup.getRecipeFor(world, RecipeType.SMELTING, input, world).orElse(null);
+							if (recipe != null && !recipe.value().assemble(input).isEmpty()) {
+								stack_ = recipe.value().assemble(input).copy();
 							}
 
 							ItemEntity itemEntity = new ItemEntity(world, dropPosition.x, dropPosition.y, dropPosition.z, stack_);

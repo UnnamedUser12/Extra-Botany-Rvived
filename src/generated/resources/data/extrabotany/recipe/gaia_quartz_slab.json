@@ -3,9 +3,7 @@
   "category": "building",
   "group": "extrabotany:quartz_slab",
   "key": {
-    "Q": {
-      "item": "extrabotany:gaia_quartz_block"
-    }
+    "Q": "extrabotany:gaia_quartz_block"
   },
   "pattern": [
     "QQQ"

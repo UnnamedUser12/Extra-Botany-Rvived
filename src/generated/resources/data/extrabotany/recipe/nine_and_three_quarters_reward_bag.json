@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "botania:dice"
-    }
+    "botania:dice"
   ],
   "result": {
     "count": 3,

@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "equipment",
   "ingredients": [
-    {
-      "item": "extrabotany:judah_oath"
-    },
-    {
-      "item": "extrabotany:sin_rune"
-    }
+    "extrabotany:judah_oath",
+    "extrabotany:sin_rune"
   ],
   "result": {
     "count": 1,

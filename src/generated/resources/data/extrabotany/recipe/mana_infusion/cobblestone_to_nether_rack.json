@@ -4,12 +4,9 @@
     "type": "block",
     "block": "extrabotany:dimension_catalyst"
   },
-  "input": {
-    "item": "minecraft:cobblestone"
-  },
+  "input": "minecraft:cobblestone",
   "mana": 500,
   "output": {
-    "count": 1,
     "id": "minecraft:netherrack"
   }
 }

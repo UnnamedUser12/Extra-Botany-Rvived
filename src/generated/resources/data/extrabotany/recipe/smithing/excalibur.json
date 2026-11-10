@@ -1,16 +1,9 @@
 {
   "type": "minecraft:smithing_transform",
-  "addition": {
-    "item": "extrabotany:hero_medal"
-  },
-  "base": {
-    "item": "botania:terra_sword"
-  },
+  "addition": "extrabotany:hero_medal",
+  "base": "botania:terra_sword",
   "result": {
-    "count": 1,
     "id": "extrabotany:excalibur"
   },
-  "template": {
-    "item": "botania:dreamwood_twig"
-  }
+  "template": "botania:dreamwood_twig"
 }

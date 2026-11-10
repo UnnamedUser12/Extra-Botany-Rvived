@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 /**
@@ -20,8 +22,22 @@ import java.util.stream.Stream;
 final class ModResources {
 	private ModResources() {}
 
+	private static Iterable<Path> roots() {
+		return ModList.get().getModFileById(LibMisc.MOD_ID).getFile().getContents().getContentRoots();
+	}
+
 	static Path path(String path) {
-		return ModList.get().getModFileById(LibMisc.MOD_ID).getFile().findResource(path.split("/"));
+		Path first = null;
+		for (Path root : roots()) {
+			Path candidate = root.resolve(path);
+			if (first == null) {
+				first = candidate;
+			}
+			if (Files.exists(candidate)) {
+				return candidate;
+			}
+		}
+		return first;
 	}
 
 	static boolean exists(String path) {
@@ -40,19 +56,22 @@ final class ModResources {
 	 * The files below a directory of the mod, as paths relative to that directory and with "/" as the separator.
 	 */
 	static List<String> files(String directory, String extension) {
-		Path root = path(directory);
-		if (!Files.isDirectory(root)) {
-			return List.of();
+		TreeSet<String> found = new TreeSet<>();
+		for (Path base : roots()) {
+			Path root = base.resolve(directory);
+			if (!Files.isDirectory(root)) {
+				continue;
+			}
+			try (Stream<Path> walk = Files.walk(root)) {
+				walk.filter(Files::isRegularFile)
+						.map(file -> root.relativize(file).toString().replace('\\', '/'))
+						.filter(name -> name.endsWith(extension))
+						.forEach(found::add);
+			} catch (IOException e) {
+				throw new IllegalStateException("Cannot list " + directory, e);
+			}
 		}
-		try (Stream<Path> walk = Files.walk(root)) {
-			return walk.filter(Files::isRegularFile)
-					.map(file -> root.relativize(file).toString().replace('\\', '/'))
-					.filter(name -> name.endsWith(extension))
-					.sorted()
-					.toList();
-		} catch (IOException e) {
-			throw new IllegalStateException("Cannot list " + directory, e);
-		}
+		return new ArrayList<>(found);
 	}
 
 	/**

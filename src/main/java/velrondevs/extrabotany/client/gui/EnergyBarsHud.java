@@ -2,9 +2,11 @@ package velrondevs.extrabotany.client.gui;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+
+import velrondevs.botania.client.core.helper.RenderHelper;
 
 import velrondevs.extrabotany.common.attachment.FlamescionState;
 import velrondevs.extrabotany.common.entity.mount.MotorEntity;
@@ -31,9 +33,9 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>Source: ExtraMeteorP 1.16 {@code HUDHandler}, {@code HerrscherGUI}, {@code MotorGUI} and {@code FlamescionGUI}.
  */
 public final class EnergyBarsHud {
-	private static final ResourceLocation HERRSCHER_TEXTURE = prefix("textures/gui/herrscherhud.png");
-	private static final ResourceLocation MOTOR_TEXTURE = prefix("textures/gui/motorhud.png");
-	private static final ResourceLocation FLAMESCION_TEXTURE = prefix("textures/gui/flamescionhud.png");
+	private static final Identifier HERRSCHER_TEXTURE = prefix("textures/gui/herrscherhud.png");
+	private static final Identifier MOTOR_TEXTURE = prefix("textures/gui/motorhud.png");
+	private static final Identifier FLAMESCION_TEXTURE = prefix("textures/gui/flamescionhud.png");
 	private static final int BAR_WIDTH = 64;
 	private static final int BAR_HEIGHT = 6;
 	private static final int BOTTOM_OFFSET = 56;
@@ -49,7 +51,7 @@ public final class EnergyBarsHud {
 
 	private EnergyBarsHud() {}
 
-	public static void render(GuiGraphics gui, DeltaTracker deltaTracker) {
+	public static void render(GuiGraphicsExtractor gui, DeltaTracker deltaTracker) {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
 		if (player == null || minecraft.options.hideGui) {
@@ -60,26 +62,26 @@ public final class EnergyBarsHud {
 
 		if (HerrscherHandler.isHerrscherOfThunder(player)) {
 			int energy = HerrscherHandler.getEnergy(player);
-			gui.blit(HERRSCHER_TEXTURE, x, y, 0, V_BACKGROUND, BAR_WIDTH, BAR_HEIGHT);
+			RenderHelper.drawTexturedModalRect(gui, HERRSCHER_TEXTURE, x, y, 0, V_BACKGROUND, BAR_WIDTH, BAR_HEIGHT);
 			if (energy >= HerrscherHandler.MAX_ENERGY) {
-				gui.blit(HERRSCHER_TEXTURE, x, y, 0, V_FULL, BAR_WIDTH, BAR_HEIGHT);
+				RenderHelper.drawTexturedModalRect(gui, HERRSCHER_TEXTURE, x, y, 0, V_FULL, BAR_WIDTH, BAR_HEIGHT);
 			} else {
-				gui.blit(HERRSCHER_TEXTURE, x, y, 0, V_FILL, BAR_WIDTH * energy / HerrscherHandler.MAX_ENERGY, BAR_HEIGHT);
+				RenderHelper.drawTexturedModalRect(gui, HERRSCHER_TEXTURE, x, y, 0, V_FILL, BAR_WIDTH * energy / HerrscherHandler.MAX_ENERGY, BAR_HEIGHT);
 			}
 			y -= BAR_SPACING;
 		}
 
 		if (player.getVehicle() instanceof MotorEntity motor) {
-			gui.blit(MOTOR_TEXTURE, x, y, 0, V_BACKGROUND, BAR_WIDTH, BAR_HEIGHT);
-			gui.blit(MOTOR_TEXTURE, x, y, 0, V_FILL, BAR_WIDTH * motor.getEnergy() / MotorEntity.MAX_ENERGY, BAR_HEIGHT);
+			RenderHelper.drawTexturedModalRect(gui, MOTOR_TEXTURE, x, y, 0, V_BACKGROUND, BAR_WIDTH, BAR_HEIGHT);
+			RenderHelper.drawTexturedModalRect(gui, MOTOR_TEXTURE, x, y, 0, V_FILL, BAR_WIDTH * motor.getEnergy() / MotorEntity.MAX_ENERGY, BAR_HEIGHT);
 			y -= BAR_SPACING;
 		}
 
 		if (!player.isPassenger() && !player.isSpectator() && player.getMainHandItem().is(ExtraBotanyItems.flamescionWeapon)) {
 			FlamescionState state = FlamescionHandler.getState(player);
 			int v = state.isOverloaded() ? V_OVERLOADED : V_FILL;
-			gui.blit(FLAMESCION_TEXTURE, x, y, 0, V_BACKGROUND, BAR_WIDTH, BAR_HEIGHT);
-			gui.blit(FLAMESCION_TEXTURE, x, y, 0, v, BAR_WIDTH * state.getEnergy() / FlamescionHandler.MAX_ENERGY, BAR_HEIGHT);
+			RenderHelper.drawTexturedModalRect(gui, FLAMESCION_TEXTURE, x, y, 0, V_BACKGROUND, BAR_WIDTH, BAR_HEIGHT);
+			RenderHelper.drawTexturedModalRect(gui, FLAMESCION_TEXTURE, x, y, 0, v, BAR_WIDTH * state.getEnergy() / FlamescionHandler.MAX_ENERGY, BAR_HEIGHT);
 		}
 	}
 }

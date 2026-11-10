@@ -1,5 +1,8 @@
 package velrondevs.extrabotany.common.entity;
 
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import velrondevs.extrabotany.registry.ExtraBotanyEntities;
 
 import net.minecraft.nbt.CompoundTag;
@@ -77,7 +80,8 @@ public class SkullMissileEntity extends ThrowableProjectile {
 	}
 
 	public SkullMissileEntity(Level level, LivingEntity shooter) {
-		super(ExtraBotanyEntities.SKULL_MISSILE, shooter, level);
+		super(ExtraBotanyEntities.SKULL_MISSILE, shooter.getX(), shooter.getEyeY() - 0.1F, shooter.getZ(), level);
+		setOwner(shooter);
 	}
 
 	@Override
@@ -132,7 +136,7 @@ public class SkullMissileEntity extends ThrowableProjectile {
 		double range = 15;
 		AABB bounds = new AABB(getOnPos()).inflate(range);
 		DamageSource source = this.getDamageSource();
-		Predicate<Entity> vulnerableTo = e -> !e.isInvulnerableTo(source);
+		Predicate<Entity> vulnerableTo = e -> e instanceof LivingEntity living && level() instanceof ServerLevel serverLevel && !living.isInvulnerableTo(serverLevel, source);
 		List<? extends LivingEntity> entities;
 
 		entities = level().getEntitiesOfClass(Player.class, bounds,
@@ -140,7 +144,7 @@ public class SkullMissileEntity extends ThrowableProjectile {
 
 		Entity found = null;
 		if (!entities.isEmpty()) {
-			found = entities.get(level().random.nextInt(entities.size()));
+			found = entities.get(level().getRandom().nextInt(entities.size()));
 			setTarget(found);
 		}
 
@@ -238,7 +242,7 @@ public class SkullMissileEntity extends ThrowableProjectile {
 		for (int i = 0; i < steps; i++) {
 			level().addParticle(data, particlePos.x, particlePos.y, particlePos.z, 0, 0, 0);
 
-			if (level().random.nextInt(steps) <= 1) {
+			if (level().getRandom().nextInt(steps) <= 1) {
 				level().addParticle(data, particlePos.x + (Math.random() - 0.5) * 0.4, particlePos.y + (Math.random() - 0.5) * 0.4, particlePos.z + (Math.random() - 0.5) * 0.4, 0, 0, 0);
 			}
 
@@ -253,7 +257,7 @@ public class SkullMissileEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag cmp) {
+	protected void addAdditionalSaveData(ValueOutput cmp) {
 		super.addAdditionalSaveData(cmp);
 		//cmp.putUUID(TAG_SKIN, this.getSkin());
 		cmp.putBoolean(TAG_FIRE, this.isFire());
@@ -261,12 +265,12 @@ public class SkullMissileEntity extends ThrowableProjectile {
 		cmp.putInt(TAG_TICKS_EXISTED, this.getTicksExisted());
 
 		getTarget().ifPresent(target -> {
-			cmp.putUUID(TAG_TARGET, target.getUUID());
+			cmp.store(TAG_TARGET, UUIDUtil.CODEC, target.getUUID());
 		});
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundTag cmp) {
+	protected void readAdditionalSaveData(ValueInput cmp) {
 		super.readAdditionalSaveData(cmp);
 		/*
 		if (cmp.hasUUID(TAG_SKIN)) {
@@ -274,14 +278,14 @@ public class SkullMissileEntity extends ThrowableProjectile {
 		}
 		*/
 
-		this.setFire(cmp.getBoolean(TAG_FIRE));
-		setEffect(cmp.getBoolean("Effect")); setDamage(cmp.contains("Damage") ? cmp.getFloat("Damage") : 12); setTrueDamage(cmp.getFloat("TrueDamage"));
-		this.setTicksExisted(cmp.getInt(TAG_TICKS_EXISTED));
+		this.setFire(cmp.getBooleanOr(TAG_FIRE, false));
+		setEffect(cmp.getBooleanOr("Effect", false)); setDamage(cmp.getFloatOr("Damage", 12F)); setTrueDamage(cmp.getFloatOr("TrueDamage", 0.0F));
+		this.setTicksExisted(cmp.getIntOr(TAG_TICKS_EXISTED, 0));
 
-		if (cmp.hasUUID(TAG_TARGET)) {
-			this.targetUUID = cmp.getUUID(TAG_TARGET);
+		cmp.read(TAG_TARGET, UUIDUtil.CODEC).ifPresent(uuid -> {
+			this.targetUUID = uuid;
 			this.cachedTarget = null;
-		}
+		});
 	}
 
 	public void setFire(boolean fire) {
@@ -311,7 +315,7 @@ public class SkullMissileEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	public boolean canBeCollidedWith() {
+	public boolean canBeCollidedWith(@org.jetbrains.annotations.Nullable Entity other) {
 		return false;
 	}
 

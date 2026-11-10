@@ -11,9 +11,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 import velrondevs.extrabotany.registry.ExtraBotanyFluids;
 import velrondevs.extrabotany.config.ExtraBotanyConfig;
@@ -56,7 +56,7 @@ public class ManaLiquefactionBlockEntity extends ManaMachineBlockEntity {
 
 	private int energy;
 	@SuppressWarnings("unchecked")
-	private final BlockCapabilityCache<IFluidHandler, Direction>[] neighbours = new BlockCapabilityCache[ALL_SIDES.length];
+	private final BlockCapabilityCache<ResourceHandler<FluidResource>, Direction>[] neighbours = new BlockCapabilityCache[ALL_SIDES.length];
 
 	public ManaLiquefactionBlockEntity(BlockPos pos, BlockState state) {
 		super(ExtraBotanyBlockEntities.MANA_LIQUEFACTION, pos, state);
@@ -92,7 +92,7 @@ public class ManaLiquefactionBlockEntity extends ManaMachineBlockEntity {
 		boolean powered = level.hasNeighborSignal(worldPosition);
 		int transferSpeed = config.manaGeneratorTransferSpeed();
 		for (Direction side : ALL_SIDES) {
-			IFluidHandler tank = getNeighbour(level, side).getCapability();
+			ResourceHandler<FluidResource> tank = getNeighbour(level, side).getCapability();
 			if (tank != null) {
 				if (powered) {
 					fillTank(tank, Ratio.of(config.manaLiquefactionStoragePump(), config.manaLiquefactionStoragePumpContainer()));
@@ -126,42 +126,56 @@ public class ManaLiquefactionBlockEntity extends ManaMachineBlockEntity {
 	 * 从容器抽取液态魔力，并把它变成能量。
 	 * Drains Fluided Mana from the tank and changes it into energy.
 	 */
-	private void drainTank(IFluidHandler tank, Ratio ratio) {
+	private void drainTank(ResourceHandler<FluidResource> tank, Ratio ratio) {
 		int lots = Math.min(ratio.maxLots, (MAX_ENERGY - energy) / ratio.energy);
 		if (lots <= 0) {
 			return;
 		}
-		int available = tank.drain(new FluidStack(ExtraBotanyFluids.MANA, lots * ratio.other), FluidAction.SIMULATE).getAmount();
+		FluidResource mana = FluidResource.of(ExtraBotanyFluids.MANA);
+		int available;
+		try (Transaction simulation = Transaction.openRoot()) {
+			available = tank.extract(mana, lots * ratio.other, simulation);
+		}
 		lots = Math.min(lots, available / ratio.other);
 		if (lots <= 0) {
 			return;
 		}
-		int drained = tank.drain(new FluidStack(ExtraBotanyFluids.MANA, lots * ratio.other), FluidAction.EXECUTE).getAmount();
-		addEnergy(drained / ratio.other * ratio.energy);
+		try (Transaction transaction = Transaction.openRoot()) {
+			int drained = tank.extract(mana, lots * ratio.other, transaction);
+			transaction.commit();
+			addEnergy(drained / ratio.other * ratio.energy);
+		}
 	}
 
 	/**
 	 * 把能量变成液态魔力，并注入容器。
 	 * Changes energy into Fluided Mana and puts it into the tank.
 	 */
-	private void fillTank(IFluidHandler tank, Ratio ratio) {
+	private void fillTank(ResourceHandler<FluidResource> tank, Ratio ratio) {
 		int lots = Math.min(ratio.maxLots, energy / ratio.energy);
 		if (lots <= 0) {
 			return;
 		}
-		int accepted = tank.fill(new FluidStack(ExtraBotanyFluids.MANA, lots * ratio.other), FluidAction.SIMULATE);
+		FluidResource mana = FluidResource.of(ExtraBotanyFluids.MANA);
+		int accepted;
+		try (Transaction simulation = Transaction.openRoot()) {
+			accepted = tank.insert(mana, lots * ratio.other, simulation);
+		}
 		lots = Math.min(lots, accepted / ratio.other);
 		if (lots <= 0) {
 			return;
 		}
-		int filled = tank.fill(new FluidStack(ExtraBotanyFluids.MANA, lots * ratio.other), FluidAction.EXECUTE);
-		addEnergy(-(filled / ratio.other * ratio.energy));
+		try (Transaction transaction = Transaction.openRoot()) {
+			int filled = tank.insert(mana, lots * ratio.other, transaction);
+			transaction.commit();
+			addEnergy(-(filled / ratio.other * ratio.energy));
+		}
 	}
 
-	private BlockCapabilityCache<IFluidHandler, Direction> getNeighbour(ServerLevel level, Direction side) {
-		BlockCapabilityCache<IFluidHandler, Direction> cache = neighbours[side.ordinal()];
+	private BlockCapabilityCache<ResourceHandler<FluidResource>, Direction> getNeighbour(ServerLevel level, Direction side) {
+		BlockCapabilityCache<ResourceHandler<FluidResource>, Direction> cache = neighbours[side.ordinal()];
 		if (cache == null) {
-			cache = BlockCapabilityCache.create(Capabilities.FluidHandler.BLOCK, level, worldPosition.relative(side), side.getOpposite(),
+			cache = BlockCapabilityCache.create(Capabilities.Fluid.BLOCK, level, worldPosition.relative(side), side.getOpposite(),
 					() -> !isRemoved(), () -> {});
 			neighbours[side.ordinal()] = cache;
 		}
@@ -169,15 +183,15 @@ public class ManaLiquefactionBlockEntity extends ManaMachineBlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.saveAdditional(tag, registries);
+	public void writePacketNBT(CompoundTag tag, HolderLookup.Provider registries) {
+		super.writePacketNBT(tag, registries);
 		tag.putInt(TAG_ENERGY, energy);
 	}
 
 	@Override
-	protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.loadAdditional(tag, registries);
-		energy = Math.clamp(tag.getInt(TAG_ENERGY), 0, MAX_ENERGY);
+	public void readPacketNBT(CompoundTag tag, HolderLookup.Provider registries) {
+		super.readPacketNBT(tag, registries);
+		energy = Math.clamp(tag.getIntOr(TAG_ENERGY, 0), 0, MAX_ENERGY);
 	}
 
 	/**

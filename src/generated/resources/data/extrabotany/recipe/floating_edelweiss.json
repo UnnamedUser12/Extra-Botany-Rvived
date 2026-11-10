@@ -3,15 +3,10 @@
   "category": "misc",
   "group": "extrabotany:floating_flower",
   "ingredients": [
-    {
-      "tag": "botania:floating_flowers"
-    },
-    {
-      "item": "extrabotany:edelweiss"
-    }
+    "#botania:floating_flowers",
+    "extrabotany:edelweiss"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:floating_edelweiss"
   }
 }

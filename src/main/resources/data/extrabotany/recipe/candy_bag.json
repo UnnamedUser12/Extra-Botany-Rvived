@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "minecraft:leather"
-    },
-    {
-      "item": "extrabotany:candy_eins"
-    },
-    {
-      "item": "extrabotany:candy_zwei"
-    },
-    {
-      "item": "extrabotany:candy_drei"
-    }
+    "minecraft:leather",
+    "extrabotany:candy_eins",
+    "extrabotany:candy_zwei",
+    "extrabotany:candy_drei"
   ],
   "result": {
     "count": 1,

@@ -1,5 +1,6 @@
 package velrondevs.extrabotany.common.item.equipment.armor.silent_sages;
 
+import net.minecraft.world.item.equipment.ArmorType;
 import com.google.common.base.Suppliers;
 
 import net.minecraft.ChatFormatting;
@@ -37,7 +38,7 @@ public class SilentSagesArmorItem extends MikuArmorItem {
 			new ItemStack(ExtraBotanyItems.silentSagesBoots)
 	});
 
-	public SilentSagesArmorItem(Type type, Properties props) {
+	public SilentSagesArmorItem(ArmorType type, Properties props) {
 		super(ExtraBotanyArmorMaterials.SILENT_SAGES, type, props);
 	}
 

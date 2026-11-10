@@ -1,28 +1,15 @@
 {
   "type": "botania:runic_altar",
   "ingredients": [
-    {
-      "item": "minecraft:ice"
-    },
-    {
-      "item": "minecraft:blue_ice"
-    },
-    {
-      "item": "minecraft:packed_ice"
-    },
-    {
-      "item": "minecraft:snow_block"
-    },
-    {
-      "item": "minecraft:powder_snow_bucket"
-    },
-    {
-      "item": "minecraft:totem_of_undying"
-    }
+    "minecraft:ice",
+    "minecraft:blue_ice",
+    "minecraft:packed_ice",
+    "minecraft:snow_block",
+    "minecraft:powder_snow_bucket",
+    "minecraft:totem_of_undying"
   ],
   "mana": 500000,
   "output": {
-    "count": 1,
     "id": "extrabotany:zadkiel"
   }
 }

@@ -38,7 +38,7 @@ public class MiniHandbagMenu extends AbstractContainerMenu {
 	public MiniHandbagMenu(int windowId, Inventory playerInv, ItemStack bag) {
 		super(ExtraBotanyMenuTypes.MINI_HANDBAG, windowId);
 		this.bag = bag;
-		Container bagInv = playerInv.player.level().isClientSide
+		Container bagInv = playerInv.player.level().isClientSide()
 				? new SimpleContainer(MiniHandbagItem.SIZE)
 				: MiniHandbagItem.getInventory(bag);
 

@@ -1,17 +1,13 @@
 package velrondevs.extrabotany.common.crafting.recipe;
 
-import com.mojang.serialization.MapCodec;
-
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
+
+import velrondevs.botania.common.crafting.recipe.RecipeUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +19,6 @@ import velrondevs.extrabotany.common.item.brew.ManaCocktailItem;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * 把酿造瓶里的酿造复制到一瓶默认的魔力鸡尾酒里。酿造瓶变成空的魔力玻璃小瓶。
@@ -31,7 +26,7 @@ import java.util.function.Function;
  */
 public final class CopyBrewFormFlaskRecipe extends CopyBrewRecipe {
 
-	public static final RecipeSerializer<CopyBrewFormFlaskRecipe> SERIALIZER = new CopyBrewFormFlaskRecipe.Serializer();
+	public static final RecipeSerializer<CopyBrewFormFlaskRecipe> SERIALIZER = RecipeUtils.shapelessWrapper(CopyBrewFormFlaskRecipe::new);
 
 	public CopyBrewFormFlaskRecipe(ShapelessRecipe compose) {
 		super(compose);
@@ -43,13 +38,14 @@ public final class CopyBrewFormFlaskRecipe extends CopyBrewRecipe {
 	}
 
 	@Override
-	public @NotNull RecipeSerializer<?> getSerializer() {
-		return SERIALIZER;
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public @NotNull RecipeSerializer<ShapelessRecipe> getSerializer() {
+		return (RecipeSerializer) SERIALIZER;
 	}
 
 	@Override
-	public @NotNull ItemStack assemble(@NotNull CraftingInput inv, @NotNull HolderLookup.Provider registries) {
-		ItemStack result = getResultItem(registries).copy();
+	public @NotNull ItemStack assemble(@NotNull CraftingInput inv) {
+		ItemStack result = RecipeUtils.resultItem(this);
 		ItemStack brewSource = ItemStack.EMPTY;
 		ItemStack input = ItemStack.EMPTY;
 
@@ -93,8 +89,8 @@ public final class CopyBrewFormFlaskRecipe extends CopyBrewRecipe {
 		for (int i = 0; i < nonnulllist.size(); ++i) {
 			ItemStack stack = container.getItem(i);
 			Item item = stack.getItem();
-			if (stack.hasCraftingRemainingItem()) {
-				nonnulllist.set(i, stack.getCraftingRemainingItem());
+			if (stack.getCraftingRemainder() != null) {
+				nonnulllist.set(i, stack.getCraftingRemainder().create());
 			} else if (item == BotaniaItems.brewFlask) {
 				nonnulllist.set(i, BotaniaItems.vial.getDefaultInstance());
 			}
@@ -103,22 +99,4 @@ public final class CopyBrewFormFlaskRecipe extends CopyBrewRecipe {
 		return nonnulllist;
 	}
 
-	private static class Serializer implements RecipeSerializer<CopyBrewFormFlaskRecipe> {
-		private static final MapCodec<CopyBrewFormFlaskRecipe> CODEC = RecipeSerializer.SHAPELESS_RECIPE.codec()
-				.xmap(CopyBrewFormFlaskRecipe::new, Function.identity());
-		private static final StreamCodec<RegistryFriendlyByteBuf, CopyBrewFormFlaskRecipe> STREAM_CODEC = RecipeSerializer.SHAPELESS_RECIPE.streamCodec()
-				.map(CopyBrewFormFlaskRecipe::new, Function.identity());
-
-		private Serializer() {}
-
-		@Override
-		public MapCodec<CopyBrewFormFlaskRecipe> codec() {
-			return CODEC;
-		}
-
-		@Override
-		public StreamCodec<RegistryFriendlyByteBuf, CopyBrewFormFlaskRecipe> streamCodec() {
-			return STREAM_CODEC;
-		}
-	}
 }

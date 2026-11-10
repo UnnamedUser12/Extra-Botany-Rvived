@@ -5,7 +5,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.IntrinsicHolderTagsProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.*;
@@ -47,7 +47,7 @@ public class BlockTagProvider extends IntrinsicHolderTagsProvider<Block> {
 
 	public BlockTagProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> lookupProvider) {
 		super(packOutput, Registries.BLOCK, lookupProvider,
-				block -> BuiltInRegistries.BLOCK.getResourceKey(block).orElseThrow(), LibMisc.MOD_ID, null);
+				block -> BuiltInRegistries.BLOCK.getResourceKey(block).orElseThrow(), LibMisc.MOD_ID);
 	}
 
 	@Override
@@ -167,7 +167,7 @@ public class BlockTagProvider extends IntrinsicHolderTagsProvider<Block> {
 	}
 
 	private static TagKey<Block> common(String name) {
-		return TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("c", name));
+		return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("c", name));
 	}
 
 	private void registerMiningTags() {

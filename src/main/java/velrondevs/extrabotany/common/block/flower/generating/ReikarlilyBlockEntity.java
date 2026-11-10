@@ -2,6 +2,7 @@ package velrondevs.extrabotany.common.block.flower.generating;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
@@ -102,10 +103,10 @@ public class ReikarlilyBlockEntity extends ExtraGeneratingFlowerBlockEntity {
 			return false;
 		}
 
-		LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(getLevel());
+		LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(getLevel(), EntitySpawnReason.TRIGGERED);
 		double xOffset = (getLevel().getRandom().nextDouble() - 0.5) * 0.5; // [-0.25, 0.25]
 		double zOffset = (getLevel().getRandom().nextDouble() - 0.5) * 0.5; // [-0.25, 0.25]
-		lightningBolt.moveTo(
+		lightningBolt.snapTo(
 				getEffectivePos().getX() + xOffset,
 				getEffectivePos().getY() + 1,
 				getEffectivePos().getZ() + zOffset
@@ -183,9 +184,9 @@ public class ReikarlilyBlockEntity extends ExtraGeneratingFlowerBlockEntity {
 	public void readFromPacketNBT(CompoundTag cmp) {
 		super.readFromPacketNBT(cmp);
 
-		setCooldown(cmp.getInt(TAG_COOLDOWN));
-		setResidualHeat(cmp.getInt(TAG_RESIDUAL_HEAT));
-		setSpawnLightningCooldown(cmp.getInt(TAG_SPAWN_LIGHTNING_COOLDOWN));
+		setCooldown(cmp.getIntOr(TAG_COOLDOWN, 0));
+		setResidualHeat(cmp.getIntOr(TAG_RESIDUAL_HEAT, 0));
+		setSpawnLightningCooldown(cmp.getIntOr(TAG_SPAWN_LIGHTNING_COOLDOWN, 0));
 	}
 
 	@Override

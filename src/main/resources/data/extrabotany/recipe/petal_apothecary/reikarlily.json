@@ -1,39 +1,19 @@
 {
   "type": "botania:petal_apothecary",
   "ingredients": [
-    {
-      "tag": "botania:petals/light_blue"
-    },
-    {
-      "tag": "botania:petals/light_blue"
-    },
-    {
-      "tag": "botania:petals/cyan"
-    },
-    {
-      "tag": "botania:petals/cyan"
-    },
-    {
-      "tag": "botania:petals/blue"
-    },
-    {
-      "item": "botania:rune_pride"
-    },
-    {
-      "item": "botania:rune_envy"
-    },
-    {
-      "item": "botania:rune_sloth"
-    },
-    {
-      "item": "botania:life_essence"
-    }
+    "#botania:petals/light_blue",
+    "#botania:petals/light_blue",
+    "#botania:petals/cyan",
+    "#botania:petals/cyan",
+    "#botania:petals/blue",
+    "botania:rune_pride",
+    "botania:rune_envy",
+    "botania:rune_sloth",
+    "botania:life_essence"
   ],
   "output": {
     "count": 1,
     "id": "extrabotany:reikarlily"
   },
-  "reagent": {
-    "tag": "botania:seed_apothecary_reagent"
-  }
+  "reagent": "#botania:seed_apothecary_reagent"
 }

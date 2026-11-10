@@ -2,11 +2,6 @@ package velrondevs.extrabotany.common.item;
 
 import velrondevs.extrabotany.registry.ExtraBotanyItems;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntComparators;
-import it.unimi.dsi.fastutil.ints.IntList;
-
-import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -51,7 +46,7 @@ public final class UniversalRunes {
 		elementRunes = Set.of(BotaniaItems.runeWater, BotaniaItems.runeFire, BotaniaItems.runeEarth, BotaniaItems.runeAir,
 				BotaniaItems.runeSpring, BotaniaItems.runeSummer, BotaniaItems.runeAutumn, BotaniaItems.runeWinter);
 		sinRunes = Set.of(BotaniaItems.runeMana, BotaniaItems.runeLust, BotaniaItems.runeGluttony, BotaniaItems.runeGreed,
-				BotaniaItems.runeSloth, BotaniaItems.runeWrath, BotaniaItems.runeEnvy, BotaniaItems.runePride);
+				BotaniaItems.runeSloth, BotaniaItems.runeWrath, BotaniaItems.runeEnvy, BotaniaItems.runePride, BotaniaItems.runeDeception);
 		sinRune = ExtraBotanyItems.sinRune;
 		elementRune = ExtraBotanyItems.elementRune;
 	}
@@ -66,6 +61,10 @@ public final class UniversalRunes {
 	 */
 	public static boolean isUniversalRune(ItemStack stack) {
 		Item item = stack.getItem();
+		return elementRune != null && (item == elementRune || item == sinRune);
+	}
+
+	public static boolean isUniversalRune(Item item) {
 		return elementRune != null && (item == elementRune || item == sinRune);
 	}
 
@@ -86,53 +85,16 @@ public final class UniversalRunes {
 	}
 
 	/**
-	 * 为接受符文的原料生成一个新的物品编号列表：原料自己的物品，加上能代替它们的通用符文。列表从小到大排列，以后不再改动。原料不接受符文时返回 {@code null}。
-	 * Makes a new list of item numbers for an ingredient that accepts runes: the items of the ingredient, plus the universal runes that can replace them. The list is in increasing order and does not change afterward. Returns {@code null} when the ingredient accepts no rune.
-	 *
-	 * <p>列表是从"可接受物品"列表重新生成的，不是从游戏自己的编号列表复制的。原因见 {@code UniversalRuneMixin}：复制时那个列表可能还没有填完。
-	 * <p>The list is made again from the list of accepted items, and is not a copy of the number list of the game. {@code UniversalRuneMixin} gives the cause: that list can be incomplete at the time of a copy.
-	 *
-	 * @param accepted 原料的"可接受物品"列表 / the list of accepted items of the ingredient
+	 * 这个通用符文能不能代替一组可接受物品里的某一个符文。
+	 * Tells if this universal rune can replace one of the runes in a collection of accepted items.
 	 */
-	@Nullable
-	public static IntList idsWithRunes(ItemStack[] accepted) {
-		boolean needsElement = false;
-		boolean needsSin = false;
-		for (ItemStack stack : accepted) {
-			Item item = stack.getItem();
-			needsElement |= elementRunes.contains(item);
-			needsSin |= sinRunes.contains(item);
+	public static boolean replacesOneOf(Item rune, java.util.Collection<Item> accepted) {
+		Set<Item> replaced = rune == elementRune ? elementRunes : sinRunes;
+		for (Item candidate : accepted) {
+			if (replaced.contains(candidate)) {
+				return true;
+			}
 		}
-		if (!needsElement && !needsSin) {
-			return null;
-		}
-		IntList ids = new IntArrayList(accepted.length + 2);
-		for (ItemStack stack : accepted) {
-			ids.add(StackedContents.getStackingIndex(stack));
-		}
-		if (needsElement) {
-			addId(ids, elementRune);
-		}
-		if (needsSin) {
-			addId(ids, sinRune);
-		}
-		ids.sort(IntComparators.NATURAL_COMPARATOR);
-		return ids;
+		return false;
 	}
-
-	private static void addId(IntList ids, Item item) {
-		int id = StackedContents.getStackingIndex(new ItemStack(item));
-		if (!ids.contains(id)) {
-			ids.add(id);
-		}
-	}
-
-	/**
-	 * 一个原料的检查结果：游戏自己的编号列表，以及加上了通用符文的列表。两个字段都不可变，所以别的线程读到这个对象时，它一定是完整的。
-	 * The result of the check of one ingredient: the number list of the game, and the list with the universal runes added. The two fields cannot change, thus a different thread that reads this object always gets a complete object.
-	 *
-	 * @param source 游戏自己的编号列表。它只用来按对象比较。 / the number list of the game; it is only used for a comparison by identity
-	 * @param ids    加上了通用符文的列表 / the list with the universal runes added
-	 */
-	public record ExtendedIds(IntList source, IntList ids) {}
 }

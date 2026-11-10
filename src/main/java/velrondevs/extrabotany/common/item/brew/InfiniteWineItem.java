@@ -1,5 +1,13 @@
 package velrondevs.extrabotany.common.item.brew;
 
+import net.minecraft.world.item.ItemInstance;
+import net.minecraft.world.item.ItemStackTemplate;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 
@@ -9,7 +17,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
@@ -52,11 +60,16 @@ public class InfiniteWineItem extends BaseBrewItem {
 	}
 
 	@Override
-	public @NotNull InteractionResultHolder<ItemStack> use(Level world, Player player, @NotNull InteractionHand hand) {
+	public @Nullable ItemStackTemplate getCraftingRemainder(ItemInstance instance) {
+		return new ItemStackTemplate(getBaseStack().getItem());
+	}
+
+	@Override
+	public @NotNull InteractionResult use(Level world, Player player, @NotNull InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		var relic = velrondevs.extrabotany.xplat.EXplatAbstractions.INSTANCE.findRelic(stack);
 		if (relic == null || !relic.isRightPlayer(player) || getSwigsLeft(stack) < 1) {
-			return InteractionResultHolder.pass(stack);
+			return InteractionResult.PASS;
 		}
 
 		return super.use(world, player, hand);
@@ -64,17 +77,17 @@ public class InfiniteWineItem extends BaseBrewItem {
 
 	@Override
 	public @NotNull ItemStack finishUsingItem(@NotNull ItemStack stack, Level world, LivingEntity living) {
-		if (!world.isClientSide) {
+		if (!world.isClientSide()) {
 			for (MobEffectInstance effect : getBrew(stack).getPotionEffects(stack)) {
 				MobEffectInstance newEffect = new MobEffectInstance(effect.getEffect(), (int) ((float) effect.getDuration() * (1.0 + getDurationMultiplier())), effect.getAmplifier() + getAmplifierAddition(), true, true);
 				if (effect.getEffect().value().isInstantenous()) {
-					effect.getEffect().value().applyInstantenousEffect(living, living, living, newEffect.getAmplifier(), 1F);
+					effect.getEffect().value().applyInstantenousEffect((ServerLevel) world, living, living, living, newEffect.getAmplifier(), 1F);
 				} else {
 					living.addEffect(newEffect);
 				}
 			}
 
-			if (world.random.nextBoolean()) {
+			if (world.getRandom().nextBoolean()) {
 				world.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 1F, 1F);
 			}
 
@@ -92,15 +105,15 @@ public class InfiniteWineItem extends BaseBrewItem {
 	}
 
 	@Override
-	public void appendHoverText(@NotNull ItemStack stack, TooltipContext context, @NotNull List<Component> tooltip, @NotNull TooltipFlag flags) {
+	public void appendHoverText(@NotNull ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, @NotNull TooltipFlag flags) {
 		RelicImpl.addDefaultTooltip(stack, tooltip);
 		addPotionTooltip(getBrew(stack).getPotionEffects(stack), tooltip,
 				(float) (1.0D + getDurationMultiplier()), getAmplifierAddition(), context.tickRate());
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
-		if (!world.isClientSide && entity instanceof Player player) {
+	public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		if (!world.isClientSide() && entity instanceof Player player) {
 			var relic = velrondevs.extrabotany.xplat.EXplatAbstractions.INSTANCE.findRelic(stack);
 			if (relic != null) {
 				relic.tickBinding(player);
@@ -130,12 +143,12 @@ public class InfiniteWineItem extends BaseBrewItem {
 		return DURATION_MULTIPLIER;
 	}
 
-	public static void addPotionTooltip(List<MobEffectInstance> effects, List<Component> lores,
+	public static void addPotionTooltip(List<MobEffectInstance> effects, Consumer<Component> lores,
 			float durationFactor, int amplifierAddition, float tickRate) {
 		List<MobEffectInstance> adjustedEffects = effects.stream()
 				.map(effect -> new MobEffectInstance(effect.getEffect(), effect.getDuration(),
 						effect.getAmplifier() + amplifierAddition, effect.isAmbient(), effect.isVisible(), effect.showIcon()))
 				.toList();
-		PotionContents.addPotionTooltip(adjustedEffects, lores::add, durationFactor, tickRate);
+		PotionContents.addPotionTooltip(adjustedEffects, lores, durationFactor, tickRate);
 	}
 }

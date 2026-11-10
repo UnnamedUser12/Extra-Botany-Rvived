@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.Window;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -29,7 +29,7 @@ public class StardustLotusWandHud extends BindableSpecialFlowerBlockEntity.Binda
 	}
 
 	@Override
-	public void renderHUD(GuiGraphics gui, Minecraft mc, int minLeft, int minRight, int minDown) {
+	public void renderHUD(GuiGraphicsExtractor gui, Minecraft mc, int minLeft, int minRight, int minDown) {
 		Window window = mc.getWindow();
 		Font font = mc.font;
 		String name = I18n.get(flower.getBlockState().getBlock().getDescriptionId());
@@ -47,6 +47,6 @@ public class StardustLotusWandHud extends BindableSpecialFlowerBlockEntity.Binda
 		Component text = target == null
 				? Component.translatable("message.extrabotany.stardust_lotus.no_target")
 				: Component.translatable("message.extrabotany.stardust_lotus.target", target.getX(), target.getY(), target.getZ());
-		gui.drawString(font, text, centerX - font.width(text) / 2, centerY + 51, 0xFFFFFF);
+		RenderHelper.drawString(gui, font, text, centerX - font.width(text) / 2, centerY + 51, 0xFFFFFF);
 	}
 }

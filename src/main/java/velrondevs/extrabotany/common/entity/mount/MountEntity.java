@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity.mount;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -17,14 +19,16 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.animal.fish.WaterAnimal;
+import net.minecraft.world.entity.InterpolationHandler;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.entity.vehicle.VehicleEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -95,12 +99,7 @@ public abstract class MountEntity extends VehicleEntity {
 	private float outOfControlTicks;
 	private int input;
 
-	private int lerpSteps;
-	private double lerpX;
-	private double lerpY;
-	private double lerpZ;
-	private double lerpYRot;
-	private double lerpXRot;
+	private final InterpolationHandler interpolation = new InterpolationHandler(this, 10);
 
 	protected MountEntity(EntityType<? extends MountEntity> type, Level level) {
 		super(type, level);
@@ -208,9 +207,9 @@ public abstract class MountEntity extends VehicleEntity {
 		}
 
 		super.tick();
-		tickLerp();
+		interpolation.interpolate();
 
-		if (isControlledByLocalInstance()) {
+		if (isLocalInstanceAuthoritative()) {
 			applyFriction();
 			if (level().isClientSide()) {
 				steer();
@@ -220,7 +219,7 @@ public abstract class MountEntity extends VehicleEntity {
 			setDeltaMovement(Vec3.ZERO);
 		}
 
-		checkInsideBlocks();
+		applyEffectsFromBlocks();
 		pushNearbyEntities();
 		tickMount(getFirstPassenger() instanceof Player player ? player : null);
 	}
@@ -245,16 +244,6 @@ public abstract class MountEntity extends VehicleEntity {
 	 */
 	protected abstract boolean hasMountGravity();
 
-	private void tickLerp() {
-		if (isControlledByLocalInstance()) {
-			lerpSteps = 0;
-			syncPacketPositionCodec(getX(), getY(), getZ());
-		}
-		if (lerpSteps > 0) {
-			lerpPositionAndRotationStep(lerpSteps, lerpX, lerpY, lerpZ, lerpYRot, lerpXRot);
-			lerpSteps--;
-		}
-	}
 
 	private void pushNearbyEntities() {
 		List<Entity> entities = level().getEntities(this, getBoundingBox().inflate(0.2, -0.01, 0.2), EntitySelector.pushableBy(this));
@@ -474,38 +463,8 @@ public abstract class MountEntity extends VehicleEntity {
 	}
 
 	@Override
-	public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
-		lerpX = x;
-		lerpY = y;
-		lerpZ = z;
-		lerpYRot = yRot;
-		lerpXRot = xRot;
-		lerpSteps = 10;
-	}
-
-	@Override
-	public double lerpTargetX() {
-		return lerpSteps > 0 ? lerpX : getX();
-	}
-
-	@Override
-	public double lerpTargetY() {
-		return lerpSteps > 0 ? lerpY : getY();
-	}
-
-	@Override
-	public double lerpTargetZ() {
-		return lerpSteps > 0 ? lerpZ : getZ();
-	}
-
-	@Override
-	public float lerpTargetXRot() {
-		return lerpSteps > 0 ? (float) lerpXRot : getXRot();
-	}
-
-	@Override
-	public float lerpTargetYRot() {
-		return lerpSteps > 0 ? (float) lerpYRot : getYRot();
+	public InterpolationHandler getInterpolation() {
+		return interpolation;
 	}
 
 	// ---------------------------------------------------------------------
@@ -594,7 +553,7 @@ public abstract class MountEntity extends VehicleEntity {
 	}
 
 	@Override
-	public InteractionResult interact(Player player, InteractionHand hand) {
+	public InteractionResult interact(Player player, InteractionHand hand, Vec3 location) {
 		if (player.isSecondaryUseActive() || outOfControlTicks >= MAX_OUT_OF_CONTROL_TICKS) {
 			return InteractionResult.PASS;
 		}
@@ -620,11 +579,11 @@ public abstract class MountEntity extends VehicleEntity {
 
 	@Override
 	public boolean canCollideWith(Entity entity) {
-		return Boat.canVehicleCollide(this, entity);
+		return AbstractBoat.canVehicleCollide(this, entity);
 	}
 
 	@Override
-	public boolean canBeCollidedWith() {
+	public boolean canBeCollidedWith(@Nullable Entity other) {
 		return true;
 	}
 
@@ -667,11 +626,11 @@ public abstract class MountEntity extends VehicleEntity {
 	 * Only an attack from a player adds damage. The mount comes apart when the damage is more than 40. A player in creative mode takes the mount apart with one attack.
 	 */
 	@Override
-	public boolean hurt(DamageSource source, float amount) {
-		if (isInvulnerableTo(source)) {
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+		if (isInvulnerableToBase(source)) {
 			return false;
 		}
-		if (level().isClientSide() || isRemoved()) {
+		if (isRemoved()) {
 			return true;
 		}
 		Entity attacker = source.getEntity();
@@ -689,10 +648,10 @@ public abstract class MountEntity extends VehicleEntity {
 			setDamage(getDamage() + amount * 10F);
 		}
 		if (creative || getDamage() > DESTROY_DAMAGE) {
-			if (!creative && level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+			if (!creative && level.getGameRules().get(GameRules.ENTITY_DROPS)) {
 				ItemStack drop = createDropStack();
 				if (!drop.isEmpty()) {
-					spawnAtLocation(drop);
+					spawnAtLocation(level, drop);
 				}
 			}
 			discard();
@@ -719,7 +678,7 @@ public abstract class MountEntity extends VehicleEntity {
 	// ---------------------------------------------------------------------
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag tag) {
+	protected void addAdditionalSaveData(ValueOutput tag) {
 		tag.putFloat(TAG_DAMAGE, getDamage());
 		tag.putBoolean(TAG_SUMMONED, isSummoned());
 		tag.putFloat(TAG_ROLL, getRoll());
@@ -727,10 +686,10 @@ public abstract class MountEntity extends VehicleEntity {
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundTag tag) {
-		setDamage(tag.getFloat(TAG_DAMAGE));
-		setSummoned(tag.getBoolean(TAG_SUMMONED));
-		setRoll(tag.getFloat(TAG_ROLL));
-		setPitch(tag.getFloat(TAG_PITCH));
+	protected void readAdditionalSaveData(ValueInput tag) {
+		setDamage(tag.getFloatOr(TAG_DAMAGE, 0.0F));
+		setSummoned(tag.getBooleanOr(TAG_SUMMONED, false));
+		setRoll(tag.getFloatOr(TAG_ROLL, 0.0F));
+		setPitch(tag.getFloatOr(TAG_PITCH, 0.0F));
 	}
 }

@@ -1,7 +1,7 @@
 package velrondevs.extrabotany.common.item;
 
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.player.Player;
@@ -40,10 +40,10 @@ public final class MountItems {
 	 *
 	 * @param hit 玩家视线的射线检测结果。射线必须把流体算作命中。 The ray trace result of the player view. The ray must count fluids as a hit.
 	 */
-	public static InteractionResultHolder<ItemStack> place(Level level, Player player, InteractionHand hand, BlockHitResult hit, MountFactory factory) {
+	public static InteractionResult place(Level level, Player player, InteractionHand hand, BlockHitResult hit, MountFactory factory) {
 		ItemStack stack = player.getItemInHand(hand);
 		if (hit.getType() != HitResult.Type.BLOCK) {
-			return InteractionResultHolder.pass(stack);
+			return InteractionResult.PASS;
 		}
 
 		// 玩家的眼睛在另一个实体的碰撞箱里时不放置。
@@ -53,19 +53,19 @@ public final class MountItems {
 		for (Entity entity : level.getEntities(player, player.getBoundingBox().expandTowards(view.scale(REACH)).inflate(1.0),
 				EntitySelector.NO_SPECTATORS.and(Entity::isPickable))) {
 			if (entity.getBoundingBox().inflate(entity.getPickRadius()).contains(eye)) {
-				return InteractionResultHolder.pass(stack);
+				return InteractionResult.PASS;
 			}
 		}
 
 		MountEntity mount = factory.create(level, hit.getLocation(), player, stack);
 		mount.setYRot(player.getYRot());
 		if (!level.noCollision(mount, mount.getBoundingBox().inflate(-0.1))) {
-			return InteractionResultHolder.fail(stack);
+			return InteractionResult.FAIL;
 		}
 		if (!level.isClientSide()) {
 			level.addFreshEntity(mount);
 			stack.consume(1, player);
 		}
-		return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 }

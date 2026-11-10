@@ -1,0 +1,124 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "entries": [
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "extrabotany:item/infinite_wine_3",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            },
+            {
+              "type": "extrabotany:tint",
+              "kind": "brew"
+            }
+          ]
+        },
+        "threshold": 3.0
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "extrabotany:item/infinite_wine_5",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            },
+            {
+              "type": "extrabotany:tint",
+              "kind": "brew"
+            }
+          ]
+        },
+        "threshold": 5.0
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "extrabotany:item/infinite_wine_7",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            },
+            {
+              "type": "extrabotany:tint",
+              "kind": "brew"
+            }
+          ]
+        },
+        "threshold": 7.0
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "extrabotany:item/infinite_wine_9",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            },
+            {
+              "type": "extrabotany:tint",
+              "kind": "brew"
+            }
+          ]
+        },
+        "threshold": 9.0
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "extrabotany:item/infinite_wine_11",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            },
+            {
+              "type": "extrabotany:tint",
+              "kind": "brew"
+            }
+          ]
+        },
+        "threshold": 11.0
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "extrabotany:item/infinite_wine_12",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            },
+            {
+              "type": "extrabotany:tint",
+              "kind": "brew"
+            }
+          ]
+        },
+        "threshold": 12.0
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "extrabotany:item/infinite_wine",
+      "tints": [
+        {
+          "type": "minecraft:constant",
+          "value": -1
+        },
+        {
+          "type": "extrabotany:tint",
+          "kind": "brew"
+        }
+      ]
+    },
+    "property": "extrabotany:swigs_taken"
+  }
+}

@@ -7,17 +7,21 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidUtil;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 import velrondevs.botania.api.block.PetalApothecary;
+import velrondevs.botania.common.block.block_entity.BotaniaBlockEntity;
 
 /**
  * 活石桶的方块实体。它储存 16 桶同一种液体。桶里有水时，它给旁边的空花药台加水。
@@ -32,7 +36,7 @@ import velrondevs.botania.api.block.PetalApothecary;
  * <p>性能：桶每 {@value #WORK_INTERVAL} tick 工作一次。原版每 tick 查找六个方向的花药台，并且每次液体变化都发一个数据包。
  * <p>Performance: the barrel does its work one time for each {@value #WORK_INTERVAL} ticks. The original looks for apothecaries on six sides on each tick, and sends one packet for each change of the fluid.
  */
-public class LivingrockBarrelBlockEntity extends BlockEntity implements IFluidHandler {
+public class LivingrockBarrelBlockEntity extends BotaniaBlockEntity {
 	public static final int CAPACITY = 16000;
 
 	private static final String TAG_FLUID = "Fluid";
@@ -42,7 +46,7 @@ public class LivingrockBarrelBlockEntity extends BlockEntity implements IFluidHa
 	private static final int BUCKET = 1000;
 	private static final Direction[] ALL_SIDES = Direction.values();
 
-	private FluidStack fluid = FluidStack.EMPTY;
+	private final Tank tank = new Tank();
 	private boolean syncPending;
 
 	public LivingrockBarrelBlockEntity(BlockPos pos, BlockState state) {
@@ -50,7 +54,7 @@ public class LivingrockBarrelBlockEntity extends BlockEntity implements IFluidHa
 	}
 
 	public FluidStack getFluid() {
-		return fluid;
+		return FluidUtil.getStack(tank, 0);
 	}
 
 	public void serverTick() {
@@ -59,7 +63,8 @@ public class LivingrockBarrelBlockEntity extends BlockEntity implements IFluidHa
 		if (level == null || Math.floorMod(level.getGameTime() + worldPosition.asLong(), WORK_INTERVAL) != 0) {
 			return;
 		}
-		if (fluid.is(Fluids.WATER) && fluid.getAmount() >= BUCKET) {
+		FluidStack fluid = getFluid();
+		if (fluid.getFluid() == Fluids.WATER && fluid.getAmount() >= BUCKET) {
 			fillApothecaries();
 		}
 		if (syncPending) {
@@ -69,14 +74,19 @@ public class LivingrockBarrelBlockEntity extends BlockEntity implements IFluidHa
 	}
 
 	private void fillApothecaries() {
+		FluidResource water = FluidResource.of(Fluids.WATER);
 		for (Direction side : ALL_SIDES) {
-			if (fluid.getAmount() < BUCKET) {
+			if (tank.getAmountAsInt(0) < BUCKET) {
 				return;
 			}
 			if (level.getBlockEntity(worldPosition.relative(side)) instanceof PetalApothecary apothecary
 					&& apothecary.getFluid() == PetalApothecary.State.EMPTY) {
 				apothecary.setFluid(PetalApothecary.State.WATER);
-				drain(BUCKET, FluidAction.EXECUTE);
+				try (Transaction transaction = Transaction.openRoot()) {
+					if (tank.extract(0, water, BUCKET, transaction) == BUCKET) {
+						transaction.commit();
+					}
+				}
 			}
 		}
 	}
@@ -86,80 +96,41 @@ public class LivingrockBarrelBlockEntity extends BlockEntity implements IFluidHa
 		syncPending = true;
 	}
 
-	@Override
-	public int getTanks() {
-		return 1;
+	public ResourceHandler<FluidResource> getFluidHandler() {
+		return tank;
 	}
 
-	@Override
-	public FluidStack getFluidInTank(int tank) {
-		return tank == 0 ? fluid : FluidStack.EMPTY;
-	}
-
-	@Override
-	public int getTankCapacity(int tank) {
-		return tank == 0 ? CAPACITY : 0;
-	}
-
-	@Override
-	public boolean isFluidValid(int tank, FluidStack stack) {
-		return tank == 0;
-	}
-
-	@Override
-	public int fill(FluidStack resource, FluidAction action) {
-		if (resource.isEmpty() || !fluid.isEmpty() && !FluidStack.isSameFluidSameComponents(fluid, resource)) {
-			return 0;
+	private final class Tank extends FluidStacksResourceHandler {
+		private Tank() {
+			super(1, CAPACITY);
 		}
-		int accepted = Math.min(resource.getAmount(), CAPACITY - fluid.getAmount());
-		if (accepted > 0 && action.execute()) {
-			fluid = resource.copyWithAmount(fluid.getAmount() + accepted);
+
+		@Override
+		protected void onContentsChanged(int index, FluidStack previousContents) {
 			markChanged();
 		}
-		return accepted;
 	}
 
 	@Override
-	public FluidStack drain(FluidStack resource, FluidAction action) {
-		if (resource.isEmpty() || !FluidStack.isSameFluidSameComponents(fluid, resource)) {
-			return FluidStack.EMPTY;
-		}
-		return drain(resource.getAmount(), action);
-	}
-
-	@Override
-	public FluidStack drain(int maxDrain, FluidAction action) {
-		int removed = Math.min(Math.max(0, maxDrain), fluid.getAmount());
-		if (removed == 0) {
-			return FluidStack.EMPTY;
-		}
-		FluidStack result = fluid.copyWithAmount(removed);
-		if (action.execute()) {
-			fluid = fluid.copyWithAmount(fluid.getAmount() - removed);
-			markChanged();
-		}
-		return result;
-	}
-
-	@Override
-	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.saveAdditional(tag, registries);
+	public void writePacketNBT(CompoundTag tag, HolderLookup.Provider registries) {
+		FluidStack fluid = getFluid();
 		if (!fluid.isEmpty()) {
-			tag.put(TAG_FLUID, fluid.save(registries));
+			tag.store(TAG_FLUID, FluidStack.CODEC, registries.createSerializationContext(NbtOps.INSTANCE), fluid);
 		}
 	}
 
 	@Override
-	protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.loadAdditional(tag, registries);
+	public void readPacketNBT(CompoundTag tag, HolderLookup.Provider registries) {
+		FluidStack fluid;
 		if (tag.contains(TAG_LEGACY_FLUID)) {
 			fluid = loadLegacyFluid(tag);
 		} else {
-			fluid = FluidStack.parseOptional(registries, tag.getCompound(TAG_FLUID));
+			fluid = tag.read(TAG_FLUID, FluidStack.CODEC, registries.createSerializationContext(NbtOps.INSTANCE)).orElse(FluidStack.EMPTY);
 		}
 		if (fluid.getAmount() > CAPACITY) {
 			fluid.setAmount(CAPACITY);
 		}
+		tank.set(0, FluidResource.of(fluid), fluid.getAmount());
 	}
 
 	/**
@@ -167,19 +138,9 @@ public class LivingrockBarrelBlockEntity extends BlockEntity implements IFluidHa
 	 * Reads the format of the old saves of this port: one fluid ID and one quantity.
 	 */
 	private static FluidStack loadLegacyFluid(CompoundTag tag) {
-		ResourceLocation id = ResourceLocation.tryParse(tag.getString(TAG_LEGACY_FLUID));
-		Fluid legacyFluid = id == null ? Fluids.EMPTY : BuiltInRegistries.FLUID.get(id);
-		int amount = tag.getInt(TAG_LEGACY_AMOUNT);
+		Identifier id = Identifier.tryParse(tag.getStringOr(TAG_LEGACY_FLUID, ""));
+		Fluid legacyFluid = id == null ? Fluids.EMPTY : BuiltInRegistries.FLUID.getValue(id);
+		int amount = tag.getIntOr(TAG_LEGACY_AMOUNT, 0);
 		return legacyFluid == Fluids.EMPTY || amount <= 0 ? FluidStack.EMPTY : new FluidStack(legacyFluid, amount);
-	}
-
-	@Override
-	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-		return saveWithoutMetadata(registries);
-	}
-
-	@Override
-	public ClientboundBlockEntityDataPacket getUpdatePacket() {
-		return ClientboundBlockEntityDataPacket.create(this);
 	}
 }

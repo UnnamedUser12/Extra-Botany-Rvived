@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
@@ -15,7 +14,11 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EquipmentSlot;
+import java.util.function.Consumer;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -50,17 +53,16 @@ public interface VoidArchivesVariant {
 		return relic != null && relic.isRightPlayer(player);
 	}
 
-	default InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-		ItemStack stack = player.getItemInHand(hand);
-		return InteractionResultHolder.fail(stack);
+	default InteractionResult use(Level level, Player player, InteractionHand hand) {
+		return InteractionResult.FAIL;
 	}
 
 	default void onUseTick(Level level, LivingEntity livingEntity, ItemStack stack, int remainingUseDuration) {}
 
-	default void appendHoverText(ItemStack stack, Item.TooltipContext context,
-			List<Component> tooltipComponents, TooltipFlag isAdvanced) {}
+	default void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay tooltipDisplay,
+			Consumer<Component> tooltipComponents, TooltipFlag isAdvanced) {}
 
-	default void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {}
+	default void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot slot) {}
 
 	default void onDestroyed(ItemEntity itemEntity) {}
 
@@ -84,9 +86,7 @@ public interface VoidArchivesVariant {
 		return false;
 	}
 
-	default boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-		return false;
-	}
+	default void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {}
 
 	default boolean mineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, LivingEntity miningEntity) {
 		return false;
@@ -100,15 +100,17 @@ public interface VoidArchivesVariant {
 		return Component.translatable("item.extrabotany.void_archives");
 	}
 
-	default UseAnim getUseAnimation(ItemStack stack) {
-		return UseAnim.NONE;
+	default ItemUseAnimation getUseAnimation(ItemStack stack) {
+		return ItemUseAnimation.NONE;
 	}
 
 	default int getUseDuration(ItemStack stack) {
 		return 0;
 	}
 
-	default void releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int timeCharged) {}
+	default boolean releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int timeCharged) {
+		return false;
+	}
 
 	default boolean useOnRelease(ItemStack stack) {
 		return false;

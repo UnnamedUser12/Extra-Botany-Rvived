@@ -4,7 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -30,7 +30,7 @@ public class TheCommunityItem extends BaubleItem {
 
 	@Override
 	public Multimap<Holder<Attribute>, AttributeModifier> getEquippedAttributeModifiers(ItemStack stack) {
-		ResourceLocation slotId = getBaubleModifierId(stack);
+		Identifier slotId = getBaubleModifierId(stack);
 		Multimap<Holder<Attribute>, AttributeModifier> attributes = HashMultimap.create();
 		EarthStoneItem.addArmorModifier(attributes, slotId);
 		IgnisStoneItem.addDamageModifier(attributes, slotId);

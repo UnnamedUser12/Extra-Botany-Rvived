@@ -2,7 +2,7 @@ package velrondevs.extrabotany.registry;
 
 import com.mojang.serialization.Codec;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 import velrondevs.extrabotany.common.lib.LibMemoryNames;
@@ -19,7 +19,7 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * The memory types that the brain of the Guardian of Gaia uses: the range and the delay of the teleport, the number of landmines, the number of pixies, and the time that is left in the monster stage.
  */
 public class ExtraBotanyMemoryTypes {
-	public static final Map<ResourceLocation, MemoryModuleType<?>> ALL = new LinkedHashMap<>();
+	public static final Map<Identifier, MemoryModuleType<?>> ALL = new LinkedHashMap<>();
 
 	public static final MemoryModuleType<Integer> TELEPORT_DELAY_BASE = register(prefix(LibMemoryNames.TELEPORT_DELAY_BASE), Codec.INT);
 	public static final MemoryModuleType<Integer> TELEPORT_DELAY = register(prefix(LibMemoryNames.TELEPORT_DELAY), Codec.INT);
@@ -28,13 +28,13 @@ public class ExtraBotanyMemoryTypes {
 	public static final MemoryModuleType<Integer> PIXIES_MAX = register(prefix(LibMemoryNames.PIXIES_MAX), Codec.INT);
 	public static final MemoryModuleType<Integer> MOB_SPAWN_TICKS = register(prefix(LibMemoryNames.MOB_SPAWN_TICKS), Codec.INT);
 
-	private static <T> MemoryModuleType<T> register(ResourceLocation id, Codec<T> codec) {
+	private static <T> MemoryModuleType<T> register(Identifier id, Codec<T> codec) {
 		MemoryModuleType<T> type = new MemoryModuleType<>(Optional.of(codec));
 		ALL.put(id, type);
 		return type;
 	}
 
-	public static void registerMemories(BiConsumer<MemoryModuleType<?>, ResourceLocation> consumer) {
+	public static void registerMemories(BiConsumer<MemoryModuleType<?>, Identifier> consumer) {
 		for (var memory : ALL.entrySet()) {
 			consumer.accept(memory.getValue(), memory.getKey());
 		}

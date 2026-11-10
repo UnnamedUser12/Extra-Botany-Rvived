@@ -14,7 +14,9 @@ import velrondevs.extrabotany.common.entity.SwordDomainEntity;
 import velrondevs.extrabotany.common.entity.ThunderSlashEntity;
 import velrondevs.extrabotany.common.entity.VoidFieldEntity;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
@@ -60,49 +62,49 @@ public class ExtraBotanyEntities {
 			.sized(0.5F, 0.5F)
 			.clientTrackingRange(4)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":true_terrablade_projectile");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("true_terrablade_projectile")));
 	public static final EntityType<TrueShadowKatanaProjectileEntity> TRUE_SHADOW_KATANA_PROJECTILE = EntityType.Builder
 			.<TrueShadowKatanaProjectileEntity>of(TrueShadowKatanaProjectileEntity::new, MobCategory.MISC)
 			.sized(0.5F, 0.5F)
 			.clientTrackingRange(4)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":true_shadow_katana_projectile");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("true_shadow_katana_projectile")));
 	public static final EntityType<InfluxWaverProjectileEntity> INFLUX_WAVER_PROJECTILE = EntityType.Builder
 			.<InfluxWaverProjectileEntity>of(InfluxWaverProjectileEntity::new, MobCategory.MISC)
 			.sized(0.5F, 0.5F)
 			.clientTrackingRange(4)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":influx_waver_projectile");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("influx_waver_projectile")));
 	public static final EntityType<PhantomSwordEntity> PHANTOM_SWORD = EntityType.Builder
 			.<PhantomSwordEntity>of(PhantomSwordEntity::new, MobCategory.MISC)
 			.sized(0.5F, 0.5F)
 			.clientTrackingRange(4)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":phantom_sword");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("phantom_sword")));
 	public static final EntityType<ButterflyProjectileEntity> BUTTERFLY_PROJECTILE = EntityType.Builder
 			.<ButterflyProjectileEntity>of(ButterflyProjectileEntity::new, MobCategory.MISC)
 			.sized(0.25F, 0.25F)
 			.clientTrackingRange(4)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":butterfly_projectile");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("butterfly_projectile")));
 	public static final EntityType<BottledStarEntity> BOTTLED_STAR = EntityType.Builder
 			.<BottledStarEntity>of(BottledStarEntity::new, MobCategory.MISC)
 			.sized(0.35F, 0.35F)
 			.clientTrackingRange(4)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":bottled_star");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("bottled_star")));
 	public static final EntityType<PhotonProjectileEntity> PHOTON_SHOTGUN_PROJECTILE = EntityType.Builder
 			.<PhotonProjectileEntity>of(PhotonProjectileEntity::new, MobCategory.MISC)
 			.sized(0.25F, 0.25F)
 			.clientTrackingRange(4)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":photon_shotgun_projectile");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("photon_shotgun_projectile")));
 	public static final EntityType<PetPixieEntity> PET_PIXIE = EntityType.Builder
 			.<PetPixieEntity>of(PetPixieEntity::new, MobCategory.MISC)
 			.sized(0.25F, 0.25F)
 			.clientTrackingRange(8)
 			.updateInterval(3)
-			.build(LibMisc.MOD_ID + ":pet_pixie");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("pet_pixie")));
 
 	// 坐骑的碰撞箱尺寸来自原版。
 	// The collision box sizes of the mounts come from the original.
@@ -111,31 +113,31 @@ public class ExtraBotanyEntities {
 			.sized(1.675F, 1.875F)
 			.clientTrackingRange(10)
 			.updateInterval(3)
-			.build(LibMisc.MOD_ID + ":motor");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("motor")));
 	public static final EntityType<AirshipEntity> AIRSHIP = EntityType.Builder
 			.<AirshipEntity>of(AirshipEntity::new, MobCategory.MISC)
 			.sized(1.375F, 0.5625F)
 			.clientTrackingRange(10)
 			.updateInterval(3)
-			.build(LibMisc.MOD_ID + ":airship");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("airship")));
 	public static final EntityType<UfoEntity> UFO = EntityType.Builder
 			.<UfoEntity>of(UfoEntity::new, MobCategory.MISC)
 			.sized(1.5F, 1.5F)
 			.clientTrackingRange(10)
 			.updateInterval(3)
-			.build(LibMisc.MOD_ID + ":ufo");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("ufo")));
 	public static final EntityType<KeyOfTruthEntity> KEY_OF_TRUTH = EntityType.Builder
 			.<KeyOfTruthEntity>of(KeyOfTruthEntity::new, MobCategory.MISC)
 			.sized(0.1F, 0.1F)
 			.clientTrackingRange(8)
 			.updateInterval(10)
-			.build(LibMisc.MOD_ID + ":key_of_truth");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("key_of_truth")));
 	public static final EntityType<ThunderSlashEntity> THUNDER_SLASH = EntityType.Builder
 			.<ThunderSlashEntity>of(ThunderSlashEntity::new, MobCategory.MISC)
 			.sized(0.1F, 0.1F)
 			.clientTrackingRange(8)
 			.updateInterval(10)
-			.build(LibMisc.MOD_ID + ":thunder_slash");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("thunder_slash")));
 
 	// 薪炎的效果实体。
 	// The effect entities of the Flamescion.
@@ -144,31 +146,31 @@ public class ExtraBotanyEntities {
 			.sized(0.25F, 0.25F)
 			.clientTrackingRange(8)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":flamescion_slash");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("flamescion_slash")));
 	public static final EntityType<FlamescionVoidEntity> FLAMESCION_VOID = EntityType.Builder
 			.<FlamescionVoidEntity>of(FlamescionVoidEntity::new, MobCategory.MISC)
 			.sized(0.25F, 0.25F)
 			.clientTrackingRange(8)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":flamescion_void");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("flamescion_void")));
 	public static final EntityType<FlamescionUltEntity> FLAMESCION_ULT = EntityType.Builder
 			.<FlamescionUltEntity>of(FlamescionUltEntity::new, MobCategory.MISC)
 			.sized(0.25F, 0.25F)
 			.clientTrackingRange(8)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":flamescion_ult");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("flamescion_ult")));
 	public static final EntityType<StrengthenSlashEntity> STRENGTHEN_SLASH = EntityType.Builder
 			.<StrengthenSlashEntity>of(StrengthenSlashEntity::new, MobCategory.MISC)
 			.sized(0.35F, 0.35F)
 			.clientTrackingRange(8)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":strengthen_slash");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("strengthen_slash")));
 	public static final EntityType<FlamescionSwordEntity> FLAMESCION_SWORD = EntityType.Builder
 			.<FlamescionSwordEntity>of(FlamescionSwordEntity::new, MobCategory.MISC)
 			.sized(0.35F, 0.35F)
 			.clientTrackingRange(8)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":flamescion_sword");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("flamescion_sword")));
 
 	// 亚空之矛和犹大的誓约的效果实体。
 	// The effect entities of the Spear of Subspace and of the Judah Oath.
@@ -177,7 +179,7 @@ public class ExtraBotanyEntities {
 			.sized(0.1F, 0.1F)
 			.clientTrackingRange(8)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":subspace");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("subspace")));
 	// 画出来的矛很长，但是它的截面大约是半格。飞行本身扫过矛的长度方向。
 	// The spear on the screen is long, but its cross-section is approximately half a block. The flight covers the length of the spear.
 	public static final EntityType<SubspaceSpearEntity> SUBSPACE_SPEAR = EntityType.Builder
@@ -185,25 +187,25 @@ public class ExtraBotanyEntities {
 			.sized(0.5F, 0.5F)
 			.clientTrackingRange(8)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":subspace_spear");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("subspace_spear")));
 	public static final EntityType<JudahOathEntity> JUDAH_OATH = EntityType.Builder
 			.<JudahOathEntity>of(JudahOathEntity::new, MobCategory.MISC)
 			.sized(0.35F, 0.35F)
 			.clientTrackingRange(8)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":judah_oath");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("judah_oath")));
 	public static final EntityType<JudahSpearEntity> JUDAH_SPEAR = EntityType.Builder
 			.<JudahSpearEntity>of(JudahSpearEntity::new, MobCategory.MISC)
 			.sized(0.35F, 0.35F)
 			.clientTrackingRange(8)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":judah_spear");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("judah_spear")));
 	public static final EntityType<JudahSwordEntity> JUDAH_SWORD = EntityType.Builder
 			.<JudahSwordEntity>of(JudahSwordEntity::new, MobCategory.MISC)
 			.sized(0.35F, 0.35F)
 			.clientTrackingRange(8)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":judah_sword");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("judah_sword")));
 
 	public static final EntityType<VoidHerrscher> VOID_HERRSCHER = EntityType.Builder
 			.<VoidHerrscher>of(VoidHerrscher::new, MobCategory.MONSTER)
@@ -211,7 +213,7 @@ public class ExtraBotanyEntities {
 			.fireImmune()
 			.clientTrackingRange(10)
 			.updateInterval(10)
-			.build(LibMisc.MOD_ID + ":void_herrscher");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("void_herrscher")));
 	// 这三个实体不和别的东西碰撞。它们的尺寸只用来决定是否绘制。
 	// These three entities do not collide with other things. Their size is only used to find if they are drawn.
 	public static final EntityType<SubspaceLanceEntity> SUBSPACE_LANCE = EntityType.Builder
@@ -219,19 +221,19 @@ public class ExtraBotanyEntities {
 			.sized(0.5F, 2F)
 			.clientTrackingRange(8)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":subspace_lance");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("subspace_lance")));
 	public static final EntityType<SwordDomainEntity> SWORD_DOMAIN = EntityType.Builder
 			.<SwordDomainEntity>of(SwordDomainEntity::new, MobCategory.MISC)
 			.sized(0.5F, 2F)
 			.clientTrackingRange(8)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":sword_domain");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("sword_domain")));
 	public static final EntityType<VoidFieldEntity> VOID_FIELD = EntityType.Builder
 			.<VoidFieldEntity>of(VoidFieldEntity::new, MobCategory.MISC)
 			.sized(3F, 2F)
 			.clientTrackingRange(8)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":void_field");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("void_field")));
 
 	public static final EntityType<EgoMinionEntity> EGO_MINION = EntityType.Builder
 			.<EgoMinionEntity>of(EgoMinionEntity::new, MobCategory.MONSTER)
@@ -239,27 +241,27 @@ public class ExtraBotanyEntities {
 			.fireImmune()
 			.clientTrackingRange(10)
 			.updateInterval(3)
-			.build(LibMisc.MOD_ID + ":ego_minion");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("ego_minion")));
 	public static final EntityType<EgoLandmineEntity> EGO_LANDMINE = EntityType.Builder
 			.<EgoLandmineEntity>of(EgoLandmineEntity::new, MobCategory.MISC)
 			.sized(3F, 0.1F)
 			.clientTrackingRange(8)
 			.updateInterval(40)
-			.build(LibMisc.MOD_ID + ":ego_landmine");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("ego_landmine")));
 
 	public static final EntityType<FlowerWeaponEntity> FLOWER_WEAPON = EntityType.Builder
 			.<FlowerWeaponEntity>of(FlowerWeaponEntity::new, MobCategory.MISC)
 			.sized(0.35F, 0.35F)
 			.clientTrackingRange(8)
 			.updateInterval(2)
-			.build(LibMisc.MOD_ID + ":flower_weapon");
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, prefix("flower_weapon")));
 	public static final EntityType<AuraFireEntity> AURA_FIRE = EntityType.Builder.<AuraFireEntity>of(
 			AuraFireEntity::new, MobCategory.MISC)
 			.sized(0, 0)
 			.noSummon()
 			.updateInterval(10)
 			.clientTrackingRange(10)
-			.build(LibEntityNames.AURA_FIRE.toString());
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, LibEntityNames.AURA_FIRE));
 
 	public static final EntityType<Gaia> GAIA_LEGACY = EntityType.Builder.<Gaia>of(
 			Gaia::new, MobCategory.MONSTER)
@@ -267,14 +269,14 @@ public class ExtraBotanyEntities {
 			.fireImmune()
 			.clientTrackingRange(10)
 			.updateInterval(10)
-			.build(LibEntityNames.GAIA_LEGACY.toString());
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, LibEntityNames.GAIA_LEGACY));
 
 	public static final EntityType<MagicLandMineEntity> MAGIC_LANDMINE = EntityType.Builder.<MagicLandMineEntity>of(
 			MagicLandMineEntity::new, MobCategory.MISC)
 			.sized(5F, 0.1F)
 			.clientTrackingRange(8)
 			.updateInterval(40)
-			.build(LibEntityNames.MAGIC_LANDMINE.toString());
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, LibEntityNames.MAGIC_LANDMINE));
 
 	// 本我。来源：ExtraMeteorP 1.16 的实体 ego。
 	// The Ego. Source: the entity ego of ExtraMeteorP 1.16.
@@ -283,7 +285,7 @@ public class ExtraBotanyEntities {
 			.sized(0.6F, 1.8F)
 			.clientTrackingRange(10)
 			.updateInterval(2)
-			.build(LibEntityNames.EGO.toString());
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, LibEntityNames.EGO));
 
 	public static final EntityType<GaiaIII> GAIA_III = EntityType.Builder.<GaiaIII>of(
 			GaiaIII::new, MobCategory.MONSTER)
@@ -291,44 +293,44 @@ public class ExtraBotanyEntities {
 			.fireImmune()
 			.clientTrackingRange(10)
 			.updateInterval(10)
-			.build(LibEntityNames.GAIA_III.toString());
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, LibEntityNames.GAIA_III));
 
 	public static final EntityType<SkullMissileEntity> SKULL_MISSILE = EntityType.Builder.<SkullMissileEntity>of(
 			SkullMissileEntity::new, MobCategory.MISC)
 			.sized(0.5F, 0.5F)
 			.clientTrackingRange(4)
 			.updateInterval(2)
-			.build(LibEntityNames.SKULL_MISSILE.toString());
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, LibEntityNames.SKULL_MISSILE));
 
 	public static final EntityType<SkullLandMineEntity.Default> SKULL_LANDMINE_BLUE = EntityType.Builder.<SkullLandMineEntity.Default>of(
 			SkullLandMineEntity.Default::new, MobCategory.MISC)
 			.sized(0.5F, 0.5F)
 			.clientTrackingRange(8)
 			.updateInterval(40)
-			.build(LibEntityNames.SKULL_LANDMINE_BLUE.toString());
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, LibEntityNames.SKULL_LANDMINE_BLUE));
 
 	public static final EntityType<SkullLandMineEntity.Danger> SKULL_LANDMINE_RED = EntityType.Builder.<SkullLandMineEntity.Danger>of(
 			SkullLandMineEntity.Danger::new, MobCategory.MISC)
 			.sized(0.5F, 0.5F)
 			.clientTrackingRange(8)
 			.updateInterval(40)
-			.build(LibEntityNames.SKULL_LANDMINE_RED.toString());
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, LibEntityNames.SKULL_LANDMINE_RED));
 
 	public static final EntityType<SkullLandMineEntity.Disarm> SKULL_LANDMINE_GREEN = EntityType.Builder.<SkullLandMineEntity.Disarm>of(
 			SkullLandMineEntity.Disarm::new, MobCategory.MISC)
 			.sized(0.5F, 0.5F)
 			.clientTrackingRange(8)
 			.updateInterval(40)
-			.build(LibEntityNames.SKULL_LANDMINE_GREEN.toString());
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, LibEntityNames.SKULL_LANDMINE_GREEN));
 
 	public static final EntityType<HolyWaterGrenadeEntity> HOLY_WATER_GRENADE = EntityType.Builder.<HolyWaterGrenadeEntity>of(
 			HolyWaterGrenadeEntity::new, MobCategory.MISC)
 			.sized(0.25F, 0.25F)
 			.clientTrackingRange(4)
 			.updateInterval(10)
-			.build(LibEntityNames.HOLY_WATER_GRENADE.toString());
+			.build(ResourceKey.create(Registries.ENTITY_TYPE, LibEntityNames.HOLY_WATER_GRENADE));
 
-	public static void registerEntities(BiConsumer<EntityType<?>, ResourceLocation> r) {
+	public static void registerEntities(BiConsumer<EntityType<?>, Identifier> r) {
 		r.accept(VOID_HERRSCHER, prefix("void_herrscher"));
 		r.accept(EGO, LibEntityNames.EGO);
 		r.accept(EGO_MINION, prefix("ego_minion"));

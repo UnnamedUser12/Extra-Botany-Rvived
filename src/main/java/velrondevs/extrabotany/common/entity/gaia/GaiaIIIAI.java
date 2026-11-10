@@ -1,16 +1,17 @@
 package velrondevs.extrabotany.common.entity.gaia;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.mojang.serialization.Dynamic;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.ActivityData;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Swim;
 import net.minecraft.world.entity.schedule.Activity;
 
 import velrondevs.extrabotany.common.entity.gaia.behavior.*;
+
+import java.util.List;
 
 /**
  * 盖亚守护者III的大脑。出场之后它一直使用战斗活动：传送、骷髅导弹、骷髅地雷和小精灵。缴械在核心活动里，所以它在出场时也运行。
@@ -37,34 +38,31 @@ public class GaiaIIIAI extends GaiaAI {
 		GaiaSpawnPixies.initMemories(gaia.getBrain(), PIXIES_PRE_SPAWN_MAX);
 	}
 
-	protected static Brain<?> makeBrain(Gaia gaia, Dynamic<?> ops) {
-		Brain.Provider<GaiaIII> provider = Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
-		Brain<GaiaIII> brain = provider.makeBrain(ops);
-		initCoreActivity(brain);
-		initSpawnActivity(brain, EMERGE_TIME);
-		initFightActivity(brain);
-
-		brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
+	protected static Brain<?> makeBrain(Gaia gaia, Brain.Packed packed) {
+		Brain<Gaia> brain = Brain.<Gaia>provider(MEMORY_TYPES, SENSOR_TYPES, body -> List.of(
+				coreActivity(),
+				spawnActivity(EMERGE_TIME),
+				fightActivity())).makeBrain(gaia, packed);
 		brain.setDefaultActivity(Activity.EMERGE);
 		brain.useDefaultActivity();
 		return brain;
 	}
 
-	protected static void initCoreActivity(Brain<? extends Gaia> brain) {
-		brain.addActivity(Activity.CORE, 0, ImmutableList.of(
-				new Swim(0.8F),
-				new GaiaDisarm<>()
+	protected static ActivityData<Gaia> coreActivity() {
+		return ActivityData.create(Activity.CORE, 0, ImmutableList.of(
+				new Swim<Gaia>(0.8F),
+				new GaiaDisarm<Gaia>()
 		));
 	}
 
-	private static void initFightActivity(Brain<? extends Gaia> brain) {
-		brain.addActivity(Activity.FIGHT, 10, ImmutableList.of(
-				new GaiaTeleport<>(),
-				new GaiaSpawnSkullMissile<>(),
-				new GaiaSpawnSkullLandMine<>(),
-				new GaiaSpawnPixies<>(),
-				new GaiaSmashBlocksAround<>(),
-				new GaiaCleanPlayerUnstableEffects<>()
+	protected static ActivityData<Gaia> fightActivity() {
+		return ActivityData.create(Activity.FIGHT, 10, ImmutableList.of(
+				new GaiaTeleport<Gaia>(),
+				new GaiaSpawnSkullMissile<Gaia>(),
+				new GaiaSpawnSkullLandMine<Gaia>(),
+				new GaiaSpawnPixies<Gaia>(),
+				new GaiaSmashBlocksAround<Gaia>(),
+				new GaiaCleanPlayerUnstableEffects<Gaia>()
 		));
 	}
 }

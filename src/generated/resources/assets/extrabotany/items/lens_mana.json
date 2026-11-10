@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "extrabotany:item/lens_mana",
+    "tints": [
+      {
+        "type": "extrabotany:tint",
+        "kind": "lens"
+      }
+    ]
+  }
+}

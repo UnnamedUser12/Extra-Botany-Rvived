@@ -2,7 +2,7 @@ package velrondevs.extrabotany.common.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -15,7 +15,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.fluid.FluidUtil;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -39,15 +41,15 @@ public class LivingrockBarrelBlock extends BotaniaWaterloggedBlock implements En
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-		if (FluidUtil.interactWithFluidHandler(player, hand, level, pos, hit.getDirection())) {
-			return ItemInteractionResult.sidedSuccess(level.isClientSide());
+	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+		if (FluidUtil.interactWithFluidHandler(player, hand, level, pos, hit.getDirection(), null)) {
+			return InteractionResult.SUCCESS;
 		}
 		// 和原版相同：液体容器在这里不做别的事。否则一桶水会被倒在活石桶旁边。
 		// The same as in the original: a fluid container does nothing more here. If not, a bucket of water would be emptied adjacent to the barrel.
-		return FluidUtil.getFluidHandler(stack).isPresent()
-				? ItemInteractionResult.CONSUME
-				: ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		return ItemAccess.forStack(stack).oneByOne().getCapability(Capabilities.Fluid.ITEM) != null
+				? InteractionResult.CONSUME
+				: InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
 
 	@Override

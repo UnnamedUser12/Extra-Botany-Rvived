@@ -1,5 +1,6 @@
 package velrondevs.extrabotany.network.clientbound;
 
+import net.minecraft.nbt.NbtOps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -49,11 +50,11 @@ public record ColorfulBossEventPacket(UUID id, Operation operation) implements E
 
 	private void encode(RegistryFriendlyByteBuf buf) {
 		buf.writeUUID(this.id);
-		buf.writeJsonWithCodec(Operation.CODEC, operation());
+		buf.writeWithCodec(NbtOps.INSTANCE, Operation.CODEC, operation());
 	}
 
 	private static ColorfulBossEventPacket decode(RegistryFriendlyByteBuf buf) {
-		return new ColorfulBossEventPacket(buf.readUUID(), buf.readJsonWithCodec(Operation.CODEC));
+		return new ColorfulBossEventPacket(buf.readUUID(), buf.readWithCodecTrusted(NbtOps.INSTANCE, Operation.CODEC));
 	}
 
 	public static ColorfulBossEventPacket createAddPacket(BossEvent event) {

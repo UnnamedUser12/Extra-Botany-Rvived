@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "C": {
-      "item": "minecraft:chest"
-    },
-    "M": {
-      "item": "extrabotany:the_origin"
-    },
-    "T": {
-      "tag": "c:ingots/terrasteel"
-    },
-    "W": {
-      "tag": "minecraft:wool"
-    }
+    "C": "minecraft:chest",
+    "M": "extrabotany:the_origin",
+    "T": "#c:ingots/terrasteel",
+    "W": "#minecraft:wool"
   },
   "pattern": [
     "MTM",

@@ -2,7 +2,7 @@ package velrondevs.extrabotany.datagen.providers.patchouli.page.botania;
 
 import com.demonwav.mcdev.annotations.Translatable;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.datagen.providers.patchouli.page.AbstractPage;
 
@@ -27,7 +27,7 @@ public class ElvenTradePage extends AbstractPage<ElvenTradePage> {
 	}
 
 	@Override
-	public ResourceLocation getType() {
-		return ResourceLocation.tryParse("botania:elven_trade");
+	public Identifier getType() {
+		return Identifier.tryParse("botania:elven_trade");
 	}
 }

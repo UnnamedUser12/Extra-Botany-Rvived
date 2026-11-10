@@ -1,16 +1,19 @@
 package velrondevs.extrabotany.common.item.equipment.tool.hammer;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,7 +22,7 @@ import net.minecraft.world.phys.HitResult;
 
 import velrondevs.botania.api.item.SequentialBreaker;
 import velrondevs.botania.api.mana.ManaItemHandler;
-import velrondevs.botania.common.annotations.SoftImplement;
+import velrondevs.botania.common.item.equipment.tool.BlockStartBreakItem;
 import velrondevs.extrabotany.common.helper.ItemNBTHelper;
 import velrondevs.botania.common.item.equipment.tool.ToolCommons;
 
@@ -31,46 +34,45 @@ import java.util.function.Predicate;
  * 泰拉碾压者。潜行并对着空气使用可以开关范围挖掘。开启时每 tick 消耗魔力，魔力不足时自动关闭。范围挖掘一次挖掉一个面上的多个方块。
  * Terra Smasher. A sneak-use at the air sets the area mining on or off. While it is on, it uses mana on each tick, and it goes off automatically when there is not sufficient mana. The area mining breaks many blocks of one face at one time.
  */
-public class TerrasteelHammerItem extends ManasteelHammerItem implements SequentialBreaker {
+public class TerrasteelHammerItem extends ManasteelHammerItem implements SequentialBreaker, BlockStartBreakItem {
 	private static final String TAG_ENABLED = "Enabled";
 	private static final int MANA_PER_DAMAGE = 100;
 	private static final int ACTIVE_COST = 10;
 	public static final int RANGE = 2;
 
-	public TerrasteelHammerItem(Tier tier, int attackDamageModifier, float attackSpeedModifier, Properties properties) {
+	public TerrasteelHammerItem(ToolMaterial tier, int attackDamageModifier, float attackSpeedModifier, Properties properties) {
 		super(tier, attackDamageModifier, attackSpeedModifier, properties);
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 
 		if (!player.isSecondaryUseActive()) {
-			return InteractionResultHolder.pass(stack);
+			return InteractionResult.PASS;
 		}
 		if (hand != InteractionHand.MAIN_HAND) {
-			return InteractionResultHolder.pass(stack);
+			return InteractionResult.PASS;
 		}
 
 		BlockHitResult blockhitresult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);
 		if (blockhitresult.getType() == HitResult.Type.BLOCK) {
-			return InteractionResultHolder.pass(stack);
+			return InteractionResult.PASS;
 		}
 
 		setEnabled(stack, !isEnabled(stack));
 
-		if (!level.isClientSide) {
+		if (!level.isClientSide()) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), ExtraBotanySounds.HAMMER_USE, SoundSource.PLAYERS, 1F, 1F);
 		}
 
-		return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 
-	//TODO BlockEventWrapper
-	@SoftImplement("IForgeItem")
+	@Override
 	public boolean onBlockStartBreak(ItemStack stack, BlockPos pos, Player player) {
 		BlockHitResult raycast = ToolCommons.raytraceFromEntity(player, 10, false);
-		if (!player.level().isClientSide && raycast.getType() == HitResult.Type.BLOCK) {
+		if (!player.level().isClientSide() && raycast.getType() == HitResult.Type.BLOCK) {
 			Direction face = raycast.getDirection();
 			breakOtherBlock(player, stack, pos, pos, face);
 		}
@@ -115,8 +117,8 @@ public class TerrasteelHammerItem extends ManasteelHammerItem implements Sequent
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
-		super.inventoryTick(stack, world, entity, slot, selected);
+	public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		super.inventoryTick(stack, world, entity, eqSlot);
 		if (world.isClientSide() || !(entity instanceof Player player)) {
 			return;
 		}

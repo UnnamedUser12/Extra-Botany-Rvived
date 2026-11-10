@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "E": {
-      "item": "extrabotany:the_end"
-    },
-    "G": {
-      "item": "botania:gaia_ingot"
-    },
-    "H": {
-      "item": "extrabotany:hero_medal"
-    },
-    "S": {
-      "item": "extrabotany:sin_rune"
-    }
+    "E": "extrabotany:the_end",
+    "G": "botania:gaia_ingot",
+    "H": "extrabotany:hero_medal",
+    "S": "extrabotany:sin_rune"
   },
   "pattern": [
     "GSG",

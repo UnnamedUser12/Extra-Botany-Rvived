@@ -4,12 +4,9 @@
     "type": "block",
     "block": "extrabotany:dimension_catalyst"
   },
-  "input": {
-    "item": "minecraft:apple"
-  },
+  "input": "minecraft:apple",
   "mana": 500,
   "output": {
-    "count": 1,
     "id": "minecraft:chorus_fruit"
   }
 }

@@ -4,7 +4,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -37,8 +37,8 @@ public class TerrestrialAgglomerationProvider extends ExtraBotanyRecipeProvider 
 
 	@Override
 	public void buildRecipes(RecipeOutput recipeOutput) {
-		Consumer<FinishedRecipe> consumer = recipe -> recipeOutput.accept(recipe.id,
-				new RecipeTerraPlate(recipe.mana, net.minecraft.core.NonNullList.of(Ingredient.EMPTY, recipe.inputs), recipe.output), null);
+		Consumer<FinishedRecipe> consumer = recipe -> recipeOutput.accept(key(recipe.id),
+				new RecipeTerraPlate(recipe.mana, velrondevs.botania.common.crafting.recipe.RecipeUtils.ingredientList(recipe.inputs), recipe.output), null);
 		consumer.accept(new FinishedRecipe(idFor("aerialite_ingot"), ManaPoolBlockEntity.MAX_MANA / 2,
 				new ItemStack(ExtraBotanyItems.aerialite),
 				Ingredient.of(BotaniaItems.enderAirBottle),
@@ -66,21 +66,21 @@ public class TerrestrialAgglomerationProvider extends ExtraBotanyRecipeProvider 
 
 	}
 
-	private static ResourceLocation idFor(String s) {
+	private static Identifier idFor(String s) {
 		return prefix("terra_plate/" + s);
 	}
 
-	private static ResourceLocation idFor(ItemLike itemLike) {
+	private static Identifier idFor(ItemLike itemLike) {
 		return prefix("terra_plate/" + BuiltInRegistries.ITEM.getKey(itemLike.asItem()).getPath());
 	}
 
 	protected static class FinishedRecipe {
-		private final ResourceLocation id;
+		private final Identifier id;
 		private final int mana;
 		private final ItemStack output;
 		private final Ingredient[] inputs;
 
-		public FinishedRecipe(ResourceLocation id, int mana, ItemStack output, Ingredient... inputs) {
+		public FinishedRecipe(Identifier id, int mana, ItemStack output, Ingredient... inputs) {
 			this.id = id;
 			this.mana = mana;
 			this.output = output;

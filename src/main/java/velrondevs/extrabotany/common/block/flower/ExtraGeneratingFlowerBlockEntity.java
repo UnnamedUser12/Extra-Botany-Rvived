@@ -2,6 +2,7 @@ package velrondevs.extrabotany.common.block.flower;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.component.CustomData;
@@ -41,7 +42,7 @@ public abstract class ExtraGeneratingFlowerBlockEntity extends GeneratingFlowerB
 	@Override
 	public void tickFlower() {
 		super.tickFlower();
-		if (syncPending && level != null && !level.isClientSide && level.getGameTime() - lastSync >= SYNC_INTERVAL) {
+		if (syncPending && level != null && !level.isClientSide() && level.getGameTime() - lastSync >= SYNC_INTERVAL) {
 			syncPending = false;
 			lastSync = level.getGameTime();
 			super.sync();
@@ -55,7 +56,7 @@ public abstract class ExtraGeneratingFlowerBlockEntity extends GeneratingFlowerB
 	@Override
 	public void sync() {
 		setChanged();
-		if (level != null && !level.isClientSide) {
+		if (level != null && !level.isClientSide()) {
 			lastSync = level.getGameTime();
 			syncPending = false;
 			super.sync();
@@ -98,7 +99,7 @@ public abstract class ExtraGeneratingFlowerBlockEntity extends GeneratingFlowerB
 	}
 
 	@Override
-	protected void applyImplicitComponents(DataComponentInput componentInput) {
+	protected void applyImplicitComponents(DataComponentGetter componentInput) {
 		super.applyImplicitComponents(componentInput);
 		CustomData customData = componentInput.get(DataComponents.CUSTOM_DATA);
 		if (customData != null) {

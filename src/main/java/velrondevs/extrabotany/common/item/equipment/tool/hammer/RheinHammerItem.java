@@ -1,5 +1,10 @@
 package velrondevs.extrabotany.common.item.equipment.tool.hammer;
 
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -9,7 +14,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
@@ -51,20 +56,20 @@ public class RheinHammerItem extends TerrasteelHammerItem implements IShadowium,
 		this(HammerTiers.RHEIN, 4, -3.0F, props);
 	}
 
-	public RheinHammerItem(Tier tier, int attackDamageModifier, float attackSpeedModifier, Properties properties) {
+	public RheinHammerItem(ToolMaterial tier, int attackDamageModifier, float attackSpeedModifier, Properties properties) {
 		super(tier, attackDamageModifier, attackSpeedModifier, properties);
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
-		super.appendHoverText(stack, context, tooltipComponents, isAdvanced);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipComponents, TooltipFlag isAdvanced) {
+		super.appendHoverText(stack, context, tooltipDisplay, tooltipComponents, isAdvanced);
 		RelicImpl.addDefaultTooltip(stack, tooltipComponents);
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
-		super.inventoryTick(stack, world, entity, slot, selected);
-		if (!world.isClientSide && entity instanceof Player player) {
+	public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		super.inventoryTick(stack, world, entity, eqSlot);
+		if (!world.isClientSide() && entity instanceof Player player) {
 			var relic = velrondevs.extrabotany.xplat.EXplatAbstractions.INSTANCE.findRelic(stack);
 			if (relic != null) {
 				relic.tickBinding(player);
@@ -77,10 +82,10 @@ public class RheinHammerItem extends TerrasteelHammerItem implements IShadowium,
 		if (!isEnabled(stack)) {
 			return;
 		}
-		shadowiumTick(stack, world, entity, slot, selected);
-		photoniumTick(stack, world, entity, slot, selected);
-		aerialiteTick(stack, world, entity, slot, selected);
-		orichalcosTick(stack, world, entity, slot, selected);
+		shadowiumTick(stack, world, entity, 0, false);
+		photoniumTick(stack, world, entity, 0, false);
+		aerialiteTick(stack, world, entity, 0, false);
+		orichalcosTick(stack, world, entity, 0, false);
 	}
 
 	private boolean checkAdvancement(ItemStack stack, ServerPlayer serverPlayer) {

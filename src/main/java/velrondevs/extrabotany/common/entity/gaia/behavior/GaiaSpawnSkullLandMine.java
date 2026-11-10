@@ -1,8 +1,8 @@
 package velrondevs.extrabotany.common.entity.gaia.behavior;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.random.WeightedEntry;
-import net.minecraft.util.random.WeightedRandom;
+import net.minecraft.util.random.Weighted;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 
@@ -18,11 +18,11 @@ import java.util.List;
  * The landmines of Guardian of Gaia III. Each teleport puts down a group of skull landmines: 70% blue, 20% red and 10% green. When the configuration disables the disarm, a green landmine becomes a blue one.
  */
 public class GaiaSpawnSkullLandMine<E extends Gaia> extends GaiaSpawnLandMine<E> {
-	public static final List<WeightedEntry.Wrapper<EntityType<? extends SkullLandMineEntity>>> TYPES_POOL = List.of(
-			WeightedEntry.wrap(ExtraBotanyEntities.SKULL_LANDMINE_BLUE, 70),
-			WeightedEntry.wrap(ExtraBotanyEntities.SKULL_LANDMINE_RED, 20),
-			WeightedEntry.wrap(ExtraBotanyEntities.SKULL_LANDMINE_GREEN, 10)
-	);
+	public static final WeightedList<EntityType<? extends SkullLandMineEntity>> TYPES_POOL = WeightedList.of(List.of(
+			new Weighted<EntityType<? extends SkullLandMineEntity>>(ExtraBotanyEntities.SKULL_LANDMINE_BLUE, 70),
+			new Weighted<EntityType<? extends SkullLandMineEntity>>(ExtraBotanyEntities.SKULL_LANDMINE_RED, 20),
+			new Weighted<EntityType<? extends SkullLandMineEntity>>(ExtraBotanyEntities.SKULL_LANDMINE_GREEN, 10)
+	));
 
 	@Override
 	protected void spawnLandMines(Gaia gaia) {
@@ -46,9 +46,8 @@ public class GaiaSpawnSkullLandMine<E extends Gaia> extends GaiaSpawnLandMine<E>
 	}
 
 	protected SkullLandMineEntity getNewLandMine(Gaia gaia) {
-		EntityType<? extends SkullLandMineEntity> landmineType = WeightedRandom.getRandomItem(gaia.getRandom(), TYPES_POOL)
-				.orElse(WeightedEntry.wrap(ExtraBotanyEntities.SKULL_LANDMINE_BLUE, 70))
-				.data();
+		EntityType<? extends SkullLandMineEntity> landmineType = TYPES_POOL.getRandom(gaia.getRandom())
+				.orElse(ExtraBotanyEntities.SKULL_LANDMINE_BLUE);
 
 		if (landmineType == ExtraBotanyEntities.SKULL_LANDMINE_RED) {
 			return new SkullLandMineEntity.Danger(gaia.level(), gaia);

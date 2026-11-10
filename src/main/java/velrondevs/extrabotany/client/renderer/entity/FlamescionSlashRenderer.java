@@ -1,6 +1,9 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import com.mojang.math.Axis;
 
 import net.minecraft.client.model.geom.ModelPart;
@@ -9,12 +12,11 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.common.entity.flamescion.FlamescionSlashEntity;
 
@@ -27,9 +29,9 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>来源：ExtraMeteorP 1.16 {@code RenderFlamescionSlash} 和 {@code ModelSlash}。
  * <p>Source: ExtraMeteorP 1.16 {@code RenderFlamescionSlash} and {@code ModelSlash}.
  */
-public class FlamescionSlashRenderer extends EntityRenderer<FlamescionSlashEntity> {
+public class FlamescionSlashRenderer extends ExtraEntityRenderer<FlamescionSlashEntity> {
 	private static final int FRAME_COUNT = 6;
-	private static final ResourceLocation[] FRAMES = new ResourceLocation[FRAME_COUNT];
+	private static final Identifier[] FRAMES = new Identifier[FRAME_COUNT];
 	private static final float SCALE = 3F;
 	private static final int FULL_BRIGHT = 0xF000F0;
 	private static final double VISIBLE_RANGE = 6.0;
@@ -59,19 +61,18 @@ public class FlamescionSlashRenderer extends EntityRenderer<FlamescionSlashEntit
 	}
 
 	@Override
-	public void render(FlamescionSlashEntity slash, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
+	protected void render(FlamescionSlashEntity slash, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, SubmitNodeCollector collector, int light, CameraRenderState camera) {
 		pose.pushPose();
-		pose.mulPose(entityRenderDispatcher.cameraOrientation());
+		pose.mulPose(camera.orientation);
 		pose.scale(SCALE, -SCALE, -SCALE);
 		pose.mulPose(Axis.XP.rotationDegrees(slash.getPitch()));
 		pose.mulPose(Axis.YP.rotationDegrees(slash.getRotation()));
-		quad.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(getTextureLocation(slash))), FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+		quad.render(pose, buffers.getBuffer(RenderTypes.entityCutout(getTextureLocation(slash))), FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
 		pose.popPose();
-		super.render(slash, yaw, partialTick, pose, buffers, light);
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(FlamescionSlashEntity slash) {
+	public Identifier getTextureLocation(FlamescionSlashEntity slash) {
 		return FRAMES[slash.tickCount % FRAME_COUNT];
 	}
 }

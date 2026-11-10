@@ -3,11 +3,12 @@ package velrondevs.extrabotany.client.renderer.wing;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
+import velrondevs.botania.client.core.helper.RenderHelper;
 import velrondevs.botania.client.render.AccessoryRenderer;
 
 import velrondevs.extrabotany.common.item.relic.voidcore.CoreOfTheVoidItem;
@@ -47,7 +48,7 @@ public final class CoreOfTheVoidRenderer implements AccessoryRenderer {
 	 * 把所有翅膀的模型交给模型注册事件。
 	 * Gives the models of all wings to the model registration event.
 	 */
-	public static void collectModels(Consumer<ResourceLocation> output) {
+	public static void collectModels(Consumer<Identifier> output) {
 		for (WingRenderer wings : WINGS.values()) {
 			wings.models().forEach(output);
 		}
@@ -55,11 +56,11 @@ public final class CoreOfTheVoidRenderer implements AccessoryRenderer {
 
 	@Override
 	public void doRender(HumanoidModel<?> bipedModel, ItemStack stack, LivingEntity living, PoseStack ms,
-			MultiBufferSource buffers, int light, float limbSwing, float limbSwingAmount, float partialTicks,
+			SubmitNodeCollector collector, int light, float limbSwing, float limbSwingAmount, float partialTicks,
 			float ageInTicks, float netHeadYaw, float headPitch) {
 		WingRenderer wings = WINGS.get(CoreOfTheVoidItem.getVariant(stack));
 		if (wings != null) {
-			wings.render(bipedModel, stack, living, ms, buffers, light, partialTicks);
+			wings.render(bipedModel, stack, living, ms, RenderHelper.buffers(collector), light, partialTicks);
 		}
 	}
 }

@@ -13,6 +13,8 @@ import org.lwjgl.glfw.GLFW;
 
 import velrondevs.extrabotany.common.lib.LibMisc;
 
+import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
+
 /**
  * 本模组的按键绑定。
  * The key mappings of this mod.
@@ -26,13 +28,15 @@ public final class ExtraBotanyKeyMappings {
 	 * <p>按键的 ID 保留旧名称，这样玩家已经保存的按键设置不会丢失。
 	 * <p>The ID of the key keeps the old name, so that the key settings that players saved are not lost.
 	 */
+	public static final KeyMapping.Category CATEGORY = new KeyMapping.Category(prefix("extrabotany"));
 	public static final KeyMapping SKILL = new KeyMapping("key.extrabotany.legacy_skill", KeyConflictContext.IN_GAME,
-			InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "key.categories.extrabotany");
+			InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, CATEGORY);
 
 	private ExtraBotanyKeyMappings() {}
 
 	@SubscribeEvent
 	public static void register(RegisterKeyMappingsEvent event) {
+		event.registerCategory(CATEGORY);
 		event.register(SKILL);
 	}
 }

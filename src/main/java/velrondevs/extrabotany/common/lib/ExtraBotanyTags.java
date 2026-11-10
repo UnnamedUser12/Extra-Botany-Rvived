@@ -1,7 +1,7 @@
 package velrondevs.extrabotany.common.lib;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.EntityType;
@@ -43,7 +43,7 @@ public class ExtraBotanyTags {
 		}
 
 		private static TagKey<Item> tag(String namespace, String name) {
-			return TagKey.create(Registries.ITEM, ResourceLocation.tryBuild(namespace, name));
+			return TagKey.create(Registries.ITEM, Identifier.tryBuild(namespace, name));
 		}
 	}
 
@@ -63,7 +63,7 @@ public class ExtraBotanyTags {
 		}
 
 		private static TagKey<Block> tag(String namespace, String name) {
-			return TagKey.create(Registries.BLOCK, ResourceLocation.tryBuild(namespace, name));
+			return TagKey.create(Registries.BLOCK, Identifier.tryBuild(namespace, name));
 		}
 	}
 

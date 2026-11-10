@@ -7,18 +7,23 @@ import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
+import net.minecraft.world.level.Level;
+import velrondevs.botania.api.recipe.BotaniaRecipe;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.extrabotany.common.lib.LibMisc;
 import velrondevs.extrabotany.registry.ExtraBotanyItems;
@@ -40,6 +45,19 @@ public final class DataIntegrityGameTests {
 			"botania:terra_plate", "extrabotany:pedestal_smash");
 
 	private DataIntegrityGameTests() {}
+
+	private static ItemStack resultOf(Recipe<?> recipe, Level level) {
+		if (recipe instanceof BotaniaRecipe botaniaRecipe) {
+			return botaniaRecipe.getResultItem(level.registryAccess());
+		}
+		for (RecipeDisplay display : recipe.display()) {
+			ItemStack stack = display.result().resolveForFirstStack(SlotDisplayContext.fromLevel(level));
+			if (!stack.isEmpty()) {
+				return stack;
+			}
+		}
+		return ItemStack.EMPTY;
+	}
 
 	private static String withoutExtension(String file) {
 		return file.substring(0, file.length() - ".json".length());
@@ -65,17 +83,17 @@ public final class DataIntegrityGameTests {
 	 */
 	@GameTest(template = "empty", timeoutTicks = 100)
 	public static void everyRecipeFileIsLoaded(GameTestHelper helper) {
-		var manager = helper.getLevel().getRecipeManager();
+		var manager = helper.getLevel().recipeAccess();
 		List<String> files = ModResources.files("data/extrabotany/recipe", ".json");
 		helper.assertTrue(files.size() > 250, "Too few recipe files: " + files.size());
 		List<String> problems = new ArrayList<>();
 		for (String file : files) {
-			ResourceLocation id = ResourceLocation.fromNamespaceAndPath(LibMisc.MOD_ID, withoutExtension(file));
-			if (manager.byKey(id).isEmpty()) {
+			Identifier id = Identifier.fromNamespaceAndPath(LibMisc.MOD_ID, withoutExtension(file));
+			if (manager.byKey(ResourceKey.create(Registries.RECIPE, id)).isEmpty()) {
 				problems.add("recipe " + id + " was not loaded");
 			}
 		}
-		long loaded = manager.getRecipes().stream().filter(holder -> LibMisc.MOD_ID.equals(holder.id().getNamespace())).count();
+		long loaded = manager.getRecipes().stream().filter(holder -> LibMisc.MOD_ID.equals(holder.id().identifier().getNamespace())).count();
 		helper.assertTrue(problems.isEmpty(), "Recipes that are not loaded: " + ModResources.summary(problems));
 		helper.assertTrue(loaded == files.size(), "The game has " + loaded + " recipes of the mod but there are " + files.size() + " files");
 		helper.succeed();
@@ -89,8 +107,8 @@ public final class DataIntegrityGameTests {
 	public static void recipesHaveResultsAndNoEmptyTags(GameTestHelper helper) {
 		var level = helper.getLevel();
 		List<String> problems = new ArrayList<>();
-		for (RecipeHolder<?> holder : level.getRecipeManager().getRecipes()) {
-			if (!LibMisc.MOD_ID.equals(holder.id().getNamespace())) {
+		for (RecipeHolder<?> holder : level.recipeAccess().getRecipes()) {
+			if (!LibMisc.MOD_ID.equals(holder.id().identifier().getNamespace())) {
 				continue;
 			}
 			var recipe = holder.value();
@@ -98,7 +116,7 @@ public final class DataIntegrityGameTests {
 			// types give a block, a creature or a brew, and have no item result.
 			var typeId = BuiltInRegistries.RECIPE_TYPE.getKey(recipe.getType());
 			boolean givesItem = typeId.getNamespace().equals("minecraft") || RESULT_TYPES.contains(typeId.toString());
-			if (givesItem && !(recipe instanceof CustomRecipe) && recipe.getResultItem(level.registryAccess()).isEmpty()) {
+			if (givesItem && !(recipe instanceof CustomRecipe) && resultOf(recipe, level).isEmpty()) {
 				problems.add("recipe " + holder.id() + " (" + BuiltInRegistries.RECIPE_TYPE.getKey(recipe.getType()) + ") has no result");
 			}
 		}
@@ -112,8 +130,8 @@ public final class DataIntegrityGameTests {
 			collectTags(ModResources.json("data/extrabotany/recipe/" + file), used);
 			for (String tag : used) {
 				if (tags.add(tag)) {
-					var key = TagKey.create(Registries.ITEM, ResourceLocation.parse(tag));
-					var holders = BuiltInRegistries.ITEM.getTag(key);
+					var key = TagKey.create(Registries.ITEM, Identifier.parse(tag));
+					var holders = BuiltInRegistries.ITEM.get(key);
 					if (holders.isEmpty() || holders.get().size() == 0) {
 						problems.add("the item tag " + tag + " (used in " + file + ") is empty");
 					}
@@ -136,8 +154,8 @@ public final class DataIntegrityGameTests {
 		List<String> problems = new ArrayList<>();
 		for (Item item : items) {
 			boolean found = false;
-			for (RecipeHolder<?> holder : level.getRecipeManager().getRecipes()) {
-				ItemStack result = holder.value().getResultItem(level.registryAccess());
+			for (RecipeHolder<?> holder : level.recipeAccess().getRecipes()) {
+				ItemStack result = resultOf(holder.value(), level);
 				if (result.is(item)) {
 					found = true;
 					break;
@@ -170,7 +188,7 @@ public final class DataIntegrityGameTests {
 				if (name.startsWith("#") || !required) {
 					continue;
 				}
-				if (!registry.containsKey(ResourceLocation.parse(name))) {
+				if (!registry.containsKey(Identifier.parse(name))) {
 					problems.add("tag " + directory + "/" + withoutExtension(file) + " names " + name + " which does not exist");
 				}
 			}
@@ -199,14 +217,14 @@ public final class DataIntegrityGameTests {
 		List<String> problems = new ArrayList<>();
 		List<String> advancements = ModResources.files("data/extrabotany/advancement", ".json");
 		for (String file : advancements) {
-			ResourceLocation id = ResourceLocation.fromNamespaceAndPath(LibMisc.MOD_ID, withoutExtension(file));
+			Identifier id = Identifier.fromNamespaceAndPath(LibMisc.MOD_ID, withoutExtension(file));
 			if (server.getAdvancements().get(id) == null) {
 				problems.add("advancement " + id + " was not loaded");
 			}
 		}
 		List<String> tables = ModResources.files("data/extrabotany/loot_table", ".json");
 		for (String file : tables) {
-			ResourceLocation id = ResourceLocation.fromNamespaceAndPath(LibMisc.MOD_ID, withoutExtension(file));
+			Identifier id = Identifier.fromNamespaceAndPath(LibMisc.MOD_ID, withoutExtension(file));
 			ResourceKey<LootTable> key = ResourceKey.create(Registries.LOOT_TABLE, id);
 			if (server.reloadableRegistries().getLootTable(key) == LootTable.EMPTY) {
 				problems.add("loot table " + id + " was not loaded");

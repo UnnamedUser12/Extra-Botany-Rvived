@@ -2,33 +2,15 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "botania:life_essence"
-    },
-    {
-      "item": "botania:rune_mana"
-    },
-    {
-      "item": "botania:rune_pride"
-    },
-    {
-      "item": "botania:rune_gluttony"
-    },
-    {
-      "item": "botania:rune_wrath"
-    },
-    {
-      "item": "botania:rune_greed"
-    },
-    {
-      "item": "botania:rune_envy"
-    },
-    {
-      "item": "botania:rune_lust"
-    },
-    {
-      "item": "botania:rune_sloth"
-    }
+    "botania:life_essence",
+    "botania:rune_mana",
+    "botania:rune_pride",
+    "botania:rune_gluttony",
+    "botania:rune_wrath",
+    "botania:rune_greed",
+    "botania:rune_envy",
+    "botania:rune_lust",
+    "botania:rune_sloth"
   ],
   "result": {
     "count": 8,

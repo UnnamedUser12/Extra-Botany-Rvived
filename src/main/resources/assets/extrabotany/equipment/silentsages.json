@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "extrabotany:silentsages"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "extrabotany:silentsages"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "extrabotany:silentsages"
+      }
+    ]
+  }
+}

@@ -1,14 +1,13 @@
 package velrondevs.extrabotany.common.crafting.recipe;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.Level;
+
+import velrondevs.botania.common.crafting.recipe.RecipeUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -23,11 +22,9 @@ import velrondevs.extrabotany.common.helper.ItemNBTHelper;
  */
 public class WandOfTheForestExtendRecipe extends CustomRecipe {
 	public static final RecipeSerializer<WandOfTheForestExtendRecipe> SERIALIZER =
-			new SimpleCraftingRecipeSerializer<>(WandOfTheForestExtendRecipe::new);
+			RecipeUtils.simpleSerializer(WandOfTheForestExtendRecipe::new);
 
-	public WandOfTheForestExtendRecipe(CraftingBookCategory category) {
-		super(category);
-	}
+	public WandOfTheForestExtendRecipe() {}
 
 	@Override
 	public boolean matches(CraftingInput inv, Level level) {
@@ -60,7 +57,7 @@ public class WandOfTheForestExtendRecipe extends CustomRecipe {
 
 	@NotNull
 	@Override
-	public ItemStack assemble(CraftingInput inv, @NotNull HolderLookup.Provider registries) {
+	public ItemStack assemble(CraftingInput inv) {
 		if (!matches(inv, null)) {
 			return ItemStack.EMPTY;
 		}
@@ -97,12 +94,7 @@ public class WandOfTheForestExtendRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public boolean canCraftInDimensions(int width, int height) {
-		return width > 1 || height > 1;
-	}
-
-	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<? extends CustomRecipe> getSerializer() {
 		return SERIALIZER;
 	}
 }

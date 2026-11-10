@@ -3,15 +3,10 @@
   "category": "misc",
   "group": "extrabotany:floating_flower",
   "ingredients": [
-    {
-      "tag": "botania:floating_flowers"
-    },
-    {
-      "item": "extrabotany:sunshine_lily"
-    }
+    "#botania:floating_flowers",
+    "extrabotany:sunshine_lily"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:floating_sunshine_lily"
   }
 }

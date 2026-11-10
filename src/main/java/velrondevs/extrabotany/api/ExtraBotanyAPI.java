@@ -1,15 +1,9 @@
 package velrondevs.extrabotany.api;
 
-import net.minecraft.core.Holder;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.Tier;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.item.ToolMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterials;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +13,6 @@ import velrondevs.extrabotany.api.item.CoreOfTheVoidVariant;
 import velrondevs.extrabotany.api.item.VoidArchivesVariant;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,41 +25,9 @@ public interface ExtraBotanyAPI {
 
 	ExtraBotanyAPI INSTANCE = ServiceUtil.findService(ExtraBotanyAPI.class, () -> new ExtraBotanyAPI() {});
 
-	Holder<ArmorMaterial> DUMMY_ARMOR_MATERIAL = Holder.direct(new ArmorMaterial(
-			Map.of(), 0, SoundEvents.ARMOR_EQUIP_LEATHER, () -> Ingredient.EMPTY, List.of(), 0, 0));
+	ArmorMaterial DUMMY_ARMOR_MATERIAL = ArmorMaterials.LEATHER;
 
-	Tier DUMMY_ITEM_TIER = new Tier() {
-		@Override
-		public int getUses() {
-			return 0;
-		}
-
-		@Override
-		public float getSpeed() {
-			return 0;
-		}
-
-		@Override
-		public float getAttackDamageBonus() {
-			return 0;
-		}
-
-		@Override
-		public TagKey<Block> getIncorrectBlocksForDrops() {
-			return BlockTags.INCORRECT_FOR_WOODEN_TOOL;
-		}
-
-		@Override
-		public int getEnchantmentValue() {
-			return 0;
-		}
-
-		@NotNull
-		@Override
-		public Ingredient getRepairIngredient() {
-			return Ingredient.EMPTY;
-		}
-	};
+	ToolMaterial DUMMY_ITEM_TIER = ToolMaterial.WOOD;
 
 	static ExtraBotanyAPI instance() {
 		return INSTANCE;
@@ -84,19 +45,19 @@ public interface ExtraBotanyAPI {
 		return new HashMap<>();
 	}
 
-	default Holder<ArmorMaterial> getPleiadsMaidCombatArmorMaterial() {
+	default ArmorMaterial getPleiadsMaidCombatArmorMaterial() {
 		return DUMMY_ARMOR_MATERIAL;
 	}
 
-	default Holder<ArmorMaterial> getStarryIdolArmorMaterial() {
+	default ArmorMaterial getStarryIdolArmorMaterial() {
 		return DUMMY_ARMOR_MATERIAL;
 	}
 
-	default Holder<ArmorMaterial> getGoblinSlayerArmorMaterial() {
+	default ArmorMaterial getGoblinSlayerArmorMaterial() {
 		return DUMMY_ARMOR_MATERIAL;
 	}
 
-	default Holder<ArmorMaterial> getShadowWarriorArmorMaterial() {
+	default ArmorMaterial getShadowWarriorArmorMaterial() {
 		return DUMMY_ARMOR_MATERIAL;
 	}
 }

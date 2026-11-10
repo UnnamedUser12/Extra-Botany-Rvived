@@ -1,11 +1,13 @@
 package velrondevs.extrabotany.common.item.equipment.bauble;
 
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.LivingEntity;
@@ -71,7 +73,7 @@ public class AllForOneRingItem extends RelicBaubleItem {
 	public static final int ELVEN_KING_SLOTS = 3;
 
 	private static final int FORCED_REBUILD_TICKS = 100;
-	private static final ResourceLocation BOX_SLOT = prefix("bauble_box");
+	private static final Identifier BOX_SLOT = prefix("bauble_box");
 	private static final Map<Player, State> STATES = Collections.synchronizedMap(new WeakHashMap<>());
 
 	private final int slots;
@@ -85,7 +87,7 @@ public class AllForOneRingItem extends RelicBaubleItem {
 	}
 
 	public static Relic makeRelic(ItemStack stack) {
-		return new RelicImpl(stack, ResourceLocation.parse("botania:main/gaia_guardian_kill"));
+		return new RelicImpl(stack, Identifier.parse("botania:main/gaia_guardian_kill"));
 	}
 
 	/**
@@ -105,7 +107,7 @@ public class AllForOneRingItem extends RelicBaubleItem {
 		int size;
 		int[] writtenHashes = new int[0];
 		Map<Item, ItemStack> simulated = Map.of();
-		Map<ResourceLocation, Holder<Attribute>> appliedModifiers = Map.of();
+		Map<Identifier, Holder<Attribute>> appliedModifiers = Map.of();
 	}
 
 	private static ItemStack findBoxStack(Player player) {
@@ -291,10 +293,10 @@ public class AllForOneRingItem extends RelicBaubleItem {
 	 * 把被模拟的饰品的属性修饰符加到玩家身上。每个修饰符用一个新的、带有来源物品的编号，这样它不会和真正佩戴的饰品冲突。
 	 * Adds the attribute modifiers of the simulated accessories to the player. Each modifier gets a new ID that contains the source item, so that it does not conflict with an accessory that is really worn.
 	 */
-	private static Map<ResourceLocation, Holder<Attribute>> applyModifiers(Map<Item, ItemStack> simulated, Player player) {
-		Map<ResourceLocation, Holder<Attribute>> applied = new HashMap<>();
+	private static Map<Identifier, Holder<Attribute>> applyModifiers(Map<Item, ItemStack> simulated, Player player) {
+		Map<Identifier, Holder<Attribute>> applied = new HashMap<>();
 		simulated.forEach((item, stack) -> ((BaubleItem) item).getEquippedAttributeModifiers(stack).forEach((attribute, modifier) -> {
-			ResourceLocation id = prefix(("box_sim/" + BuiltInRegistries.ITEM.getKey(item) + "/" + modifier.id()).replace(':', '.'));
+			Identifier id = prefix(("box_sim/" + BuiltInRegistries.ITEM.getKey(item) + "/" + modifier.id()).replace(':', '.'));
 			AttributeInstance instance = player.getAttribute(attribute);
 			if (instance != null && !applied.containsKey(id)) {
 				if (!instance.hasModifier(id)) {
@@ -343,8 +345,8 @@ public class AllForOneRingItem extends RelicBaubleItem {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		tooltip.add(Component.translatable(getDescriptionId() + ".tooltip").withStyle(ChatFormatting.GRAY));
-		super.appendHoverText(stack, context, tooltip, flags);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		tooltip.accept(Component.translatable(getDescriptionId() + ".tooltip").withStyle(ChatFormatting.GRAY));
+		super.appendHoverText(stack, context, tooltipDisplay, tooltip, flags);
 	}
 }

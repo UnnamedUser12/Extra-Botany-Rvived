@@ -4,17 +4,17 @@ import com.mojang.authlib.GameProfile;
 
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.extrabotany.registry.ExtraBotanyBlocks;
 import velrondevs.extrabotany.common.handler.AllAdvancementsHandler;
@@ -36,7 +36,7 @@ public final class AdvancementGameTests {
 	private AdvancementGameTests() {}
 
 	private static boolean hasAdvancement(GameTestHelper helper, ServerPlayer player, String name) {
-		ResourceLocation id = prefix("main/" + name);
+		Identifier id = prefix("main/" + name);
 		AdvancementHolder advancement = helper.getLevel().getServer().getAdvancements().get(id);
 		helper.assertTrue(advancement != null, "The data pack has no advancement " + id);
 		return player.getAdvancements().getOrStartProgress(advancement).isDone();
@@ -95,7 +95,7 @@ public final class AdvancementGameTests {
 				problem = "After draw " + (draw + 1) + ": Silent Eternity drawn = " + sawRare + ", advancement done = " + done;
 			}
 		}
-		helper.assertTrue(problem == null, problem);
+		helper.assertTrue(problem == null, String.valueOf(problem));
 		helper.assertTrue(sawRare, "The Silent Eternity was not drawn in 101 draws");
 		helper.succeed();
 	}
@@ -113,7 +113,7 @@ public final class AdvancementGameTests {
 		AABB area = new AABB(stand).inflate(4);
 
 		var manager = helper.getLevel().getServer().getAdvancements();
-		ResourceLocation goalId = prefix("main/" + LibAdvancementNames.ALL_STATS);
+		Identifier goalId = prefix("main/" + LibAdvancementNames.ALL_STATS);
 		AdvancementHolder goal = manager.get(goalId);
 		helper.assertTrue(goal != null, "The data pack has no advancement " + goalId);
 		List<AdvancementHolder> main = manager.getAllAdvancements().stream()

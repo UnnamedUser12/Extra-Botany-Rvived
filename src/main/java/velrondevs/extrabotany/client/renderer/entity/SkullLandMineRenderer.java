@@ -1,15 +1,17 @@
 package velrondevs.extrabotany.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import com.mojang.math.Axis;
 
-import net.minecraft.client.model.SkullModel;
+import net.minecraft.client.model.object.skull.SkullModel;
+import net.minecraft.client.model.object.skull.SkullModelBase;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 import velrondevs.extrabotany.common.entity.SkullLandMineEntity;
@@ -18,7 +20,7 @@ import velrondevs.extrabotany.common.entity.SkullLandMineEntity;
  * 骷髅地雷的渲染器：画出一个骷髅头，爆炸前它会变大并闪烁。
  * The renderer of the skull landmine: it draws a skull that grows and flashes before the explosion.
  */
-public class SkullLandMineRenderer extends EntityRenderer<SkullLandMineEntity> {
+public class SkullLandMineRenderer extends ExtraEntityRenderer<SkullLandMineEntity> {
 
 	private final SkullModel model;
 
@@ -28,7 +30,7 @@ public class SkullLandMineRenderer extends EntityRenderer<SkullLandMineEntity> {
 	}
 
 	@Override
-	public void render(SkullLandMineEntity entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+	protected void render(SkullLandMineEntity entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffer, SubmitNodeCollector collector, int packedLight, CameraRenderState camera) {
 //        poseStack.pushPose();
 //        poseStack.scale(-1.0F, -1.0F, 1.0F);
 //        poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
@@ -39,8 +41,7 @@ public class SkullLandMineRenderer extends EntityRenderer<SkullLandMineEntity> {
 //        this.model.renderToBuffer(poseStack, buffer.getBuffer(this.model.renderType(this.getTextureLocation(entity))), packedLight,  OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 //
 //        poseStack.popPose();
-//        super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
-//
+////
 		poseStack.pushPose();
 
 		int fuse = entity.getExplodeCountDown();
@@ -60,18 +61,15 @@ public class SkullLandMineRenderer extends EntityRenderer<SkullLandMineEntity> {
 
 		float f = entity.getYRot();
 		float f1 = entity.getXRot();
-		this.model.setupAnim(0.0F, f, f1);
-		this.model.renderToBuffer(poseStack,
-				buffer.getBuffer(this.model.renderType(this.getTextureLocation(entity))),
-				packedLight,
-				overlay,
-				0xFFFFFFFF);
+		SkullModelBase.State state = new SkullModelBase.State();
+		state.yRot = f;
+		state.xRot = f1;
+		collector.submitModel(this.model, state, poseStack, this.getTextureLocation(entity), packedLight, overlay, 0, null);
 		poseStack.popPose();
-		super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(SkullLandMineEntity entity) {
+	public Identifier getTextureLocation(SkullLandMineEntity entity) {
 		return entity.getTexture();
 	}
 }

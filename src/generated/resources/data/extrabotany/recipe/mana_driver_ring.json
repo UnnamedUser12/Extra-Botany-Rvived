@@ -2,18 +2,11 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "botania:mana_ring"
-    },
-    {
-      "item": "extrabotany:hero_medal"
-    },
-    {
-      "item": "botania:pixie_dust"
-    }
+    "botania:mana_ring",
+    "extrabotany:hero_medal",
+    "botania:pixie_dust"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:mana_driver_ring"
   }
 }

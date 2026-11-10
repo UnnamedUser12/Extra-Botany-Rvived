@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "D": {
-      "tag": "c:gems/mana_diamond"
-    },
-    "M": {
-      "item": "botania:mana_gun"
-    },
-    "P": {
-      "tag": "extrabotany:photonium_ingots"
-    },
-    "S": {
-      "tag": "c:ingots/manasteel"
-    }
+    "D": "#c:gems/mana_diamond",
+    "M": "botania:mana_gun",
+    "P": "#extrabotany:photonium_ingots",
+    "S": "#c:ingots/manasteel"
   },
   "pattern": [
     "PPD",

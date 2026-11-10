@@ -2,7 +2,7 @@ package velrondevs.extrabotany.mixin.botania;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -30,7 +30,7 @@ public abstract class DisplayWindLevel {
 		at = @At("HEAD"),
 		cancellable = true
 	)
-	private void onUse(Level level, Player player, InteractionHand usedHand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+	private void onUse(Level level, Player player, InteractionHand usedHand, CallbackInfoReturnable<InteractionResult> cir) {
 		ItemStack offHand = player.getItemInHand(InteractionHand.OFF_HAND);
 		ItemStack mainHand = player.getItemInHand(InteractionHand.MAIN_HAND);
 
@@ -45,7 +45,7 @@ public abstract class DisplayWindLevel {
 						Wind.instance().getWindLevel(level, player.position())
 				);
 				player.sendSystemMessage(component);
-				cir.setReturnValue(InteractionResultHolder.success(player.getItemInHand(usedHand)));
+				cir.setReturnValue(InteractionResult.SUCCESS);
 			}
 		}
 	}

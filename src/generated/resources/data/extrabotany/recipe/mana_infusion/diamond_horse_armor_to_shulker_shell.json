@@ -4,12 +4,9 @@
     "type": "block",
     "block": "extrabotany:dimension_catalyst"
   },
-  "input": {
-    "item": "minecraft:diamond_horse_armor"
-  },
+  "input": "minecraft:diamond_horse_armor",
   "mana": 20000,
   "output": {
-    "count": 1,
     "id": "minecraft:shulker_shell"
   }
 }

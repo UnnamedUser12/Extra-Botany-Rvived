@@ -2,7 +2,7 @@ package velrondevs.extrabotany.datagen.providers.patchouli.page.botania;
 
 import com.demonwav.mcdev.annotations.Translatable;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import velrondevs.extrabotany.datagen.providers.patchouli.page.AbstractPage;
 
@@ -26,7 +26,7 @@ public class RunicAltarPage extends AbstractPage<RunicAltarPage> {
 	}
 
 	@Override
-	public ResourceLocation getType() {
-		return ResourceLocation.tryParse("botania:runic_altar");
+	public Identifier getType() {
+		return Identifier.tryParse("botania:runic_altar");
 	}
 }

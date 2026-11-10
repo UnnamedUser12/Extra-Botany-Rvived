@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -64,7 +65,7 @@ public class GaiaSpawnLandMine<E extends Gaia> extends Behavior<E> {
 			int y = (int) players.get(gaia.getRandom().nextInt(players.size())).getY();
 			int z = source.getZ() - 10 + gaia.getRandom().nextInt(20);
 
-			MagicLandMineEntity landmine = ExtraBotanyEntities.MAGIC_LANDMINE.create(gaia.level());
+			MagicLandMineEntity landmine = ExtraBotanyEntities.MAGIC_LANDMINE.create(gaia.level(), EntitySpawnReason.EVENT);
 			landmine.setPos(x + 0.5, y, z + 0.5);
 			landmine.setOwner(gaia);
 			gaia.level().addFreshEntity(landmine);

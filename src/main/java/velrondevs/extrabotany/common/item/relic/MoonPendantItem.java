@@ -1,5 +1,10 @@
 package velrondevs.extrabotany.common.item.relic;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
@@ -8,7 +13,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Entity;
@@ -78,8 +83,8 @@ public class MoonPendantItem extends NimbusAmuletItem implements BlockChangedLis
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
-		super.inventoryTick(stack, level, entity, slot, selected);
+	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		super.inventoryTick(stack, level, entity, eqSlot);
 		if (!level.isClientSide() && entity instanceof Player player) {
 			Relic relic = velrondevs.botania.xplat.XplatAbstractions.INSTANCE.findRelic(stack);
 			if (relic != null) {
@@ -89,8 +94,8 @@ public class MoonPendantItem extends NimbusAmuletItem implements BlockChangedLis
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		super.appendHoverText(stack, context, tooltip, flags);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		super.appendHoverText(stack, context, tooltipDisplay, tooltip, flags);
 		RelicImpl.addDefaultTooltip(stack, tooltip);
 	}
 
@@ -144,7 +149,7 @@ public class MoonPendantItem extends NimbusAmuletItem implements BlockChangedLis
 
 	@Override
 	public Multimap<Holder<Attribute>, AttributeModifier> getEquippedAttributeModifiers(ItemStack stack) {
-		ResourceLocation slotId = getBaubleModifierId(stack);
+		Identifier slotId = getBaubleModifierId(stack);
 		Multimap<Holder<Attribute>, AttributeModifier> attributes = HashMultimap.create();
 		attributes.put(Attributes.KNOCKBACK_RESISTANCE,
 				new AttributeModifier(slotId, 1, AttributeModifier.Operation.ADD_VALUE));

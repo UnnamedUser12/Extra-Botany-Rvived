@@ -1,11 +1,12 @@
 package velrondevs.extrabotany.common.item.equipment.armor.shooting_guardian;
 
+import net.minecraft.world.item.equipment.ArmorType;
 import com.google.common.base.Suppliers;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -45,15 +46,14 @@ public class ShootingGuardianArmorItem extends MikuArmorItem {
 			new ItemStack(ExtraBotanyItems.shootingGuardianBoots)
 	});
 
-	public ShootingGuardianArmorItem(Type type, Properties props) {
-		super(ExtraBotanyArmorMaterials.SHOOTING_GUARDIAN, type, props);
+	public ShootingGuardianArmorItem(ArmorType type, Properties props) {
+		super(ExtraBotanyArmorMaterials.SHOOTING_GUARDIAN, type, props, attributes -> withGuardianModifiers(attributes, type));
 	}
 
-	@Override
-	public ItemAttributeModifiers getDefaultAttributeModifiers() {
-		ResourceLocation id = prefix("shooting_guardian_" + getType().getName());
-		EquipmentSlotGroup slot = EquipmentSlotGroup.bySlot(getType().getSlot());
-		return super.getDefaultAttributeModifiers()
+	private static ItemAttributeModifiers withGuardianModifiers(ItemAttributeModifiers attributes, ArmorType type) {
+		Identifier id = prefix("shooting_guardian_" + type.getName());
+		EquipmentSlotGroup slot = EquipmentSlotGroup.bySlot(type.getSlot());
+		return attributes
 				.withModifierAdded(Attributes.FLYING_SPEED,
 						new AttributeModifier(id, SPEED_BONUS, AttributeModifier.Operation.ADD_MULTIPLIED_BASE), slot)
 				.withModifierAdded(Attributes.MOVEMENT_SPEED,

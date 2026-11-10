@@ -4,7 +4,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
@@ -100,7 +99,7 @@ public final class HerrscherHandler {
 		}
 		// 挥剑动作还没有结束时不能再次反击。这也阻止了反击引起的伤害再次触发反击。
 		// A second counterattack is not possible before the swing ends. This also stops damage from the counterattack from starting a counterattack again.
-		if (player.swinging || !(player.getMainHandItem().getItem() instanceof SwordItem)) {
+		if (player.swinging || !(player.getMainHandItem().is(net.minecraft.tags.ItemTags.SWORDS))) {
 			return;
 		}
 		if (!isHerrscherOfThunder(player)) {
@@ -127,7 +126,7 @@ public final class HerrscherHandler {
 		if (player.level().isClientSide() || player.isSpectator()) {
 			return false;
 		}
-		if (!(player.getMainHandItem().getItem() instanceof SwordItem) || !isHerrscherOfThunder(player)) {
+		if (!(player.getMainHandItem().is(net.minecraft.tags.ItemTags.SWORDS)) || !isHerrscherOfThunder(player)) {
 			return false;
 		}
 		if (getEnergy(player) < MAX_ENERGY && !player.isCreative()) {

@@ -4,12 +4,9 @@
     "type": "block",
     "block": "extrabotany:dimension_catalyst"
   },
-  "input": {
-    "item": "minecraft:snowball"
-  },
+  "input": "minecraft:snowball",
   "mana": 2000,
   "output": {
-    "count": 1,
     "id": "minecraft:ender_pearl"
   }
 }

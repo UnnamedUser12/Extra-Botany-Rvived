@@ -18,8 +18,8 @@ public final class PoolTestHelper {
 		var registries = pool.getLevel().registryAccess();
 		CompoundTag tag = pool.saveWithoutMetadata(registries);
 		tag.putBoolean("outputting", outputting);
-		if (tag.getInt("manaCap") <= 0) tag.putInt("manaCap", ManaPoolBlockEntity.MAX_MANA);
-		pool.loadWithComponents(tag, registries);
+		if (tag.getIntOr("manaCap", 0) <= 0) tag.putInt("manaCap", ManaPoolBlockEntity.MAX_MANA);
+		BlockEntityIO.load(pool, tag);
 	}
 
 	/**
@@ -29,16 +29,16 @@ public final class PoolTestHelper {
 	public static ManaPoolBlockEntity ready(ManaPoolBlockEntity pool) {
 		var registries = pool.getLevel().registryAccess();
 		CompoundTag tag = pool.saveWithoutMetadata(registries);
-		if (tag.getInt("manaCap") <= 0) {
+		if (tag.getIntOr("manaCap", 0) <= 0) {
 			tag.putInt("manaCap", ManaPoolBlockEntity.MAX_MANA);
-			pool.loadWithComponents(tag, registries);
+			BlockEntityIO.load(pool, tag);
 		}
 		return pool;
 	}
 
 	public static ManaPoolBlockEntity placePool(GameTestHelper helper, BlockPos pos, boolean outputting) {
 		helper.setBlock(pos, velrondevs.botania.registry.BotaniaBlocks.manaPool);
-		ManaPoolBlockEntity pool = helper.getBlockEntity(pos);
+		ManaPoolBlockEntity pool = helper.getBlockEntity(pos, ManaPoolBlockEntity.class);
 		setOutputting(pool, outputting);
 		return pool;
 	}

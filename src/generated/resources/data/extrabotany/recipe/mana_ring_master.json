@@ -2,24 +2,12 @@
   "type": "botania:mana_upgrade",
   "category": "equipment",
   "key": {
-    "C": {
-      "item": "extrabotany:the_chaos"
-    },
-    "E": {
-      "item": "extrabotany:the_end"
-    },
-    "H": {
-      "item": "extrabotany:hero_medal"
-    },
-    "O": {
-      "tag": "extrabotany:orichalcos_ingots"
-    },
-    "R": {
-      "item": "botania:mana_ring_greater"
-    },
-    "Y": {
-      "item": "extrabotany:the_origin"
-    }
+    "C": "extrabotany:the_chaos",
+    "E": "extrabotany:the_end",
+    "H": "extrabotany:hero_medal",
+    "O": "#extrabotany:orichalcos_ingots",
+    "R": "botania:mana_ring_greater",
+    "Y": "extrabotany:the_origin"
   },
   "pattern": [
     "OHO",
@@ -27,7 +15,6 @@
     "OCO"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:mana_ring_master"
   }
 }

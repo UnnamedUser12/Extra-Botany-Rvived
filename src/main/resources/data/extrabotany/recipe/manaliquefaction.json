@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "A": {
-      "item": "botania:livingrock"
-    },
-    "B": {
-      "item": "minecraft:lapis_block"
-    },
-    "C": {
-      "item": "botania:mana_pool"
-    }
+    "A": "botania:livingrock",
+    "B": "minecraft:lapis_block",
+    "C": "botania:mana_pool"
   },
   "pattern": [
     "ABA",

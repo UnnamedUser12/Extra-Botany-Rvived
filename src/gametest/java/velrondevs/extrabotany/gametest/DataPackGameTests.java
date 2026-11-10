@@ -4,10 +4,10 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -19,8 +19,8 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.botania.common.lib.BotaniaTags;
 
@@ -44,7 +44,7 @@ public final class DataPackGameTests {
 	private DataPackGameTests() {}
 
 	private static TagKey<Item> itemTag(String namespace, String path) {
-		return ItemTags.create(ResourceLocation.fromNamespaceAndPath(namespace, path));
+		return ItemTags.create(Identifier.fromNamespaceAndPath(namespace, path));
 	}
 
 	/**
@@ -99,18 +99,19 @@ public final class DataPackGameTests {
 			if (!LibMisc.MOD_ID.equals(BuiltInRegistries.BLOCK.getKey(block).getNamespace())) {
 				continue;
 			}
-			ResourceKey<LootTable> key = block.getLootTable();
-			if (key == net.minecraft.world.level.storage.loot.BuiltInLootTables.EMPTY) {
+			var optionalKey = block.getLootTable();
+			if (optionalKey.isEmpty()) {
 				continue;
 			}
-			helper.assertTrue(lootTables.getLootTable(key) != LootTable.EMPTY, "There is no loot table for the block " + key.location());
+			ResourceKey<LootTable> key = optionalKey.get();
+			helper.assertTrue(lootTables.getLootTable(key) != LootTable.EMPTY, "There is no loot table for the block " + key.identifier());
 			checked++;
 		}
 		helper.assertTrue(checked > 80, "Too few blocks were examined: " + checked);
 
 		for (String boss : List.of("gaia_3rd", "ego", "void_herrscher")) {
 			ResourceKey<LootTable> key = ResourceKey.create(Registries.LOOT_TABLE,
-					ResourceLocation.fromNamespaceAndPath(LibMisc.MOD_ID, "entities/" + boss));
+					Identifier.fromNamespaceAndPath(LibMisc.MOD_ID, "entities/" + boss));
 			helper.assertTrue(lootTables.getLootTable(key) != LootTable.EMPTY, "There is no loot table for the boss " + boss);
 		}
 		helper.succeed();
@@ -122,7 +123,7 @@ public final class DataPackGameTests {
 	 */
 	@GameTest(template = "empty", timeoutTicks = 20)
 	public static void recordsHaveSongsOfTheCorrectLength(GameTestHelper helper) {
-		var songs = helper.getLevel().registryAccess().registryOrThrow(Registries.JUKEBOX_SONG);
+		var songs = helper.getLevel().registryAccess().lookupOrThrow(Registries.JUKEBOX_SONG);
 		record Expected(Item item, ResourceKey<JukeboxSong> song, net.minecraft.sounds.SoundEvent sound, float seconds) {}
 		for (Expected expected : List.of(
 				new Expected(ExtraBotanyItems.recordGaia3, ExtraBotanyJukeboxSongs.GAIA_3, ExtraBotanySounds.MUSIC_GAIA3, 201F),
@@ -130,12 +131,12 @@ public final class DataPackGameTests {
 				new Expected(ExtraBotanyItems.recordHerrscherOfTheVoid, ExtraBotanyJukeboxSongs.HERRSCHER_OF_THE_VOID, ExtraBotanySounds.MUSIC_HERRSCHER, 48F))) {
 			var playable = new ItemStack(expected.item()).get(DataComponents.JUKEBOX_PLAYABLE);
 			helper.assertTrue(playable != null, BuiltInRegistries.ITEM.getKey(expected.item()) + " cannot be played in a jukebox");
-			Holder<JukeboxSong> holder = playable.song().unwrap(helper.getLevel().registryAccess()).orElse(null);
-			helper.assertTrue(holder != null && holder.is(expected.song()), "The record points to an incorrect song: " + expected.song().location());
-			JukeboxSong song = songs.getOrThrow(expected.song());
-			helper.assertTrue(song.soundEvent().value() == expected.sound(), "The song has an incorrect sound: " + expected.song().location());
+			Holder<JukeboxSong> holder = playable.song();
+			helper.assertTrue(holder != null && holder.is(expected.song()), "The record points to an incorrect song: " + expected.song().identifier());
+			JukeboxSong song = songs.getOrThrow(expected.song()).value();
+			helper.assertTrue(song.soundEvent().value() == expected.sound(), "The song has an incorrect sound: " + expected.song().identifier());
 			helper.assertTrue(song.lengthInSeconds() == expected.seconds(),
-					"The length of " + expected.song().location() + " is " + song.lengthInSeconds() + " seconds, expected " + expected.seconds());
+					"The length of " + expected.song().identifier() + " is " + song.lengthInSeconds() + " seconds, expected " + expected.seconds());
 		}
 		helper.succeed();
 	}
@@ -169,11 +170,11 @@ public final class DataPackGameTests {
 		// 所有的配方都能加载：数据包里的配方文件数量和游戏里的配方数量相同。
 		// All recipes load: the number of recipe files in the data pack is the same as the number of recipes in the game.
 		long files = resources.listResources("recipe", path -> path.getNamespace().equals(LibMisc.MOD_ID) && path.getPath().endsWith(".json")).size();
-		long loaded = helper.getLevel().getRecipeManager().getRecipes().stream()
-				.map(RecipeHolder::id).filter(id -> id.getNamespace().equals(LibMisc.MOD_ID)).count();
+		long loaded = helper.getLevel().recipeAccess().getRecipes().stream()
+				.map(holder -> holder.id().identifier()).filter(id -> id.getNamespace().equals(LibMisc.MOD_ID)).count();
 		helper.assertTrue(files == loaded, "The data pack has " + files + " recipe files of this mod, but the game loaded " + loaded);
-		long crafting = helper.getLevel().getRecipeManager().getRecipes().stream()
-				.filter(holder -> holder.id().getNamespace().equals(LibMisc.MOD_ID) && holder.value() instanceof CraftingRecipe).count();
+		long crafting = helper.getLevel().recipeAccess().getRecipes().stream()
+				.filter(holder -> holder.id().identifier().getNamespace().equals(LibMisc.MOD_ID) && holder.value() instanceof CraftingRecipe).count();
 		helper.assertTrue(crafting > 50, "Too few crafting recipes were loaded: " + crafting);
 		helper.succeed();
 	}

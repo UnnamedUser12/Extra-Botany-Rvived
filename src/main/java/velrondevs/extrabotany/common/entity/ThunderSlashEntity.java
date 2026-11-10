@@ -66,7 +66,7 @@ public class ThunderSlashEntity extends PlayerOwnedEntity {
 		List<LivingEntity> inRange = level().getEntitiesOfClass(LivingEntity.class, new AABB(blockPosition()).inflate(RANGE - 0.5));
 		for (LivingEntity living : inRange) {
 			if (living instanceof Enemy) {
-				living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, SLOWNESS_TICKS, SLOWNESS_LEVEL));
+				living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SLOWNESS_TICKS, SLOWNESS_LEVEL));
 			}
 		}
 

@@ -8,11 +8,11 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.monster.WitherSkeleton;
+import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -70,7 +70,7 @@ public class GaiaSpawnMob<E extends Gaia> extends Behavior<E> {
 		if (ticks > GaiaAI.MOB_SPAWN_START_TICKS * 2 &&
 				countDown > GaiaAI.MOB_SPAWN_END_TICKS &&
 				countDown % GaiaAI.MOB_SPAWN_WAVE_TIME == 0) {
-			spawnMobs(gaia, getPlayers(gaia));
+			spawnMobs(level, gaia, getPlayers(gaia));
 		}
 
 		setSpawnTicks(gaia, countDown - 1);
@@ -79,30 +79,30 @@ public class GaiaSpawnMob<E extends Gaia> extends Behavior<E> {
 		}
 	}
 
-	private void spawnMobs(Gaia gaia, List<Player> players) {
+	private void spawnMobs(ServerLevel level, Gaia gaia, List<Player> players) {
 		for (int pl = 0; pl < players.size(); pl++) {
-			for (int i = 0; i < 3 + gaia.level().random.nextInt(2); i++) {
-				Mob entity = switch (gaia.level().random.nextInt(3)) {
+			for (int i = 0; i < 3 + gaia.level().getRandom().nextInt(2); i++) {
+				Mob entity = switch (gaia.level().getRandom().nextInt(3)) {
 					case 0 -> {
-						if (gaia.level().random.nextInt(12) == 0) {
-							yield EntityType.WITCH.create(gaia.level());
+						if (gaia.level().getRandom().nextInt(12) == 0) {
+							yield EntityType.WITCH.create(gaia.level(), EntitySpawnReason.MOB_SUMMONED);
 						}
-						yield EntityType.ZOMBIE.create(gaia.level());
+						yield EntityType.ZOMBIE.create(gaia.level(), EntitySpawnReason.MOB_SUMMONED);
 					}
 					case 1 -> {
-						if (gaia.level().random.nextInt(8) == 0) {
-							yield EntityType.WITHER_SKELETON.create(gaia.level());
+						if (gaia.level().getRandom().nextInt(8) == 0) {
+							yield EntityType.WITHER_SKELETON.create(gaia.level(), EntitySpawnReason.MOB_SUMMONED);
 						}
-						yield EntityType.SKELETON.create(gaia.level());
+						yield EntityType.SKELETON.create(gaia.level(), EntitySpawnReason.MOB_SUMMONED);
 					}
 					case 2 -> {
 						if (!players.isEmpty()) {
-							for (int j = 0; j < 1 + gaia.level().random.nextInt(8); j++) {
+							for (int j = 0; j < 1 + gaia.level().getRandom().nextInt(8); j++) {
 								PixieEntity pixie = new PixieEntity(gaia.level());
 								pixie.setProps(players.get(gaia.getRandom().nextInt(players.size())), gaia, 1, 8);
 								pixie.setPos(gaia.getX() + gaia.getBbWidth() / 2, gaia.getY() + 2, gaia.getZ() + gaia.getBbWidth() / 2);
-								EventHooks.finalizeMobSpawn(pixie, (ServerLevelAccessor) gaia.level(),
-										gaia.level().getCurrentDifficultyAt(pixie.blockPosition()), MobSpawnType.MOB_SUMMONED, null);
+								EventHooks.finalizeMobSpawn(pixie, level,
+										level.getCurrentDifficultyAt(pixie.blockPosition()), EntitySpawnReason.MOB_SUMMONED, null);
 								gaia.level().addFreshEntity(pixie);
 							}
 						}
@@ -118,8 +118,8 @@ public class GaiaSpawnMob<E extends Gaia> extends Behavior<E> {
 					float range = 6F;
 					entity.setPos(gaia.getX() + 0.5 + Math.random() * range - range / 2, gaia.getY() - 1,
 							gaia.getZ() + 0.5 + Math.random() * range - range / 2);
-					EventHooks.finalizeMobSpawn(entity, (ServerLevelAccessor) gaia.level(),
-							gaia.level().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.MOB_SUMMONED, null);
+					EventHooks.finalizeMobSpawn(entity, level,
+							level.getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.MOB_SUMMONED, null);
 					if (entity instanceof WitherSkeleton) {
 						entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(BotaniaItems.elementiumSword));
 					}

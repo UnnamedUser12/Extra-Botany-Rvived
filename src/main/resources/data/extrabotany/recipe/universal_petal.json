@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "L": {
-      "item": "botania:life_essence"
-    },
-    "P": {
-      "tag": "botania:petals"
-    }
+    "L": "botania:life_essence",
+    "P": "#botania:petals"
   },
   "pattern": [
     "PPP",

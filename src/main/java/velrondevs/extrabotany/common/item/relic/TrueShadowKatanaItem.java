@@ -5,7 +5,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -42,7 +42,7 @@ public class TrueShadowKatanaItem extends RelicSwordItem {
 	private static final double ARC_STEP_RADIANS = Math.PI / 4;
 
 	public TrueShadowKatanaItem(Properties props) {
-		super(Tiers.DIAMOND, props.attributes(createAttributes(Tiers.DIAMOND, 5, -2F)));
+		super(ToolMaterial.DIAMOND, 5, -2F, props);
 	}
 
 	@Override

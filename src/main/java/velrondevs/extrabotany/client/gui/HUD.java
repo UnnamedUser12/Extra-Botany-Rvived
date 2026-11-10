@@ -1,14 +1,13 @@
 package velrondevs.extrabotany.client.gui;
 
 import com.google.common.collect.Iterables;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
@@ -33,7 +32,7 @@ import java.util.List;
  */
 public final class HUD {
 	public static HUD INSTANCE;
-	private static final ResourceLocation manaBar = ResourceLocation.tryParse("botania:textures/gui/mana_hud.png");
+	private static final Identifier manaBar = Identifier.tryParse("botania:textures/gui/mana_hud.png");
 
 	private final Minecraft minecraft;
 	private final ColorfulBossBarOverlay bossOverlay;
@@ -45,16 +44,14 @@ public final class HUD {
 		this.bossOverlay = new ColorfulBossBarOverlay(minecraft);
 	}
 
-	public void onDrawScreenPost(GuiGraphics gui, float partialTicks) {
-		PoseStack ms = gui.pose();
+	public void onDrawScreenPost(GuiGraphicsExtractor gui, float partialTicks) {
 		if (minecraft.options.hideGui) {
 			return;
 		}
-		ProfilerFiller profiler = minecraft.getProfiler();
+		ProfilerFiller profiler = Profiler.get();
 		profiler.push("extrabotany-hud");
 
-		float f = minecraft.getTimer().getGameTimeDeltaPartialTick(true);
-		scopeScale = Mth.lerp(0.5F * f, scopeScale, 1.125F);
+		scopeScale = Mth.lerp(0.5F * partialTicks, scopeScale, 1.125F);
 		if (minecraft.options.getCameraType().isFirstPerson()) {
 			if (shouldRenderCameraGUI()) {
 				profiler.push("camera-hud");
@@ -83,7 +80,7 @@ public final class HUD {
 	 * <p>植物魔法用 int 累加所有物品的魔力。大师魔力之戒报告的数值接近 int 的最大值，所以累加会溢出。这里用 long 累加。
 	 * <p>Botania adds the mana of all items in an int. The Master Band of Mana reports a value near the maximum of an int, thus the sum overflows. This method adds in a long.
 	 */
-	private void renderManaBar(GuiGraphics gui, float partialTicks) {
+	private void renderManaBar(GuiGraphicsExtractor gui, float partialTicks) {
 		Player player = minecraft.player;
 		if (player == null || player.isSpectator()) {
 			return;
@@ -123,7 +120,7 @@ public final class HUD {
 			renderManaInvBar(gui, (float) ((double) totalMana / (double) totalMaxMana));
 		}
 	}
-	private static void renderManaInvBar(GuiGraphics gui, float progress) {
+	private static void renderManaInvBar(GuiGraphicsExtractor gui, float progress) {
 		Minecraft mc = Minecraft.getInstance();
 		int width = 182;
 		int x = mc.getWindow().getGuiScaledWidth() / 2 - width / 2;
@@ -139,12 +136,7 @@ public final class HUD {
 		int r = color >> 16 & 255;
 		int g = color >> 8 & 255;
 		int b = color & 255;
-		RenderSystem.setShaderColor((float) r / 255.0F, (float) g / 255.0F, (float) b / 255.0F, 1.0F - (float) r / 255.0F);
-		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(770, 771);
-		RenderHelper.drawTexturedModalRect(gui, manaBar, x, y, 0, 251, width, 5);
-		RenderSystem.disableBlend();
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderHelper.drawTexturedModalRect(gui, manaBar, x, y, 0, 251, width, 5, ARGB.colorFromFloat(1.0F - r / 255.0F, r / 255.0F, g / 255.0F, b / 255.0F));
 	}
 
 	private boolean shouldRenderCameraGUI() {

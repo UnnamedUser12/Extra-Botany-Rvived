@@ -1,6 +1,8 @@
 package velrondevs.extrabotany.common.crafting.recipe;
 
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+
+import velrondevs.botania.common.crafting.recipe.RecipeUtils;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
@@ -14,10 +16,11 @@ import org.jetbrains.annotations.NotNull;
 public abstract class CopyBrewRecipe extends ShapelessRecipe {
 
 	public CopyBrewRecipe(ShapelessRecipe compose) {
-		super(compose.getGroup(), compose.category(), compose.getResultItem(RegistryAccess.EMPTY), compose.getIngredients());
+		super(RecipeUtils.commonInfo(compose), new CraftingRecipe.CraftingBookInfo(compose.category(), compose.group()),
+				RecipeUtils.result(compose), RecipeUtils.ingredients(compose));
 	}
 
 	public abstract Item getBrewSource();
 	@Override
-	public abstract @NotNull RecipeSerializer<?> getSerializer();
+	public abstract @NotNull RecipeSerializer<ShapelessRecipe> getSerializer();
 }

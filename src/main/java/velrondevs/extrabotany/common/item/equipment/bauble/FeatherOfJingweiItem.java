@@ -4,7 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -46,7 +46,7 @@ public class FeatherOfJingweiItem extends BaubleItem {
 	 */
 	@Override
 	public Multimap<Holder<Attribute>, AttributeModifier> getEquippedAttributeModifiers(ItemStack stack) {
-		ResourceLocation slotId = getBaubleModifierId(stack);
+		Identifier slotId = getBaubleModifierId(stack);
 		Multimap<Holder<Attribute>, AttributeModifier> attributes = HashMultimap.create();
 		attributes.put(Attributes.MAX_ABSORPTION,
 				new AttributeModifier(slotId, AuraFireEntity.ABSORPTION_MAX, AttributeModifier.Operation.ADD_VALUE));
@@ -62,7 +62,7 @@ public class FeatherOfJingweiItem extends BaubleItem {
 
 	public static InteractionResult attackEntity(AttackEntityEvent event) {
 		Player player = event.getEntity();
-		if (!player.level().isClientSide) {
+		if (!player.level().isClientSide()) {
 			trySpawnAuraFire(player);
 		}
 		return InteractionResult.PASS;
@@ -94,7 +94,7 @@ public class FeatherOfJingweiItem extends BaubleItem {
 
 		AuraFireEntity fire = getFire(player);
 		player.level().addFreshEntity(fire);
-		player.playNotifySound(ExtraBotanySounds.FEATHER_OF_JINGWEI_SHOOT, SoundSource.PLAYERS, 1f, SoundEventUtil.randomPitch(player.level()));
+		player.playSound(ExtraBotanySounds.FEATHER_OF_JINGWEI_SHOOT, 1f, SoundEventUtil.randomPitch(player.level()));
 	}
 
 	public static AuraFireEntity getFire(Player player) {

@@ -31,6 +31,6 @@ public class VoidCallerItem extends Item {
 		if (!context.getLevel().isClientSide()) {
 			context.getItemInHand().consume(1, player);
 		}
-		return InteractionResult.sidedSuccess(context.getLevel().isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 }

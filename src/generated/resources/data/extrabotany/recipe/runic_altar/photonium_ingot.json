@@ -1,25 +1,14 @@
 {
   "type": "botania:runic_altar",
   "ingredients": [
-    {
-      "item": "botania:elementium_ingot"
-    },
-    {
-      "item": "extrabotany:gilded_potato_mashed"
-    },
-    {
-      "item": "extrabotany:spirit_fragment"
-    },
-    {
-      "item": "extrabotany:spirit_fragment"
-    },
-    {
-      "item": "extrabotany:spirit_fragment"
-    }
+    "botania:elementium_ingot",
+    "extrabotany:gilded_potato_mashed",
+    "extrabotany:spirit_fragment",
+    "extrabotany:spirit_fragment",
+    "extrabotany:spirit_fragment"
   ],
   "mana": 4200,
   "output": {
-    "count": 1,
     "id": "extrabotany:photonium_ingot"
   }
 }

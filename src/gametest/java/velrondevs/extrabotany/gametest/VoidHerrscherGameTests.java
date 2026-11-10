@@ -3,7 +3,7 @@ package velrondevs.extrabotany.gametest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -16,8 +16,8 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.monster.Husk;
+import net.minecraft.world.entity.animal.golem.IronGolem;
+import net.minecraft.world.entity.monster.zombie.Husk;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -29,8 +29,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import velrondevs.extrabotany.registry.ExtraBotanyEntities;
 import velrondevs.extrabotany.common.entity.SubspaceLanceEntity;
@@ -65,9 +65,9 @@ public final class VoidHerrscherGameTests {
 		}
 		BlockPos home = helper.absolutePos(HOME);
 		VoidHerrscher boss = new VoidHerrscher(ExtraBotanyEntities.VOID_HERRSCHER, level);
-		CompoundTag tag = boss.saveWithoutId(new CompoundTag());
+		CompoundTag tag = TestNbt.saveEntity(helper.getLevel().registryAccess(), boss);
 		tag.put("Home", GlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, GlobalPos.of(level.dimension(), home)).getOrThrow());
-		boss.load(tag);
+		TestNbt.loadEntity(helper.getLevel().registryAccess(), boss, tag);
 		boss.setPos(Vec3.atBottomCenterOf(home));
 		return boss;
 	}
@@ -101,7 +101,7 @@ public final class VoidHerrscherGameTests {
 		VoidHerrscher boss = createBoss(helper);
 		helper.assertTrue(boss.getDamageCap() == 25F && !boss.isRankII() && boss.getShields() == 0, "A new boss must have no shields and a damage limit of 25");
 
-		CompoundTag tag = boss.saveWithoutId(new CompoundTag());
+		CompoundTag tag = TestNbt.saveEntity(helper.getLevel().registryAccess(), boss);
 		tag.putInt("ShieldLayers", 2);
 		tag.putInt("RotatingShields", 3);
 		tag.putBoolean("RankII", true);
@@ -116,9 +116,9 @@ public final class VoidHerrscherGameTests {
 		ListTag supporters = new ListTag();
 		supporters.add(StringTag.valueOf("ExtraMeteorP"));
 		tag.put("Supporters", supporters);
-		boss.load(tag);
+		TestNbt.loadEntity(helper.getLevel().registryAccess(), boss, tag);
 
-		CompoundTag saved = boss.saveWithoutId(new CompoundTag());
+		CompoundTag saved = TestNbt.saveEntity(helper.getLevel().registryAccess(), boss);
 		for (String key : List.of("ShieldLayers", "RotatingShields", "RankII", "RankIII", "HerrscherDamageTaken", "HerrscherTpDelay", "DodgeCd",
 				"SkillCd", "SkillType", "SupportCd", "EmergeLanceDone", "Supporters")) {
 			helper.assertTrue(tag.get(key).equals(saved.get(key)), "The save lost the key " + key);
@@ -129,9 +129,9 @@ public final class VoidHerrscherGameTests {
 		// 用命令召唤的 Boss 没有这些键，它必须保留默认值。
 		// A boss from a command does not have these keys, and it must keep the defaults.
 		VoidHerrscher summoned = new VoidHerrscher(ExtraBotanyEntities.VOID_HERRSCHER, helper.getLevel());
-		summoned.load(new CompoundTag());
-		helper.assertTrue(summoned.saveWithoutId(new CompoundTag()).getInt("ShieldLayers") == 5
-				&& summoned.saveWithoutId(new CompoundTag()).getInt("DodgeCd") == 300, "A boss without save data lost its defaults");
+		TestNbt.loadEntity(helper.getLevel().registryAccess(), summoned, new CompoundTag());
+		helper.assertTrue(TestNbt.saveEntity(helper.getLevel().registryAccess(), summoned).getIntOr("ShieldLayers", 0) == 5
+				&& TestNbt.saveEntity(helper.getLevel().registryAccess(), summoned).getIntOr("DodgeCd", 0) == 300, "A boss without save data lost its defaults");
 		helper.succeed();
 	}
 
@@ -182,12 +182,12 @@ public final class VoidHerrscherGameTests {
 	public static void herrscherShieldsAndDodge(GameTestHelper helper) {
 		VoidHerrscher boss = createBoss(helper);
 		Player player = player(helper, HOME.offset(3, 0, 0));
-		player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 200, 1));
-		CompoundTag tag = boss.saveWithoutId(new CompoundTag());
+		player.addEffect(new MobEffectInstance(MobEffects.SPEED, 200, 1));
+		CompoundTag tag = TestNbt.saveEntity(helper.getLevel().registryAccess(), boss);
 		tag.putInt("ShieldLayers", 0);
 		tag.putInt("RotatingShields", 3);
 		tag.putBoolean("RankII", true);
-		boss.load(tag);
+		TestNbt.loadEntity(helper.getLevel().registryAccess(), boss, tag);
 		float maxHealth = boss.getMaxHealth();
 
 		// 20 x 0.85^3 = 12.3，没有超过 20，所以护盾不碎。
@@ -195,7 +195,7 @@ public final class VoidHerrscherGameTests {
 		hit(boss, player, 20F);
 		helper.assertTrue(boss.getShields() == 3 && Math.abs(maxHealth - boss.getHealth() - 20F * 0.85F * 0.85F * 0.85F) < 0.001F,
 				"Three shields must decrease 20 damage to 12.28, but the boss lost " + (maxHealth - boss.getHealth()));
-		helper.assertTrue(boss.hasEffect(MobEffects.MOVEMENT_SPEED), "A boss with shields must copy the potion effects of the attacker");
+		helper.assertTrue(boss.hasEffect(MobEffects.SPEED), "A boss with shields must copy the potion effects of the attacker");
 
 		float before = boss.getHealth();
 		hit(boss, player, 100F);
@@ -273,7 +273,7 @@ public final class VoidHerrscherGameTests {
 					helper.assertTrue(height > 1.7 && height <= 1.9, "The lance must stop between 1.75 and 1.9 blocks above the floor, but it is at " + height);
 					helper.assertTrue(trigger.hasEffect(MobEffects.WEAKNESS), "The lightning chain must jump back to the creature that started it");
 					helper.assertTrue(other.getHealth() == golemHealth && trigger.getHealth() == golemHealth, "The attack of a boss must not hurt creatures that are not players");
-					owner.kill();
+					owner.kill(helper.getLevel());
 				})
 				.thenWaitUntil(() -> helper.assertTrue(!lance.isAlive(), "The lance must go away after its owner dies"))
 				.thenSucceed();
@@ -320,7 +320,7 @@ public final class VoidHerrscherGameTests {
 				.withOptionalParameter(LootContextParams.DIRECT_ATTACKING_ENTITY, player)
 				.withParameter(LootContextParams.LAST_DAMAGE_PLAYER, player)
 				.create(LootContextParamSets.ENTITY);
-		List<ItemStack> loot = level.getServer().reloadableRegistries().getLootTable(boss.getLootTable()).getRandomItems(params);
+		List<ItemStack> loot = level.getServer().reloadableRegistries().getLootTable(boss.getLootTable().orElseThrow()).getRandomItems(params);
 
 		helper.assertTrue(loot.stream().anyMatch(stack -> stack.is(ExtraBotanyItems.pandorasBox)), "The loot does not have the Pandora's Box");
 		helper.assertTrue(loot.stream().anyMatch(stack -> stack.is(ExtraBotanyItems.limitedEditionSupplyBag) && stack.getCount() == 3),

@@ -4,9 +4,10 @@ import com.mojang.blaze3d.platform.Window;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
+import velrondevs.botania.client.core.helper.RenderHelper;
 import velrondevs.botania.api.block_entity.BindableSpecialFlowerBlockEntity;
 
 import velrondevs.extrabotany.common.block.flower.functional.AnnoyingFlowerBlockEntity;
@@ -21,7 +22,7 @@ public class AnnoyingFlowerWandHud extends BindableSpecialFlowerBlockEntity.Bind
 	}
 
 	@Override
-	public void renderHUD(GuiGraphics gui, Minecraft mc) {
+	public void renderHUD(GuiGraphicsExtractor gui, Minecraft mc) {
 		Window window = mc.getWindow();
 		Font font = mc.font;
 		Component component = Component.translatable("message.extrabotany.gui.food_level", flower.getBoostLeft());
@@ -30,6 +31,6 @@ public class AnnoyingFlowerWandHud extends BindableSpecialFlowerBlockEntity.Bind
 		int centerY = window.getGuiScaledHeight() / 2;
 
 		super.renderHUD(gui, mc, halfWidth + 2, halfWidth + 2, 48);
-		gui.drawString(font, component, centerX - halfWidth + 12, centerY + 34, 0xFFFFFF);
+		RenderHelper.drawString(gui, font, component, centerX - halfWidth + 12, centerY + 34, 0xFFFFFF);
 	}
 }

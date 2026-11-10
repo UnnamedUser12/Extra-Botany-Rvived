@@ -89,10 +89,10 @@ public abstract class WandOfTheForestExtension {
 	private static void bindManalink(Level world, Player player, ManalinkBlockEntity manalink, GlobalPos globalPos) {
 		// setLinkPos() marks dirty and pushes an immediate update to tracking clients.
 		manalink.setLinkPos(globalPos);
-		if (world.isClientSide) {
+		if (world.isClientSide()) {
 			player.playSound(BotaniaSounds.ding, 0.11F, 1F);
 			Proxy.INSTANCE.displayClientMessage(Component.translatable("message.extrabotany.actionbar.bind_to_pos",
-					globalPos.dimension().location() +
+					globalPos.dimension().identifier() +
 							"[x=" + globalPos.pos().getX() + ",y=" + globalPos.pos().getY() + ",z=" + globalPos.pos().getZ() + "]")
 					.withStyle(ChatFormatting.GREEN), true);
 		}
@@ -124,9 +124,9 @@ public abstract class WandOfTheForestExtension {
 			GlobalPos globalPos = GlobalPos.of(ctx.getLevel().dimension(), pos);
 			WandOfTheForestItemExtension.setBindingAttemptExtend(ctx.getItemInHand(), globalPos);
 
-			if (world.isClientSide) {
+			if (world.isClientSide()) {
 				player.playSound(BotaniaSounds.ding, 0.11F, 1F);
-				String dimensionKey = world.dimension().location().toString();
+				String dimensionKey = world.dimension().identifier().toString();
 
 				Proxy.INSTANCE.displayClientMessage(Component.translatable("message.extrabotany.actionbar.selected_pos",
 						dimensionKey + "[x=" + pos.getX() + ",y=" + pos.getY() + ",z=" + pos.getZ() + "]").withStyle(ChatFormatting.GREEN), true);

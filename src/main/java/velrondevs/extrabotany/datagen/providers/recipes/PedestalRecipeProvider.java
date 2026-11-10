@@ -3,7 +3,7 @@ package velrondevs.extrabotany.datagen.providers.recipes;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 
@@ -34,15 +34,15 @@ public class PedestalRecipeProvider extends ExtraBotanyRecipeProvider {
 	public void buildRecipes(RecipeOutput consumer) {
 		consumer.accept(id("gilded_potato_mashed"),
 				new PedestalsRecipe(new ItemStack(ExtraBotanyItems.gildedPotatoMashed),
-						Ingredient.of(ExtraBotanyTags.Items.HAMMERS),
+						tag(ExtraBotanyTags.Items.HAMMERS),
 						Ingredient.of(ExtraBotanyItems.gildedPotato), 5, 5), null);
 		consumer.accept(id("spirit_fragment"),
 				new PedestalsRecipe(new ItemStack(ExtraBotanyItems.spiritFragment),
-						Ingredient.of(ExtraBotanyTags.Items.HAMMERS),
+						tag(ExtraBotanyTags.Items.HAMMERS),
 						Ingredient.of(ExtraBotanyItems.spiritFuel), 10, 5), null);
 	}
 
-	private static ResourceLocation id(String id) {
-		return prefix("pedestal_smash/" + id);
+	private static net.minecraft.resources.ResourceKey<net.minecraft.world.item.crafting.Recipe<?>> id(String id) {
+		return key(prefix("pedestal_smash/" + id));
 	}
 }

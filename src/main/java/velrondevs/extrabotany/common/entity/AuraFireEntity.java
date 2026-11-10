@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import velrondevs.extrabotany.registry.ExtraBotanyEntities;
 
 import net.minecraft.core.particles.ParticleTypes;
@@ -59,7 +61,8 @@ public class AuraFireEntity extends ThrowableProjectile {
 	}
 
 	public AuraFireEntity(LivingEntity shooter) {
-		super(ExtraBotanyEntities.AURA_FIRE, shooter, shooter.level());
+		super(ExtraBotanyEntities.AURA_FIRE, shooter.getX(), shooter.getEyeY() - 0.1F, shooter.getZ(), shooter.level());
+		setOwner(shooter);
 
 		setRot(shooter.getYRot() + 180, -shooter.getXRot());
 		setDeltaMovement(calculateVelocity(getXRot(), getYRot()));
@@ -74,7 +77,7 @@ public class AuraFireEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
+	public void addAdditionalSaveData(ValueOutput tag) {
 		super.addAdditionalSaveData(tag);
 		tag.putFloat(TAG_GRAVITY, (float) getGravity());
 		tag.putInt(TAG_TICKS_EXISTED, getTicksExisted());
@@ -83,12 +86,12 @@ public class AuraFireEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag cmp) {
+	public void readAdditionalSaveData(ValueInput cmp) {
 		super.readAdditionalSaveData(cmp);
-		setTicksExisted(cmp.getInt(TAG_TICKS_EXISTED));
-		setMaxLivingTime(cmp.getInt(TAG_MAX_LIVING_TIME));
-		setGravity(cmp.getFloat(TAG_GRAVITY));
-		setDamage(cmp.getFloat(TAG_DAMAGE));
+		setTicksExisted(cmp.getIntOr(TAG_TICKS_EXISTED, 0));
+		setMaxLivingTime(cmp.getIntOr(TAG_MAX_LIVING_TIME, 0));
+		setGravity(cmp.getFloatOr(TAG_GRAVITY, 0.0F));
+		setDamage(cmp.getFloatOr(TAG_DAMAGE, 0.0F));
 	}
 
 	@Override
@@ -123,7 +126,7 @@ public class AuraFireEntity extends ThrowableProjectile {
 
 			DamageSource source = createDamageSource(entity, owner);
 
-			if (!entity.hurt(source, damage)) {
+			if (!entity.hurtOrSimulate(source, damage)) {
 				continue;
 			}
 
@@ -151,7 +154,7 @@ public class AuraFireEntity extends ThrowableProjectile {
 	}
 
 	protected void particles() {
-		if (!isAlive() || !level().isClientSide) {
+		if (!isAlive() || !level().isClientSide()) {
 			return;
 		}
 
@@ -216,6 +219,7 @@ public class AuraFireEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	public void updateFluidHeightAndDoFluidPushing() {
+	protected boolean updateFluidInteraction() {
+		return false;
 	}
 }

@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "extrabotany:goblin_slayer"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "extrabotany:goblin_slayer"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "extrabotany:goblin_slayer"
+      }
+    ]
+  }
+}

@@ -3,7 +3,7 @@ package velrondevs.extrabotany.common.entity.gaia.behavior;
 import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -47,25 +47,25 @@ public class GaiaSpawnPixies<E extends Gaia> extends Behavior<E> {
 
 	@Override
 	protected void start(ServerLevel level, E gaia, long gameTime) {
-		spawnPixies(gaia);
+		spawnPixies(level, gaia);
 	}
 
-	protected void spawnPixies(Gaia gaia) {
+	protected void spawnPixies(ServerLevel level, Gaia gaia) {
 		List<Player> players = getPlayers(gaia);
 
 		for (int runTime = 0; runTime < players.size(); runTime++) {
 			int spawnCount = 1;
 			//Spawns when after hurt teleport
 			if (gaia.hurtTime > 0) {
-				spawnCount = gaia.level().random.nextInt(getPixiesMaxPerSpawn(gaia));
+				spawnCount = gaia.level().getRandom().nextInt(getPixiesMaxPerSpawn(gaia));
 			}
 
 			for (int i = 1; i <= spawnCount; i++) {
 				PixieEntity pixie = new PixieEntity(gaia.level());
 				pixie.setProps(players.get(gaia.getRandom().nextInt(players.size())), gaia, 1, 8);
 				pixie.setPos(gaia.getX() + gaia.getBbWidth() / 2, gaia.getY() + 2, gaia.getZ() + gaia.getBbWidth() / 2);
-				EventHooks.finalizeMobSpawn(pixie, (ServerLevelAccessor) gaia.level(),
-						gaia.level().getCurrentDifficultyAt(pixie.blockPosition()), MobSpawnType.MOB_SUMMONED, null);
+				EventHooks.finalizeMobSpawn(pixie, level,
+						level.getCurrentDifficultyAt(pixie.blockPosition()), EntitySpawnReason.MOB_SUMMONED, null);
 				gaia.level().addFreshEntity(pixie);
 			}
 		}

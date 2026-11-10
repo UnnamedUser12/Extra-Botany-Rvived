@@ -299,10 +299,10 @@ public class StardustLotusBlockEntity extends ExtraFunctionalFlowerBlockEntity {
 
 	@Override
 	public void readFromPacketNBT(CompoundTag tag) {
-		consumedMana = tag.getInt(TAG_CONSUMED_MANA);
-		hasPaper = tag.getBoolean(TAG_HAS_PAPER);
-		target = tag.getBoolean(TAG_HAS_TARGET)
-				? new BlockPos(tag.getInt(TAG_TARGET_X), tag.getInt(TAG_TARGET_Y), tag.getInt(TAG_TARGET_Z))
+		consumedMana = tag.getIntOr(TAG_CONSUMED_MANA, 0);
+		hasPaper = tag.getBooleanOr(TAG_HAS_PAPER, false);
+		target = tag.getBooleanOr(TAG_HAS_TARGET, false)
+				? new BlockPos(tag.getIntOr(TAG_TARGET_X, 0), tag.getIntOr(TAG_TARGET_Y, 0), tag.getIntOr(TAG_TARGET_Z, 0))
 				: null;
 	}
 }

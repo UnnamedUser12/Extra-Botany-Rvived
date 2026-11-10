@@ -2,18 +2,10 @@
   "type": "botania:mana_upgrade",
   "category": "equipment",
   "key": {
-    "A": {
-      "item": "botania:manasteel_leggings"
-    },
-    "R": {
-      "item": "botania:rune_autumn"
-    },
-    "S": {
-      "tag": "extrabotany:aerialite_ingots"
-    },
-    "T": {
-      "item": "botania:livingwood_twig"
-    }
+    "A": "botania:manasteel_leggings",
+    "R": "botania:rune_autumn",
+    "S": "#extrabotany:aerialite_ingots",
+    "T": "botania:livingwood_twig"
   },
   "pattern": [
     "TRT",

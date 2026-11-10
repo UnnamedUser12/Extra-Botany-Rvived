@@ -1,12 +1,17 @@
 package velrondevs.extrabotany.common.item.relic.voidcore;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
@@ -85,10 +90,10 @@ public class CoreOfTheVoidItem extends BaubleItem implements CustomCreativeTabCo
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		super.appendHoverText(stack, context, tooltip, flags);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		super.appendHoverText(stack, context, tooltipDisplay, tooltip, flags);
 		RelicImpl.addDefaultTooltip(stack, tooltip);
-		tooltip.add(Component.translatable("extrabotany.wings." + getVariant(stack)));
+		tooltip.accept(Component.translatable("extrabotany.wings." + getVariant(stack)));
 	}
 
 	@SuppressWarnings("deprecation") // Matches Botania 456's flight state until its shared flight API migrates.
@@ -99,7 +104,7 @@ public class CoreOfTheVoidItem extends BaubleItem implements CustomCreativeTabCo
 			if (shouldPlayerHaveFlight(player)) {
 				player.getAbilities().mayfly = true;
 				if (player.getAbilities().flying) {
-					if (!player.level().isClientSide) {
+					if (!player.level().isClientSide()) {
 						if (!player.isCreative() && !player.isSpectator()) {
 							ManaItemHandler.instance().requestManaExact(tiara, player, getFlyCost(), true);
 						}
@@ -127,9 +132,9 @@ public class CoreOfTheVoidItem extends BaubleItem implements CustomCreativeTabCo
 
 		if (shouldBackFire(stack, entity) && entity.tickCount % 10 == 0) {
 
-			if (entity.hurt(damageSource(entity.level().registryAccess()), getBackfireDamage()) &&
+			if (entity.hurtOrSimulate(damageSource(entity.level().registryAccess()), getBackfireDamage()) &&
 					entity instanceof Player player) {
-				player.playNotifySound(ExtraBotanySounds.PLAYER_BACKFIRE, SoundSource.PLAYERS, 1, SoundEventUtil.randomPitch(player.level()));
+				player.playSound(ExtraBotanySounds.PLAYER_BACKFIRE, 1, SoundEventUtil.randomPitch(player.level()));
 			}
 			return;
 		}
@@ -138,7 +143,7 @@ public class CoreOfTheVoidItem extends BaubleItem implements CustomCreativeTabCo
 	}
 
 	public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-		String username = event.getEntity().getGameProfile().getName();
+		String username = event.getEntity().getGameProfile().name();
 		playersWithFlight.remove(username + ":false");
 		playersWithFlight.remove(username + ":true");
 	}
@@ -160,7 +165,7 @@ public class CoreOfTheVoidItem extends BaubleItem implements CustomCreativeTabCo
 	}
 
 	private static String playerStr(Player player) {
-		return player.getGameProfile().getName() + ":" + player.level().isClientSide;
+		return player.getGameProfile().name() + ":" + player.level().isClientSide();
 	}
 
 	public static boolean shouldBackFire(ItemStack stack, LivingEntity entity) {
@@ -206,19 +211,19 @@ public class CoreOfTheVoidItem extends BaubleItem implements CustomCreativeTabCo
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
-		if (!world.isClientSide && entity instanceof Player player) {
+	public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		if (!world.isClientSide() && entity instanceof Player player) {
 			var relic = velrondevs.extrabotany.xplat.EXplatAbstractions.INSTANCE.findRelic(stack);
 			if (relic != null) {
 				relic.tickBinding(player);
 			}
 		}
-		super.inventoryTick(stack, world, entity, slot, selected);
+		super.inventoryTick(stack, world, entity, eqSlot);
 	}
 
 	@Override
 	public Multimap<Holder<Attribute>, AttributeModifier> getEquippedAttributeModifiers(ItemStack stack) {
-		ResourceLocation slotId = getBaubleModifierId(stack);
+		Identifier slotId = getBaubleModifierId(stack);
 		Multimap<Holder<Attribute>, AttributeModifier> attributes = HashMultimap.create();
 		//TODO 反噬以及无魔力时去除Attribute
 		attributes.put(Attributes.MOVEMENT_SPEED,

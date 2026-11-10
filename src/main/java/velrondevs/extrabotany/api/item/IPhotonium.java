@@ -40,12 +40,12 @@ public interface IPhotonium {
 		}
 
 		if (isDay(level) && isOutCave(level, entity.blockPosition())) {
-			living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 5 * 20, 1));
+			living.addEffect(new MobEffectInstance(MobEffects.SPEED, 5 * 20, 1));
 		}
 	}
 
 	default boolean isDay(Level level) {
-		return !level.isNight();
+		return level.isBrightOutside();
 	}
 
 	default boolean isOutCave(Level level, BlockPos pos) {

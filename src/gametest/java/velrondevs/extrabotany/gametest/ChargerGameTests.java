@@ -7,7 +7,7 @@ import velrondevs.extrabotany.common.block.block_entity.PowerFrameBlockEntity;
 import velrondevs.extrabotany.xplat.EXplatAbstractions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -17,8 +17,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 import velrondevs.botania.api.state.BotaniaStateProperties;
 import velrondevs.botania.registry.BotaniaBlocks;
 import velrondevs.botania.common.block.block_entity.mana.BellowsBlockEntity;
@@ -39,7 +39,7 @@ public final class ChargerGameTests {
         charger.setItem(new ItemStack(BotaniaItems.manaTablet));
         ticks(charger, 40);
         h.assertTrue(charger.tickCount == 80 && charger.syncCalls == 1 && charger.dirtyCalls == 1,
-                "Missing pool must send the inserted item once, then remain idle");
+                "Missing pool must send the inserted item once, then remain idle: sync=" + charger.syncCalls + " dirty=" + charger.dirtyCalls + " tick=" + charger.tickCount);
         h.assertTrue(mana(charger.getItem()) == 0, "Missing pool changed item mana");
         h.succeed();
     }
@@ -77,7 +77,7 @@ public final class ChargerGameTests {
         charger.dirtyCalls = 0;
         var chunk = h.getLevel().getChunkAt(charger.getBlockPos());
         for (int i = 0; i < 2; i++) {
-            chunk.setUnsaved(false);
+            chunk.tryMarkSaved();
             ticks(charger, 1);
             h.assertTrue(chunk.isUnsaved(), "Off-cadence transfer failed to mark its chunk for saving");
         }
@@ -137,7 +137,7 @@ public final class ChargerGameTests {
         h.assertTrue(client.isEmpty(), "Empty slot was absent from the block entity packet");
         charger.setItem(new ItemStack(Items.STONE));
         ticks(charger, 20);
-        h.assertTrue(charger.syncCalls == 2 && charger.getItem().is(Items.STONE), "Invalid slot contents repeatedly synced or changed");
+        h.assertTrue(charger.syncCalls == 2 && charger.getItem().is(Items.STONE), "Invalid slot contents repeatedly synced or changed: sync=" + charger.syncCalls);
         client = restore(h, charger, charger.lastPacket);
         h.assertTrue(client.getItem().is(Items.STONE), "Idle slot replacement was absent from the update packet");
         h.succeed();
@@ -195,10 +195,10 @@ public final class ChargerGameTests {
                 "Power Frame did not apply exactly two linked bellows to its original transfer rate");
         for (var direction : List.of(Direction.EAST, Direction.WEST)) {
             var bellows = (BellowsBlockEntity) h.getLevel().getBlockEntity(h.absolutePos(poolPos.relative(direction)));
-            h.assertTrue(bellows.getUpdateTag(h.getLevel().registryAccess()).getBoolean("active"), "Linked bellows was not activated");
+            h.assertTrue(bellows.getUpdateTag(h.getLevel().registryAccess()).getBooleanOr("active", false), "Linked bellows was not activated");
         }
         var unlinked = (BellowsBlockEntity) h.getLevel().getBlockEntity(h.absolutePos(poolPos.north()));
-        h.assertTrue(!unlinked.getUpdateTag(h.getLevel().registryAccess()).getBoolean("active"), "Unlinked bellows was activated");
+        h.assertTrue(!unlinked.getUpdateTag(h.getLevel().registryAccess()).getBooleanOr("active", false), "Unlinked bellows was activated");
         PoolTestHelper.setOutputting(pool, false);
         ticks(frame, 1);
         h.assertTrue(mana(frame.getItem()) == 0 && pool.getCurrentMana() == 20_000, "Bellows-assisted draining changed rate or conservation");
@@ -249,7 +249,7 @@ public final class ChargerGameTests {
     private static CountingCharger restore(GameTestHelper h, CountingCharger original, CompoundTag tag) {
         var restored = new CountingCharger(original.getBlockPos());
         restored.setLevel(h.getLevel());
-        restored.loadWithComponents(tag, h.getLevel().registryAccess());
+        BlockEntityIO.load(restored, tag);
         return restored;
     }
 

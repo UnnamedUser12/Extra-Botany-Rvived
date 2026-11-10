@@ -5,7 +5,7 @@ import velrondevs.extrabotany.common.advancements.ItemUsedTrigger;
 import velrondevs.extrabotany.common.advancements.ManaChargeTrigger;
 
 import net.minecraft.advancements.CriterionTrigger;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.function.BiConsumer;
 
@@ -16,7 +16,7 @@ import java.util.function.BiConsumer;
 public final class ExtraBotanyCriteriaTriggers {
 	private ExtraBotanyCriteriaTriggers() {}
 
-	public static void init(BiConsumer<CriterionTrigger<?>, ResourceLocation> register) {
+	public static void init(BiConsumer<CriterionTrigger<?>, Identifier> register) {
 		register.accept(ItemUsedTrigger.INSTANCE, ItemUsedTrigger.ID);
 		register.accept(ManaChargeTrigger.INSTANCE, ManaChargeTrigger.ID);
 		register.accept(HasArmorSetTrigger.INSTANCE, HasArmorSetTrigger.ID);

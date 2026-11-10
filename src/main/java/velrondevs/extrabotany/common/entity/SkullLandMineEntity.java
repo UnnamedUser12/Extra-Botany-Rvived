@@ -2,7 +2,7 @@ package velrondevs.extrabotany.common.entity;
 
 import velrondevs.extrabotany.registry.ExtraBotanyEntities;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -31,7 +31,7 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  * <p>Source: ExtraMeteorP 1.12 {@code EntitySkullLandmine}.
  */
 public abstract class SkullLandMineEntity extends MagicLandMineEntity {
-	private static final ResourceLocation DEFAULT_SKULL = prefix("textures/entity/skull_missile/skull_missile.png");
+	private static final Identifier DEFAULT_SKULL = prefix("textures/entity/skull_missile/skull_missile.png");
 	public static final float LANDMINE_WIDTH = 5F;
 
 	public SkullLandMineEntity(EntityType<? extends SkullLandMineEntity> type, Level level) {
@@ -48,13 +48,13 @@ public abstract class SkullLandMineEntity extends MagicLandMineEntity {
 		return level().getEntitiesOfClass(entityClass, new AABB(getX(), getY(), getZ(), getX(), getY(), getZ()).inflate(LANDMINE_WIDTH / 2));
 	}
 
-	public ResourceLocation getTexture() {
+	public Identifier getTexture() {
 		return DEFAULT_SKULL;
 	}
 
 	public static class Default extends SkullLandMineEntity {
 
-		public static final ResourceLocation SKULL = prefix("textures/entity/skull_landmine/blue.png");
+		public static final Identifier SKULL = prefix("textures/entity/skull_landmine/blue.png");
 
 		public Default(EntityType<? extends Default> type, Level level) {
 			super(type, level);
@@ -66,7 +66,7 @@ public abstract class SkullLandMineEntity extends MagicLandMineEntity {
 		}
 
 		@Override
-		public ResourceLocation getTexture() {
+		public Identifier getTexture() {
 			return SKULL;
 		}
 
@@ -77,7 +77,7 @@ public abstract class SkullLandMineEntity extends MagicLandMineEntity {
 	}
 
 	public static class Danger extends SkullLandMineEntity {
-		public static final ResourceLocation SKULL = prefix("textures/entity/skull_landmine/red.png");
+		public static final Identifier SKULL = prefix("textures/entity/skull_landmine/red.png");
 
 		public Danger(EntityType<? extends Danger> type, Level level) {
 			super(type, level);
@@ -112,7 +112,7 @@ public abstract class SkullLandMineEntity extends MagicLandMineEntity {
 		}
 
 		@Override
-		public ResourceLocation getTexture() {
+		public Identifier getTexture() {
 			return SKULL;
 		}
 
@@ -123,7 +123,7 @@ public abstract class SkullLandMineEntity extends MagicLandMineEntity {
 	}
 
 	public static class Disarm extends SkullLandMineEntity {
-		public static final ResourceLocation SKULL = prefix("textures/entity/skull_landmine/green.png");
+		public static final Identifier SKULL = prefix("textures/entity/skull_landmine/green.png");
 
 		public Disarm(EntityType<? extends Disarm> type, Level level) {
 			super(type, level);
@@ -156,7 +156,7 @@ public abstract class SkullLandMineEntity extends MagicLandMineEntity {
 		}
 
 		@Override
-		public ResourceLocation getTexture() {
+		public Identifier getTexture() {
 			return SKULL;
 		}
 

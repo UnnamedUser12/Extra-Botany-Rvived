@@ -3,7 +3,7 @@ package velrondevs.extrabotany.common.item;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -44,9 +44,9 @@ public class WalkingCaneItem extends Item {
 	}
 
 	@Override
-	public void releaseUsing(ItemStack stack, Level level, LivingEntity entityLiving, int timeLeft) {
+	public boolean releaseUsing(ItemStack stack, Level level, LivingEntity entityLiving, int timeLeft) {
 		if (!(entityLiving instanceof Player player)) {
-			return;
+			return false;
 		}
 
 		int time = getUseDuration(stack, entityLiving) - timeLeft;
@@ -57,11 +57,12 @@ public class WalkingCaneItem extends Item {
 		player.addDeltaMovement(getAdditionDeltaMovement(player, time));
 
 		if (level.isClientSide()) {
-			player.playNotifySound(ExtraBotanySounds.WALKING_CANE_USE, SoundSource.PLAYERS, 1.0F, SoundEventUtil.randomPitch(level));
+			player.playSound(ExtraBotanySounds.WALKING_CANE_USE, 1.0F, SoundEventUtil.randomPitch(level));
 		}
 
-		player.getCooldowns().addCooldown(this, getCooldownTicks());
+		player.getCooldowns().addCooldown(new ItemStack(this), getCooldownTicks());
 		//}
+		return true;
 	}
 
 	public Vec3 getAdditionDeltaMovement(Player player, int time) {
@@ -84,7 +85,7 @@ public class WalkingCaneItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		return ItemUtils.startUsingInstantly(level, player, hand);
 	}
 
@@ -94,8 +95,8 @@ public class WalkingCaneItem extends Item {
 	}
 
 	@Override
-	public UseAnim getUseAnimation(ItemStack stack) {
-		return UseAnim.BOW;
+	public ItemUseAnimation getUseAnimation(ItemStack stack) {
+		return ItemUseAnimation.BOW;
 	}
 
 	public double getAdditionSpeed() {

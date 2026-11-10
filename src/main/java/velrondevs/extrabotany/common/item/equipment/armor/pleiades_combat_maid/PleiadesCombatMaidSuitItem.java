@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.item.equipment.armor.pleiades_combat_maid;
 
+import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,6 +12,9 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import velrondevs.botania.api.mana.ManaDiscountArmor;
+import velrondevs.extrabotany.registry.ExtraBotanyArmorMaterials;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import java.util.function.UnaryOperator;
 import velrondevs.botania.api.mana.ManaItemHandler;
 
 import velrondevs.extrabotany.common.item.equipment.bauble.NatureOrbItem;
@@ -25,7 +30,11 @@ public class PleiadesCombatMaidSuitItem extends PleiadesCombatMaidArmorItem impl
 	private static final float EMPTY_HAND_BONUS = 10.0F;
 
 	public PleiadesCombatMaidSuitItem(Properties properties) {
-		super(Type.CHESTPLATE, properties);
+		super(ArmorType.CHESTPLATE, properties);
+	}
+
+	protected PleiadesCombatMaidSuitItem(Properties properties, UnaryOperator<ItemAttributeModifiers> extra) {
+		super(ExtraBotanyArmorMaterials.PLEIADS_MAID_COMBAT, ArmorType.CHESTPLATE, properties, extra);
 	}
 
 	@Override
@@ -34,8 +43,8 @@ public class PleiadesCombatMaidSuitItem extends PleiadesCombatMaidArmorItem impl
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
-		super.inventoryTick(stack, world, entity, slot, selected);
+	public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		super.inventoryTick(stack, world, entity, eqSlot);
 		if (world.isClientSide() || !(entity instanceof Player player)) {
 			return;
 		}

@@ -3,7 +3,7 @@ package velrondevs.extrabotany.common.item.equipment.tool;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
@@ -59,7 +59,7 @@ public class SilverBulletItem extends ManaBlasterItem {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		// 潜行时切换弹夹里的透镜。这一步和魔力脉冲枪相同。
 		// A sneak-use changes the lens in the clip. This step is the same as for the Mana Blaster.
@@ -78,9 +78,9 @@ public class SilverBulletItem extends ManaBlasterItem {
 	 * 发射一个不消耗魔力的脉冲。冷却存放在物品的冷却组件里，所以冷却条和魔力脉冲枪的相同。
 	 * Shoots one burst that takes no mana. The cooldown is kept in the cooldown component of the item, so the cooldown bar is the same as for the Mana Blaster.
 	 */
-	private InteractionResultHolder<ItemStack> shootWithoutMana(Level level, Player player, ItemStack stack, InteractionHand hand) {
+	private InteractionResult shootWithoutMana(Level level, Player player, ItemStack stack, InteractionHand hand) {
 		if (ItemNBTHelper.getInt(stack, "cooldown", 0) > 0) {
-			return InteractionResultHolder.pass(stack);
+			return InteractionResult.PASS;
 		}
 
 		BurstProperties props = getBurstProps(player, stack, false, hand);
@@ -107,7 +107,7 @@ public class SilverBulletItem extends ManaBlasterItem {
 			// The recoil applies only on the client. The Tectonic Girdle cancels the recoil. This rule is the same as for the Mana Blaster.
 			player.setDeltaMovement(player.getDeltaMovement().subtract(burst.getDeltaMovement().multiply(0.1, 0.3, 0.1)));
 		}
-		return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 
 	/**
@@ -115,7 +115,7 @@ public class SilverBulletItem extends ManaBlasterItem {
 	 * Haste decreases the time between shots. The rule is the same as for the Mana Blaster.
 	 */
 	private static int cooldownFor(Player player) {
-		MobEffectInstance haste = player.getEffect(MobEffects.DIG_SPEED);
+		MobEffectInstance haste = player.getEffect(MobEffects.HASTE);
 		return haste == null ? COOLDOWN_TICKS : Math.max(2, COOLDOWN_TICKS - (haste.getAmplifier() + 1) * 8);
 	}
 }

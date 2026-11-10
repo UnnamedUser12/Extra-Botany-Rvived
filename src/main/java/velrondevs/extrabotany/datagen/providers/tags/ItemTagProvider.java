@@ -4,16 +4,17 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.ItemTagsProvider;
+import net.minecraft.data.tags.TagAppender;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.data.BlockTagCopyingItemTagProvider;
 
 import velrondevs.botania.common.item.lens.LensItem;
 import velrondevs.botania.common.lib.BotaniaTags;
@@ -33,9 +34,9 @@ import static velrondevs.extrabotany.registry.ExtraBotanyItems.*;
  * <p>标签的内容来自 {@code ExtraBotanyItems} 里的物品分组。给模组加新物品时，把它加进对应的分组。
  * <p>The content of the tags comes from the item groups in {@code ExtraBotanyItems}. When a new item is added to the mod, put it into the related group.
  */
-public class ItemTagProvider extends ItemTagsProvider {
+public class ItemTagProvider extends BlockTagCopyingItemTagProvider {
 	public ItemTagProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> lookupProvider, CompletableFuture<TagsProvider.TagLookup<Block>> blockTagProvider) {
-		super(packOutput, lookupProvider, blockTagProvider);
+		super(packOutput, lookupProvider, blockTagProvider, LibMisc.MOD_ID);
 	}
 
 	@Override
@@ -81,14 +82,13 @@ public class ItemTagProvider extends ItemTagsProvider {
 		this.copy(BotaniaTags.Blocks.SPECIAL_FLOWERS, BotaniaTags.Items.SPECIAL_FLOWERS);
 		this.copy(BotaniaTags.Blocks.MINI_FLOWERS, BotaniaTags.Items.MINI_FLOWERS);
 
-		this.tag(ItemTags.TALL_FLOWERS).addOptionalTag(BotaniaTags.Items.DOUBLE_MYSTICAL_FLOWERS.location());
-		this.tag(ItemTags.SMALL_FLOWERS).addOptionalTag(BotaniaTags.Items.MYSTICAL_FLOWERS.location()).addOptionalTag(BotaniaTags.Items.SPECIAL_FLOWERS.location());
+		this.tag(ItemTags.FLOWERS).addOptionalTag(BotaniaTags.Items.DOUBLE_MYSTICAL_FLOWERS);
+		this.tag(ItemTags.SMALL_FLOWERS).addOptionalTag(BotaniaTags.Items.MYSTICAL_FLOWERS).addOptionalTag(BotaniaTags.Items.SPECIAL_FLOWERS);
 
-		TagsProvider.TagAppender<Item> builder = this.tag(BotaniaTags.Items.LENS);
+		TagAppender<Item, Item> builder = this.tag(BotaniaTags.Items.LENS);
 		BuiltInRegistries.ITEM.stream().filter(i -> i instanceof LensItem && BuiltInRegistries.ITEM.getKey(i).getNamespace().equals(LibMisc.MOD_ID))
-				.map(BuiltInRegistries.ITEM::getKey)
-				.sorted()
-				.forEach(item -> builder.add(ResourceKey.create(Registries.ITEM, item)));
+				.sorted(java.util.Comparator.comparing(BuiltInRegistries.ITEM::getKey))
+				.forEach(i -> builder.add(i));
 
 		this.tag(ItemTags.PIGLIN_LOVED).add(gildedPotato, gildedPotatoMashed, dasRheingold);
 		this.tag(ExtraBotanyTags.Items.MUSIC_DISCS).add(recordGaia3, recordEgo, recordHerrscherOfTheVoid);
@@ -174,10 +174,10 @@ public class ItemTagProvider extends ItemTagsProvider {
 	}
 
 	private static TagKey<Item> accessory(String name) {
-		return ItemTags.create(ResourceLocation.fromNamespaceAndPath("curios", name));
+		return ItemTags.create(Identifier.fromNamespaceAndPath("curios", name));
 	}
 
 	private static TagKey<Item> common(String name) {
-		return ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", name));
+		return ItemTags.create(Identifier.fromNamespaceAndPath("c", name));
 	}
 }

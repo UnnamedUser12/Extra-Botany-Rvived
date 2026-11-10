@@ -49,7 +49,7 @@ public interface EXplatAbstractions {
 	/** Compatibility boundary for APIs removed from Botania's loader abstraction in 1.21. */
 	default <T extends BlockEntity> BlockEntityType<T> createBlockEntityType(
 			BiFunction<BlockPos, BlockState, T> factory, Block... blocks) {
-		return BlockEntityType.Builder.of(factory::apply, blocks).build(null);
+		return new BlockEntityType<>(factory::apply, blocks);
 	}
 
 	/** Compatibility wrappers for capability lookups that moved out of Botania's loader abstraction. */

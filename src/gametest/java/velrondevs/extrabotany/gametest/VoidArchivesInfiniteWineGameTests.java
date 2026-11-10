@@ -4,15 +4,15 @@ import velrondevs.extrabotany.common.brew.BrewUtil;
 import velrondevs.extrabotany.registry.ExtraBotanyItems;
 import velrondevs.extrabotany.common.item.relic.void_archives.variants.InfiniteWine;
 import velrondevs.extrabotany.xplat.EXplatAbstractions;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 import velrondevs.botania.api.mana.ManaItem;
 import velrondevs.botania.registry.BotaniaBrews;
 import velrondevs.botania.registry.BotaniaItems;
@@ -55,8 +55,8 @@ public final class VoidArchivesInfiniteWineGameTests {
 
         var brewEffect = BotaniaBrews.healing.getPotionEffects(wine).getFirst();
         var expected = player.getHealth();
-        brewEffect.getEffect().value().applyInstantenousEffect(player, player, player,
-                brewEffect.getAmplifier() + InfiniteWine.INSTANCE.getAmplifierAddition(), 1F);
+        brewEffect.getEffect().value().applyInstantenousEffect(h.getLevel(), player, player, player,
+                brewEffect.getAmplifier() + InfiniteWine.INSTANCE.getAmplifierAddition(), 1D);
         expected = player.getHealth();
         player.setHealth(1);
         InfiniteWine.INSTANCE.finishUsingItem(wine, h.getLevel(), player);
@@ -74,7 +74,7 @@ public final class VoidArchivesInfiniteWineGameTests {
         EXplatAbstractions.INSTANCE.findRelic(wine).bindToUUID(player.getUUID());
         BrewUtil.setBrew(wine, velrondevs.extrabotany.registry.ExtraBotanyBrews.revolution);
         InfiniteWine.INSTANCE.finishUsingItem(wine, h.getLevel(), player);
-        var haste = player.getEffect(MobEffects.DIG_SPEED);
+        var haste = player.getEffect(MobEffects.HASTE);
         h.assertTrue(haste != null && haste.getAmplifier() == 3 && haste.getDuration() == 2700,
                 "Void Archives wine changed the lasting brew amplifier or duration");
         h.assertTrue(mana.getMana() == 0, "Lasting wine effect did not consume exactly 20,000 mana");

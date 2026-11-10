@@ -1,6 +1,6 @@
 package velrondevs.extrabotany.registry;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.MenuType;
 
 import velrondevs.botania.xplat.XplatAbstractions;
@@ -20,7 +20,7 @@ public final class ExtraBotanyMenuTypes {
 
 	private ExtraBotanyMenuTypes() {}
 
-	public static void registerMenuTypes(BiConsumer<MenuType<?>, ResourceLocation> r) {
+	public static void registerMenuTypes(BiConsumer<MenuType<?>, Identifier> r) {
 		r.accept(MINI_HANDBAG, prefix(LibItemNames.MINI_HANDBAG));
 	}
 }

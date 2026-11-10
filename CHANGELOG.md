@@ -1,7 +1,14 @@
 # Changelog
 
 ## 1.0.1
-- No gameplay changes. This version is built and uploaded automatically by GitHub Actions from the source repository.
+- Ported to Minecraft 26.1.2 / NeoForge 26.1.2.126, built against Botania Revived 26.1.2 (1.0.7).
+- Rendering moved to the 26.1 render states: entities, items, armor (now with `equipment` assets) and the GUI.
+- Recipes extend `BotaniaRecipe` and use the Botania serializers. The four custom recipe types are synced to the client.
+- Entities, block entities, fluids and energy use the new `ValueInput`/`ValueOutput` and transfer APIs.
+- Network packets are sent as NBT, because the JSON codec no longer exists in 26.1.
+- Mixins audited against 26.1.2. `UniversalRuneMixin` now works on `Ingredient.test`, and Botania 1.0.7 adds the Rune of Deception, which the Rune of Sin replaces.
+- Known differences: the custom shaders (Gaia grain and the boss health bar) became vanilla pipelines, so that effect is gone. The EMI integration is disabled because EMI has no 26.1.2 version. Milk now also removes Black Sabbath, Blood Temptation, Constant Pain and Divine Justice, because effect cures no longer exist in 26.1.
+- 235 GameTests (recipes, weapons and relics, armor, baubles, flowers, bosses, mounts, Mini Handbag, effects and loot) in a separate `gametest` source set that is not part of the release jar. Every test runs in its own isolated environment.
 
 ## 1.0.0
 

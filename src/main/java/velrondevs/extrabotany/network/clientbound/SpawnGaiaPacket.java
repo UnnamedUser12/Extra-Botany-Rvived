@@ -1,5 +1,6 @@
 package velrondevs.extrabotany.network.clientbound;
 
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -34,7 +35,7 @@ public record SpawnGaiaPacket(ClientboundAddEntityPacket inner, Gaia.GaiaSpawnDa
 		buf.writeVarInt(data().getPlayerCount());
 		buf.writeGlobalPos(data().getHome());
 		//buf.writeUUID(data().getBossInfoUUID());
-		buf.writeJsonWithCodec(GaiaArena.CODEC, data().getArena());
+		buf.writeWithCodec(NbtOps.INSTANCE, GaiaArena.CODEC, data().getArena());
 	}
 
 	private static SpawnGaiaPacket decode(RegistryFriendlyByteBuf buf) {
@@ -43,7 +44,7 @@ public record SpawnGaiaPacket(ClientboundAddEntityPacket inner, Gaia.GaiaSpawnDa
 		data.setPlayerCount(buf.readVarInt());
 		data.setHome(buf.readGlobalPos());
 		//data.setBossInfoUUID(buf.readUUID());
-		data.setArena(buf.readJsonWithCodec(GaiaArena.CODEC));
+		data.setArena(buf.readWithCodecTrusted(NbtOps.INSTANCE, GaiaArena.CODEC));
 		return new SpawnGaiaPacket(inner, data);
 	}
 }

@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "extrabotany:shootingguardian"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "extrabotany:shootingguardian"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "extrabotany:shootingguardian"
+      }
+    ]
+  }
+}

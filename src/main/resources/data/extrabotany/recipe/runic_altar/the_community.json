@@ -2,28 +2,16 @@
   "type": "botania:runic_altar",
   "catalysts": [],
   "ingredients": [
-    {
-      "item": "extrabotany:the_chaos"
-    },
-    {
-      "item": "extrabotany:aero_stone"
-    },
-    {
-      "item": "extrabotany:aqua_stone"
-    },
-    {
-      "item": "extrabotany:earth_stone"
-    },
-    {
-      "item": "extrabotany:ignis_stone"
-    }
+    "extrabotany:the_chaos",
+    "extrabotany:aero_stone",
+    "extrabotany:aqua_stone",
+    "extrabotany:earth_stone",
+    "extrabotany:ignis_stone"
   ],
   "mana": 10000,
   "output": {
     "count": 1,
     "id": "extrabotany:the_community"
   },
-  "reagent": {
-    "item": "botania:livingrock"
-  }
+  "reagent": "botania:livingrock"
 }

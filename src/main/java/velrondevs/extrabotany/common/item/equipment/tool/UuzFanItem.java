@@ -1,7 +1,7 @@
 package velrondevs.extrabotany.common.item.equipment.tool;
 
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -26,9 +26,9 @@ public class UuzFanItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
-		player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
+		player.getCooldowns().addCooldown(new ItemStack(this), COOLDOWN_TICKS);
 		if (!level.isClientSide()) {
 			for (int i = -1; i <= 1; i++) {
 				ButterflyProjectileEntity butterfly = new ButterflyProjectileEntity(level, player);
@@ -37,6 +37,6 @@ public class UuzFanItem extends Item {
 				level.addFreshEntity(butterfly);
 			}
 		}
-		return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 }

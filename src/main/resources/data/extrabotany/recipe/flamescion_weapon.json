@@ -2,24 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "B": {
-      "item": "minecraft:blaze_rod"
-    },
-    "E": {
-      "item": "extrabotany:the_end"
-    },
-    "L": {
-      "item": "botania:life_essence"
-    },
-    "O": {
-      "tag": "extrabotany:orichalcos_ingots"
-    },
-    "T": {
-      "item": "botania:terra_sword"
-    },
-    "U": {
-      "item": "extrabotany:the_universe"
-    }
+    "B": "minecraft:blaze_rod",
+    "E": "extrabotany:the_end",
+    "L": "botania:life_essence",
+    "O": "#extrabotany:orichalcos_ingots",
+    "T": "botania:terra_sword",
+    "U": "extrabotany:the_universe"
   },
   "pattern": [
     "OUE",

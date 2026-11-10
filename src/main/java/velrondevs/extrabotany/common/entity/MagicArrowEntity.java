@@ -1,5 +1,7 @@
 package velrondevs.extrabotany.common.entity;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
@@ -30,15 +32,15 @@ public class MagicArrowEntity extends ManaBurstEntity {
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag compound) {
+	public void addAdditionalSaveData(ValueOutput compound) {
 		super.addAdditionalSaveData(compound);
 		compound.putFloat(TAG_DAMAGE, getDamage());
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag compound) {
+	public void readAdditionalSaveData(ValueInput compound) {
 		super.readAdditionalSaveData(compound);
-		setDamage(compound.getFloat(TAG_DAMAGE));
+		setDamage(compound.getFloatOr(TAG_DAMAGE, 0.0F));
 	}
 
 	public float getDamage() {

@@ -43,6 +43,6 @@ public class CandyItem extends Item {
 	@Override
 	public Component getName(ItemStack stack) {
 		return SeasonalItemHelper.isChristmas()
-				? Component.translatable(getDescriptionId(stack) + ".christmas") : super.getName(stack);
+				? Component.translatable(getDescriptionId() + ".christmas") : super.getName(stack);
 	}
 }

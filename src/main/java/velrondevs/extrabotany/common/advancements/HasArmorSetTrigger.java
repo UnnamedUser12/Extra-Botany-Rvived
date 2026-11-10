@@ -4,11 +4,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.critereon.ContextAwarePredicate;
-import net.minecraft.advancements.critereon.EntityPredicate;
-import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.criterion.ContextAwarePredicate;
+import net.minecraft.advancements.criterion.EntityPredicate;
+import net.minecraft.advancements.criterion.ItemPredicate;
+import net.minecraft.advancements.criterion.SimpleCriterionTrigger;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
@@ -27,7 +27,7 @@ import static velrondevs.extrabotany.common.lib.ResourceLocationHelper.prefix;
  */
 public class HasArmorSetTrigger extends SimpleCriterionTrigger<HasArmorSetTrigger.TriggerInstance> {
 
-	public static final ResourceLocation ID = prefix("has_armor_set");
+	public static final Identifier ID = prefix("has_armor_set");
 	public static final HasArmorSetTrigger INSTANCE = new HasArmorSetTrigger();
 
 	public void trigger(ServerPlayer player) {
@@ -48,7 +48,7 @@ public class HasArmorSetTrigger extends SimpleCriterionTrigger<HasArmorSetTrigge
 
 		public static Criterion<TriggerInstance> forArmorSet(ItemStack[] armorSet) {
 			ItemPredicate[] predicates = Arrays.stream(armorSet)
-					.map(item -> ItemPredicate.Builder.item().of(item.getItem()).build())
+					.map(item -> ItemPredicate.Builder.item().of(net.minecraft.core.registries.BuiltInRegistries.ITEM, item.getItem()).build())
 					.toArray(ItemPredicate[]::new);
 			if (predicates.length != 4) {
 				throw new IllegalArgumentException("Armor sets must contain exactly four items");

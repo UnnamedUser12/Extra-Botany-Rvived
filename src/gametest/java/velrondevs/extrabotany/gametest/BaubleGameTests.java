@@ -2,9 +2,9 @@ package velrondevs.extrabotany.gametest;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -15,8 +15,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import top.theillusivec4.curios.api.CuriosApi;
 
@@ -81,7 +81,7 @@ public final class BaubleGameTests {
 		if (relic != null) {
 			relic.bindToUUID(player.getUUID());
 		}
-		var inventory = CuriosApi.getCuriosInventory(player).orElseThrow();
+		var inventory = CuriosTestHelper.inventory(player);
 		var handler = inventory.getCurios().values().stream()
 				.filter(candidate -> candidate.getStacks().getSlots() > 0)
 				.findFirst().orElseThrow();
@@ -223,7 +223,7 @@ public final class BaubleGameTests {
 
 		player.tickCount = 20;
 		star.onWornTick(new ItemStack(star), player);
-		var slow = target.getEffect(MobEffects.MOVEMENT_SLOWDOWN);
+		var slow = target.getEffect(MobEffects.SLOWNESS);
 		helper.assertTrue(slow != null && slow.getAmplifier() == 4, "The star did not apply Slowness V");
 		helper.assertTrue(mana.getMana() == 970, "The star must charge 30 mana for one target, mana is " + mana.getMana());
 		helper.succeed();
@@ -239,7 +239,7 @@ public final class BaubleGameTests {
 			player.hurt(player.damageSources().generic(), 1000F);
 			helper.assertTrue(player.isAlive() && player.getHealth() == 5F, "The chips did not prevent the death, health is " + player.getHealth());
 			helper.assertTrue(mana.getMana() == 2000, "The rescue must cost 3000 mana, mana is " + mana.getMana());
-			helper.assertTrue(player.getCooldowns().isOnCooldown(ExtraBotanyItems.potatoChips), "The rescue did not start a cooldown");
+			helper.assertTrue(player.getCooldowns().isOnCooldown(new ItemStack(ExtraBotanyItems.potatoChips)), "The rescue did not start a cooldown");
 			helper.assertTrue(player.hasEffect(MobEffects.REGENERATION), "The rescue did not give Regeneration");
 
 			// 冷却期间不会再次保命。
@@ -254,12 +254,12 @@ public final class BaubleGameTests {
 	@GameTest(template = "empty", timeoutTicks = 20)
 	public static void moonPendantMakesTheWearerFireproof(GameTestHelper helper) {
 		Player player = player(helper);
-		helper.assertTrue(!player.isInvulnerableTo(player.damageSources().onFire()), "A player is fireproof without the pendant");
+		helper.assertTrue(!player.isInvulnerableTo(helper.getLevel(), player.damageSources().onFire()), "A player is fireproof without the pendant");
 
 		equip(player, ExtraBotanyItems.moonPendant);
 		helper.runAfterDelay(2, () -> {
-			helper.assertTrue(player.isInvulnerableTo(player.damageSources().onFire()), "The pendant did not stop fire damage");
-			helper.assertTrue(!player.isInvulnerableTo(player.damageSources().generic()), "The pendant stopped damage that is not fire");
+			helper.assertTrue(player.isInvulnerableTo(helper.getLevel(), player.damageSources().onFire()), "The pendant did not stop fire damage");
+			helper.assertTrue(!player.isInvulnerableTo(helper.getLevel(), player.damageSources().generic()), "The pendant stopped damage that is not fire");
 			helper.succeed();
 		});
 	}
@@ -277,7 +277,7 @@ public final class BaubleGameTests {
 		helper.succeed();
 	}
 
-	@GameTest(template = "empty", timeoutTicks = 20)
+	@GameTest(template = "empty", timeoutTicks = 120)
 	public static void bottledFlamePlacesATorchInTheDark(GameTestHelper helper) {
 		// 用石头围出一个没有光的小房间。
 		// Make a small room with no light from stone.
@@ -289,14 +289,15 @@ public final class BaubleGameTests {
 		player.getInventory().setItem(5, new ItemStack(Items.TORCH, 3));
 		var flame = (BaubleItem) ExtraBotanyItems.bottledFlame;
 
-		helper.runAfterDelay(5, () -> {
+		helper.startSequence().thenWaitUntil(() -> {
+			helper.assertTrue(helper.getLevel().getMaxLocalRawBrightness(player.blockPosition()) <= 8, "The light engine has not darkened the room yet");
+		}).thenExecute(() -> {
 			player.tickCount = 10;
 			flame.onWornTick(new ItemStack(flame), player);
 			helper.assertBlockPresent(Blocks.TORCH, CENTER);
 			helper.assertTrue(player.getInventory().getItem(5).getCount() == 2, "The torch did not come from the inventory");
 			helper.assertTrue(player.getOffhandItem().isEmpty(), "The off hand item was not restored");
-			helper.succeed();
-		});
+		}).thenSucceed();
 	}
 
 	@GameTest(template = "empty", timeoutTicks = 20)
@@ -333,7 +334,7 @@ public final class BaubleGameTests {
 	}
 
 	private static void assertId(GameTestHelper helper, Item item, String path) {
-		ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+		Identifier id = BuiltInRegistries.ITEM.getKey(item);
 		helper.assertTrue(id.getNamespace().equals("extrabotany") && id.getPath().equals(path),
 				"Expected extrabotany:" + path + " but found " + id);
 	}

@@ -1,12 +1,11 @@
 package velrondevs.extrabotany.common.brew.effect;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.neoforge.common.EffectCure;
 
-import java.util.Set;
 
 /**
  * Black Sabbath. When the effect is about to end, the creature dies. No item can remove it.
@@ -24,13 +23,8 @@ public class BlackSabbathMobEffect extends MobEffect {
 	}
 
 	@Override
-	public boolean applyEffectTick(LivingEntity entity, int amplifier) {
-		entity.kill();
+	public boolean applyEffectTick(ServerLevel level, LivingEntity entity, int amplifier) {
+		entity.kill(level);
 		return true;
-	}
-
-	@Override
-	public void fillEffectCures(Set<EffectCure> cures, MobEffectInstance effectInstance) {
-		// No cure is added, so milk and other items cannot remove this effect.
 	}
 }

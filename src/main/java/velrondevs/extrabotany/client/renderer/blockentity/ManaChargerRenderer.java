@@ -4,11 +4,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+
+import org.jspecify.annotations.Nullable;
+
+import velrondevs.botania.client.core.helper.RenderHelper;
+import velrondevs.botania.client.render.block_entity.BotaniaBlockEntityRenderer;
 
 import velrondevs.extrabotany.common.block.block_entity.ManaChargerBlockEntity;
 
@@ -16,29 +20,27 @@ import velrondevs.extrabotany.common.block.block_entity.ManaChargerBlockEntity;
  * 魔力充能基座的渲染器：把里面的物品平放着画出来。
  * The renderer of the Mana Charger: it draws the item in it flat.
  */
-public class ManaChargerRenderer implements BlockEntityRenderer<ManaChargerBlockEntity> {
-
+public class ManaChargerRenderer extends BotaniaBlockEntityRenderer<ManaChargerBlockEntity> {
 	private static final float SIZE = 1.0F;
-	private final ItemRenderer itemRenderer;
 
-	public ManaChargerRenderer(BlockEntityRendererProvider.Context context) {
-		this.itemRenderer = context.getItemRenderer();
-	}
+	public ManaChargerRenderer(BlockEntityRendererProvider.Context context) {}
 
 	@Override
-	public void render(ManaChargerBlockEntity charger, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+	protected void render(@Nullable ManaChargerBlockEntity charger, float partialTick, PoseStack poseStack, MultiBufferSource buffer,
+			SubmitNodeCollector collector, int packedLight, int packedOverlay) {
+		if (charger == null) {
+			return;
+		}
 		ItemStack stack = charger.getItem();
 		if (stack.isEmpty()) {
 			return;
 		}
 		poseStack.pushPose();
-
 		poseStack.translate(0.5F, 0.2F, 0.5F);
 		poseStack.mulPose(Axis.XP.rotationDegrees(90));
 		poseStack.scale(0.5F * SIZE, 0.5F * SIZE, 0.5F * SIZE);
-
-		itemRenderer.renderStatic(stack, ItemDisplayContext.FIXED, packedLight,
-				packedOverlay, poseStack, buffer, charger.getLevel(), 0);
+		RenderHelper.renderItem(stack, ItemDisplayContext.FIXED, poseStack, collector, packedLight,
+				packedOverlay, charger.getLevel(), 0);
 		poseStack.popPose();
 	}
 }

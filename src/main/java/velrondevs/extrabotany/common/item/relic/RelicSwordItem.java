@@ -1,5 +1,11 @@
 package velrondevs.extrabotany.common.item.relic;
 
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.ToolMaterial;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -7,8 +13,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
@@ -34,11 +38,15 @@ import java.util.List;
  * <p>来源：ExtraMeteorP 1.16 {@code ItemSwordRelic}。
  * <p>Source: ExtraMeteorP 1.16 {@code ItemSwordRelic}.
  */
-public abstract class RelicSwordItem extends SwordItem implements LeftClickItem {
+public abstract class RelicSwordItem extends Item implements LeftClickItem {
 	private static final int MANA_PER_REPAIR = 240;
 
-	protected RelicSwordItem(Tier tier, Properties props) {
-		super(tier, props);
+	protected RelicSwordItem(ToolMaterial tier, float attackDamage, float attackSpeed, Properties props) {
+		super(props.sword(tier, attackDamage, attackSpeed));
+	}
+
+	protected RelicSwordItem(ToolMaterial tier, ItemAttributeModifiers attributes, Properties props) {
+		super(props.sword(tier, 0, 0).attributes(attributes));
 	}
 
 	public static Relic makeRelic(ItemStack stack) {
@@ -107,8 +115,8 @@ public abstract class RelicSwordItem extends SwordItem implements LeftClickItem 
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
-		super.inventoryTick(stack, level, entity, slot, selected);
+	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot eqSlot) {
+		super.inventoryTick(stack, level, entity, eqSlot);
 		if (level.isClientSide() || !(entity instanceof Player player)) {
 			return;
 		}
@@ -122,8 +130,8 @@ public abstract class RelicSwordItem extends SwordItem implements LeftClickItem 
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		super.appendHoverText(stack, context, tooltip, flags);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		super.appendHoverText(stack, context, tooltipDisplay, tooltip, flags);
 		RelicImpl.addDefaultTooltip(stack, tooltip);
 	}
 

@@ -63,23 +63,23 @@ public class ExtraBotanyMobEffects {
         TO_REGISTER.forEach(proxy -> proxy.register(registry));
         // Active-effect maps use Holder identity. A proxy differs from the holder produced by
         // network/save codecs, so all public references must resolve to the registered holders.
-        ETERNITY = registry.getHolderOrThrow(ETERNITY.unwrapKey().orElseThrow());
-        INCANDESCENCE = registry.getHolderOrThrow(INCANDESCENCE.unwrapKey().orElseThrow());
-        FLAMESCION = registry.getHolderOrThrow(FLAMESCION.unwrapKey().orElseThrow());
-        WITCH_CURSE = registry.getHolderOrThrow(WITCH_CURSE.unwrapKey().orElseThrow());
-        TIMELOCK = registry.getHolderOrThrow(TIMELOCK.unwrapKey().orElseThrow());
-        DIVINE_JUSTICE = registry.getHolderOrThrow(DIVINE_JUSTICE.unwrapKey().orElseThrow());
-        IMMOBILIZE = registry.getHolderOrThrow(IMMOBILIZE.unwrapKey().orElseThrow());
-        LINK = registry.getHolderOrThrow(LINK.unwrapKey().orElseThrow());
-        HEAL_REVERSE = registry.getHolderOrThrow(HEAL_REVERSE.unwrapKey().orElseThrow());
-        DISCOUNT = registry.getHolderOrThrow(DISCOUNT.unwrapKey().orElseThrow());
-        WARM = registry.getHolderOrThrow(WARM.unwrapKey().orElseThrow());
-        THIRROR = registry.getHolderOrThrow(THIRROR.unwrapKey().orElseThrow());
-        BLACK_SABBATH = registry.getHolderOrThrow(BLACK_SABBATH.unwrapKey().orElseThrow());
-        BLOOD_TEMPTATION = registry.getHolderOrThrow(BLOOD_TEMPTATION.unwrapKey().orElseThrow());
-        CONSTANT_PAIN = registry.getHolderOrThrow(CONSTANT_PAIN.unwrapKey().orElseThrow());
-        MIND_CRACK = registry.getHolderOrThrow(MIND_CRACK.unwrapKey().orElseThrow());
-        TEMPTATION = registry.getHolderOrThrow(TEMPTATION.unwrapKey().orElseThrow());
+        ETERNITY = registry.getOrThrow(ETERNITY.unwrapKey().orElseThrow());
+        INCANDESCENCE = registry.getOrThrow(INCANDESCENCE.unwrapKey().orElseThrow());
+        FLAMESCION = registry.getOrThrow(FLAMESCION.unwrapKey().orElseThrow());
+        WITCH_CURSE = registry.getOrThrow(WITCH_CURSE.unwrapKey().orElseThrow());
+        TIMELOCK = registry.getOrThrow(TIMELOCK.unwrapKey().orElseThrow());
+        DIVINE_JUSTICE = registry.getOrThrow(DIVINE_JUSTICE.unwrapKey().orElseThrow());
+        IMMOBILIZE = registry.getOrThrow(IMMOBILIZE.unwrapKey().orElseThrow());
+        LINK = registry.getOrThrow(LINK.unwrapKey().orElseThrow());
+        HEAL_REVERSE = registry.getOrThrow(HEAL_REVERSE.unwrapKey().orElseThrow());
+        DISCOUNT = registry.getOrThrow(DISCOUNT.unwrapKey().orElseThrow());
+        WARM = registry.getOrThrow(WARM.unwrapKey().orElseThrow());
+        THIRROR = registry.getOrThrow(THIRROR.unwrapKey().orElseThrow());
+        BLACK_SABBATH = registry.getOrThrow(BLACK_SABBATH.unwrapKey().orElseThrow());
+        BLOOD_TEMPTATION = registry.getOrThrow(BLOOD_TEMPTATION.unwrapKey().orElseThrow());
+        CONSTANT_PAIN = registry.getOrThrow(CONSTANT_PAIN.unwrapKey().orElseThrow());
+        MIND_CRACK = registry.getOrThrow(MIND_CRACK.unwrapKey().orElseThrow());
+        TEMPTATION = registry.getOrThrow(TEMPTATION.unwrapKey().orElseThrow());
 
 	}
 }

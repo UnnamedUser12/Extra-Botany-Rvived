@@ -5,18 +5,19 @@ import velrondevs.extrabotany.registry.ExtraBotanyBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.Containers;
+import velrondevs.botania.common.block.block_entity.BlockEntityNbt;
+import velrondevs.botania.common.block.block_entity.BotaniaBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.event.EventHooks;
@@ -55,7 +56,7 @@ import velrondevs.extrabotany.registry.ExtraBotanyDataMaps;
  * <p>性能：茧每 {@value #PICKUP_INTERVAL} tick 查找一次掉落物，孵化期间每 {@value #SAVE_INTERVAL} tick 把区块标记为需要保存。只有放入和取出物品时才发同步数据包，客户端自己计时。
  * <p>Performance: the cocoon looks for dropped items one time for each {@value #PICKUP_INTERVAL} ticks, and during the incubation it marks the chunk for saving one time for each {@value #SAVE_INTERVAL} ticks. A synchronization packet is only sent when an item is put in or taken out, and the client counts the time itself.
  */
-public class CocoonOfDesireBlockEntity extends BlockEntity {
+public class CocoonOfDesireBlockEntity extends BotaniaBlockEntity {
 	public static final int HATCH_TIME = 1200;
 
 	private static final String TAG_ITEM = "Item";
@@ -102,7 +103,7 @@ public class CocoonOfDesireBlockEntity extends BlockEntity {
 
 	public void playPickupSound(SoundSource source) {
 		level.playSound(null, worldPosition, SoundEvents.ITEM_PICKUP, source, 0.5F,
-				(level.random.nextFloat() - level.random.nextFloat()) * 0.2F + 1F);
+				(level.getRandom().nextFloat() - level.getRandom().nextFloat()) * 0.2F + 1F);
 	}
 
 	public void clientTick() {
@@ -134,7 +135,7 @@ public class CocoonOfDesireBlockEntity extends BlockEntity {
 		// The same as in the original: the range is 1 block around the center of the block.
 		AABB range = new AABB(worldPosition).inflate(0.5);
 		for (ItemEntity dropped : level.getEntitiesOfClass(ItemEntity.class, range,
-				entity -> entity.isAlive() && entity.getItem().getItemHolder().getData(ExtraBotanyDataMaps.COCOON_HATCH) != null)) {
+				entity -> entity.isAlive() && entity.getItem().typeHolder().getData(ExtraBotanyDataMaps.COCOON_HATCH) != null)) {
 			ItemStack remaining = dropped.getItem().copy();
 			setItem(remaining.split(1));
 			if (remaining.isEmpty()) {
@@ -148,18 +149,18 @@ public class CocoonOfDesireBlockEntity extends BlockEntity {
 	}
 
 	private void hatch(ServerLevel level) {
-		ExtraBotanyDataMaps.CocoonHatch hatch = item.getItemHolder().getData(ExtraBotanyDataMaps.COCOON_HATCH);
-		Entity born = hatch == null ? null : hatch.entity().create(level);
+		ExtraBotanyDataMaps.CocoonHatch hatch = item.typeHolder().getData(ExtraBotanyDataMaps.COCOON_HATCH);
+		Entity born = hatch == null ? null : hatch.entity().create(level, EntitySpawnReason.MOB_SUMMONED);
 		if (born == null) {
 			restartTimer();
 			return;
 		}
-		born.moveTo(worldPosition.getX() + 0.5, worldPosition.getY() + 1, worldPosition.getZ() + 0.5, level.random.nextFloat() * 360F, 0F);
+		born.snapTo(worldPosition.getX() + 0.5, worldPosition.getY() + 1, worldPosition.getZ() + 0.5, level.getRandom().nextFloat() * 360F, 0F);
 		if (born instanceof AgeableMob ageable) {
 			ageable.setAge(BABY_AGE);
 		}
 		if (born instanceof Mob mob) {
-			EventHooks.finalizeMobSpawn(mob, level, level.getCurrentDifficultyAt(worldPosition), MobSpawnType.MOB_SUMMONED, null);
+			EventHooks.finalizeMobSpawn(mob, level, level.getCurrentDifficultyAt(worldPosition), EntitySpawnReason.MOB_SUMMONED, null);
 		}
 		if (!level.addFreshEntity(born)) {
 			restartTimer();
@@ -172,28 +173,23 @@ public class CocoonOfDesireBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.saveAdditional(tag, registries);
+	public void writePacketNBT(CompoundTag tag, HolderLookup.Provider registries) {
 		tag.putInt(TAG_TIME_PASSED, timePassed);
 		if (!item.isEmpty()) {
-			tag.put(TAG_ITEM, item.save(registries));
+			tag.put(TAG_ITEM, BlockEntityNbt.saveOptional(item, registries));
 		}
 	}
 
 	@Override
-	protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.loadAdditional(tag, registries);
-		item = ItemStack.parseOptional(registries, tag.getCompound(TAG_ITEM));
-		timePassed = item.isEmpty() ? 0 : Math.clamp(tag.getInt(TAG_TIME_PASSED), 0, HATCH_TIME);
+	public void readPacketNBT(CompoundTag tag, HolderLookup.Provider registries) {
+		item = BlockEntityNbt.parseOptional(registries, tag.get(TAG_ITEM));
+		timePassed = item.isEmpty() ? 0 : Math.clamp(tag.getIntOr(TAG_TIME_PASSED, 0), 0, HATCH_TIME);
 	}
 
 	@Override
-	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-		return saveWithoutMetadata(registries);
-	}
-
-	@Override
-	public ClientboundBlockEntityDataPacket getUpdatePacket() {
-		return ClientboundBlockEntityDataPacket.create(this);
+	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+		if (level != null) {
+			Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), item);
+		}
 	}
 }

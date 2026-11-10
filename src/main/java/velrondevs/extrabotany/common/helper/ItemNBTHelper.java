@@ -34,7 +34,7 @@ public final class ItemNBTHelper {
 	 */
 	@SuppressWarnings("deprecation")
 	private static CompoundTag view(ItemStack stack) {
-		return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe();
+		return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
 	}
 
 	public static boolean verifyExistance(ItemStack stack, String key) {
@@ -52,7 +52,7 @@ public final class ItemNBTHelper {
 
 	public static boolean getBoolean(ItemStack stack, String key, boolean fallback) {
 		CompoundTag tag = view(stack);
-		return tag.contains(key) ? tag.getBoolean(key) : fallback;
+		return tag.contains(key) ? tag.getBooleanOr(key, fallback) : fallback;
 	}
 
 	public static void setBoolean(ItemStack stack, String key, boolean value) {
@@ -61,7 +61,7 @@ public final class ItemNBTHelper {
 
 	public static int getInt(ItemStack stack, String key, int fallback) {
 		CompoundTag tag = view(stack);
-		return tag.contains(key) ? tag.getInt(key) : fallback;
+		return tag.contains(key) ? tag.getIntOr(key, fallback) : fallback;
 	}
 
 	public static void setInt(ItemStack stack, String key, int value) {
@@ -70,7 +70,7 @@ public final class ItemNBTHelper {
 
 	public static long getLong(ItemStack stack, String key, long fallback) {
 		CompoundTag tag = view(stack);
-		return tag.contains(key) ? tag.getLong(key) : fallback;
+		return tag.contains(key) ? tag.getLongOr(key, fallback) : fallback;
 	}
 
 	public static void setLong(ItemStack stack, String key, long value) {
@@ -79,7 +79,7 @@ public final class ItemNBTHelper {
 
 	public static String getString(ItemStack stack, String key, String fallback) {
 		CompoundTag tag = view(stack);
-		return tag.contains(key) ? tag.getString(key) : fallback;
+		return tag.contains(key) ? tag.getStringOr(key, fallback) : fallback;
 	}
 
 	public static void setString(ItemStack stack, String key, String value) {
@@ -88,10 +88,10 @@ public final class ItemNBTHelper {
 
 	public static ListTag getList(ItemStack stack, String key, int elementType, boolean nullable) {
 		CompoundTag tag = view(stack);
-		if (!tag.contains(key, Tag.TAG_LIST)) {
+		if (!tag.contains(key)) {
 			return nullable ? null : new ListTag();
 		}
-		ListTag list = tag.getList(key, elementType);
+		ListTag list = tag.getListOrEmpty(key);
 		if (list.isEmpty() && nullable) {
 			return null;
 		}

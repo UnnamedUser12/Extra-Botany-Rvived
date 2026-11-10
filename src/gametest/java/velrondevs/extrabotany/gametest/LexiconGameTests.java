@@ -5,14 +5,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.GameTest;
+import velrondevs.extrabotany.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
-
-import velrondevs.extrabotany.common.lib.LibMisc;
+import net.minecraft.resources.Identifier;
+import velrondevs.extrabotany.gametest.framework.GameTestHolder;
+import velrondevs.extrabotany.gametest.framework.PrefixGameTestTemplate;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -34,10 +31,6 @@ public final class LexiconGameTests {
 
 	private LexiconGameTests() {}
 
-	private static Path modResource(String path) {
-		return ModList.get().getModFileById(LibMisc.MOD_ID).getFile().findResource(path.split("/"));
-	}
-
 	private static JsonObject readJson(Path path) {
 		try {
 			return JsonParser.parseString(Files.readString(path, StandardCharsets.UTF_8)).getAsJsonObject();
@@ -52,11 +45,11 @@ public final class LexiconGameTests {
 	 */
 	@GameTest(template = "empty", timeoutTicks = 40)
 	public static void lexiconEntriesReferToThingsThatExist(GameTestHelper helper) {
-		Path root = modResource(ENTRIES);
+		Path root = ModResources.path(ENTRIES);
 		helper.assertTrue(Files.isDirectory(root), "The lexicon entries are not in the mod file: " + ENTRIES);
-		JsonObject english = readJson(modResource("assets/extrabotany/lang/en_us.json"));
-		JsonObject chinese = readJson(modResource("assets/extrabotany/lang/zh_cn.json"));
-		Set<ResourceLocation> recipes = helper.getLevel().getRecipeManager().getRecipeIds().collect(java.util.stream.Collectors.toSet());
+		JsonObject english = readJson(ModResources.path("assets/extrabotany/lang/en_us.json"));
+		JsonObject chinese = readJson(ModResources.path("assets/extrabotany/lang/zh_cn.json"));
+		Set<Identifier> recipes = helper.getLevel().getServer().getRecipeManager().getRecipes().stream().map(holder -> holder.id().identifier()).collect(java.util.stream.Collectors.toSet());
 
 		List<Path> files;
 		try (Stream<Path> walk = Files.walk(root)) {
@@ -84,7 +77,7 @@ public final class LexiconGameTests {
 				}
 				for (String key : List.of("recipe", "recipe2")) {
 					if (page.has(key)) {
-						ResourceLocation id = ResourceLocation.tryParse(page.get(key).getAsString());
+						Identifier id = Identifier.tryParse(page.get(key).getAsString());
 						if (id == null || !recipes.contains(id)) {
 							problems.add(name + ": the recipe " + page.get(key).getAsString() + " does not exist");
 						}
@@ -98,7 +91,7 @@ public final class LexiconGameTests {
 					for (String letter : mapping.keySet()) {
 						String block = mapping.get(letter).getAsString();
 						int state = block.indexOf('[');
-						ResourceLocation id = ResourceLocation.tryParse(state < 0 ? block : block.substring(0, state));
+						Identifier id = Identifier.tryParse(state < 0 ? block : block.substring(0, state));
 						if (id == null || !BuiltInRegistries.BLOCK.containsKey(id)) {
 							problems.add(name + ": the multiblock block " + block + " does not exist");
 						}
@@ -129,7 +122,7 @@ public final class LexiconGameTests {
 	}
 
 	private static void checkItemId(List<String> problems, String entry, String field, String item) {
-		ResourceLocation id = ResourceLocation.tryParse(item);
+		Identifier id = Identifier.tryParse(item);
 		if (id == null || !BuiltInRegistries.ITEM.containsKey(id)) {
 			problems.add(entry + ": the item " + item + " in \"" + field + "\" does not exist");
 		}

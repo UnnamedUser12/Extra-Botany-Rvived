@@ -1,12 +1,15 @@
 package velrondevs.extrabotany.common.item.relic;
 
+import net.minecraft.world.item.Item;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -16,7 +19,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
@@ -132,13 +135,13 @@ public class SpearOfSubspaceItem extends RelicItem implements LeftClickItem, Len
 	// ---------------------------------------------------------------------
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
-		if (player.isSpectator() || player.getCooldowns().isOnCooldown(this)) {
-			return InteractionResultHolder.fail(stack);
+		if (player.isSpectator() || player.getCooldowns().isOnCooldown(new ItemStack(this))) {
+			return InteractionResult.FAIL;
 		}
 		player.startUsingItem(hand);
-		return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
@@ -147,8 +150,8 @@ public class SpearOfSubspaceItem extends RelicItem implements LeftClickItem, Len
 	}
 
 	@Override
-	public UseAnim getUseAnimation(ItemStack stack) {
-		return UseAnim.NONE;
+	public ItemUseAnimation getUseAnimation(ItemStack stack) {
+		return ItemUseAnimation.NONE;
 	}
 
 	@Override
@@ -158,13 +161,13 @@ public class SpearOfSubspaceItem extends RelicItem implements LeftClickItem, Len
 	}
 
 	@Override
-	public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
-		if (level.isClientSide() || !(entity instanceof Player player) || player.isSpectator() || player.getCooldowns().isOnCooldown(this)) {
-			return;
+	public boolean releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
+		if (level.isClientSide() || !(entity instanceof Player player) || player.isSpectator() || player.getCooldowns().isOnCooldown(new ItemStack(this))) {
+			return false;
 		}
 		Relic relic = velrondevs.botania.xplat.XplatAbstractions.INSTANCE.findRelic(stack);
 		if (relic == null || !relic.isRightPlayer(player)) {
-			return;
+			return false;
 		}
 
 		// 服务端抬起玩家，然后把新的速度发给客户端。
@@ -174,10 +177,11 @@ public class SpearOfSubspaceItem extends RelicItem implements LeftClickItem, Len
 		player.hurtMarked = true;
 
 		boolean paid = ManaItemHandler.instance().requestManaExactForTool(stack, player, DOMAIN_MANA_COST, true);
-		player.getCooldowns().addCooldown(this, paid ? DOMAIN_COOLDOWN_TICKS : DOMAIN_COOLDOWN_TICKS * 2);
+		player.getCooldowns().addCooldown(new ItemStack(this), paid ? DOMAIN_COOLDOWN_TICKS : DOMAIN_COOLDOWN_TICKS * 2);
 		player.addEffect(new MobEffectInstance(ExtraBotanyMobEffects.ETERNITY, ETERNITY_TICKS));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), ExtraBotanySounds.SPEAR_OF_SUBSPACE_USE, SoundSource.PLAYERS, 1.6F, 1F);
 		openDomain(level, player);
+		return true;
 	}
 
 	private static void openDomain(Level level, Player player) {
@@ -258,8 +262,8 @@ public class SpearOfSubspaceItem extends RelicItem implements LeftClickItem, Len
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
-		tooltip.add(Component.translatable("tooltip.extrabotany.spear_of_subspace").withStyle(ChatFormatting.GRAY));
-		super.appendHoverText(stack, context, tooltip, flags);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flags) {
+		tooltip.accept(Component.translatable("tooltip.extrabotany.spear_of_subspace").withStyle(ChatFormatting.GRAY));
+		super.appendHoverText(stack, context, tooltipDisplay, tooltip, flags);
 	}
 }

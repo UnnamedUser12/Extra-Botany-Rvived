@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "extrabotany:starry_idol"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "extrabotany:starry_idol"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "extrabotany:starry_idol"
+      }
+    ]
+  }
+}

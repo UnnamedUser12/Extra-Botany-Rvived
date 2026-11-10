@@ -1,6 +1,5 @@
 package velrondevs.extrabotany.common.entity.gaia;
 
-import com.mojang.serialization.Dynamic;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -12,7 +11,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Unit;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -103,7 +102,7 @@ public class GaiaIII extends Gaia {
 			gaia.getAttribute(Attributes.ARMOR).setBaseValue(30);
 
 			gaia.playSound(BotaniaSounds.gaiaSummon, 0.05F, 1F);
-			EventHooks.finalizeMobSpawn(gaia, serverLevel, world.getCurrentDifficultyAt(gaia.blockPosition()), MobSpawnType.EVENT, null);
+			EventHooks.finalizeMobSpawn(gaia, serverLevel, serverLevel.getCurrentDifficultyAt(gaia.blockPosition()), EntitySpawnReason.EVENT, null);
 			world.addFreshEntity(gaia);
 
 			for (Player nearbyPlayer : playersAround) {
@@ -123,12 +122,12 @@ public class GaiaIII extends Gaia {
 	}
 
 	@Override
-	protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-		return GaiaIIIAI.makeBrain(this, dynamic);
+	protected Brain<?> makeBrain(Brain.Packed packed) {
+		return GaiaIIIAI.makeBrain(this, packed);
 	}
 
 	@Override
-	protected void initMemories(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData) {
+	protected void initMemories(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason, @Nullable SpawnGroupData spawnData) {
 		GaiaIIIAI.initMemories(this, level.getLevel(), getHome().pos());
 	}
 
@@ -137,10 +136,6 @@ public class GaiaIII extends Gaia {
 		GaiaIIIAI.updateActivity(this);
 	}
 
-	@Override
-	public ResourceKey<LootTable> getDefaultLootTable() {
-		return this.getType().getDefaultLootTable();
-	}
 
 	@Override
 	public float getDamageCap() {

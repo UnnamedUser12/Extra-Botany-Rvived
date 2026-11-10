@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "tag": "extrabotany:aerialite_ingots"
-    }
+    "#extrabotany:aerialite_ingots"
   ],
   "result": {
     "count": 9,

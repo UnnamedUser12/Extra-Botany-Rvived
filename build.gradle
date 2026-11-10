@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'eclipse'
     id 'idea'
-    id 'net.neoforged.moddev' version '2.0.147'
+    id 'net.neoforged.moddev' version '2.0.148'
 }
 
 version = "${mcversion}-${mod_version}-${tag_lanzador}"
@@ -11,9 +11,7 @@ base {
     archivesName = "${mod_named}"
 }
 
-// Minecraft 1.21.1 needs Java 21
 java.toolchain {
-    vendor = JvmVendorSpec.ADOPTIUM
     languageVersion = JavaLanguageVersion.of(java_version.toInteger())
 }
 
@@ -22,7 +20,6 @@ java {
 }
 
 sourceSets {
-    // Game tests and their structures. They are not part of the release jar.
     gametest {
         compileClasspath += sourceSets.main.output
         runtimeClasspath += sourceSets.main.output
@@ -40,10 +37,13 @@ neoForge {
     addModdingDependenciesTo(sourceSets.gametest)
 
     runs {
+        configureEach {
+            systemProperty 'fml.earlyprogresswindow', 'false'
+        }
+
         client {
             client()
             gameDirectory = file('run')
-            // Abre directo el mundo de pruebas: ./gradlew runClient -Pvm_world=<carpeta en run/saves>
             def world = findProperty('vm_world') ?: 'extra_test'
             if (file("run/saves/${world}").isDirectory()) {
                 programArguments.addAll '--quickPlaySingleplayer', world.toString()
@@ -56,31 +56,39 @@ neoForge {
             programArgument '--nogui'
         }
 
-        // ./gradlew runGameTestServer : runs the tests of src/gametest (never part of the release jar)
         gameTestServer {
             type = 'gameTestServer'
             gameDirectory = file('run/gametest')
             systemProperty 'neoforge.enabledGameTestNamespaces', modid
         }
 
-        data {
-            data()
+        serverData {
+            serverData()
             gameDirectory = file('run')
-            // Hand-written resources win over generated ones (see datagen/util/HandWrittenFilter).
             systemProperty 'extrabotany.datagen.handwritten', file('src/main/resources').absolutePath
-            // -Pdatagen_output=<dir> sends the output somewhere else, to compare it before replacing src/generated/resources.
             def datagenOutput = findProperty('datagen_output') ? file(findProperty('datagen_output')) : file('src/generated/resources')
             programArguments.addAll '--mod', "${modid}", '--all',
                     '--output', datagenOutput.getAbsolutePath(),
-                    '--existing', file('src/main/resources').getAbsolutePath(),
-                    '--existing-mod', 'botania'
+                    '--existing', file('src/main/resources').getAbsolutePath()
+        }
+
+        clientData {
+            clientData()
+            gameDirectory = file('run')
+            systemProperty 'extrabotany.datagen.handwritten', file('src/main/resources').absolutePath
+            def datagenOutput = findProperty('datagen_output') ? file(findProperty('datagen_output')) : file('src/generated/resources')
+            programArguments.addAll '--mod', "${modid}", '--all',
+                    '--output', datagenOutput.getAbsolutePath(),
+                    '--existing', file('src/main/resources').getAbsolutePath()
         }
     }
 
     mods {
         "${modid}" {
             sourceSet(sourceSets.main)
-            sourceSet(sourceSets.gametest)
+            if (!project.hasProperty('no_gametest')) {
+                sourceSet(sourceSets.gametest)
+            }
         }
     }
 }
@@ -95,56 +103,50 @@ repositories {
     maven {
         name = 'Jared'
         url = 'https://maven.blamejared.com/'
-    }
-    maven {
-        name = 'C4'
-        url = 'https://maven.theillusivec4.top/'
-    }
-    maven {
-        name = 'TerraformersMC'
-        url = 'https://maven.terraformersmc.com/'
         content {
-            includeGroup 'dev.emi'
+            includeGroup 'vazkii.patchouli'
+            includeGroup 'mezz.jei'
+            includeGroup 'net.mezzdev.config'
         }
     }
-    maven {
-        name = 'LatvianDev'
-        url = 'https://maven.latvian.dev/releases'
-        content {
-            includeGroup 'dev.latvian.mods'
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Curse Maven'
+                url = 'https://cursemaven.com'
+            }
         }
-    }
-    maven {
-        name = 'Curse Maven'
-        url = 'https://cursemaven.com'
-        content {
+        filter {
             includeGroup 'curse.maven'
+        }
+    }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Modrinth'
+                url = 'https://api.modrinth.com/maven'
+            }
+        }
+        filter {
+            includeGroup 'maven.modrinth'
         }
     }
 }
 
 dependencies {
-    // Botania Revived (modid botania, package velrondevs.botania)
     implementation "curse.maven:${botania_curse_id}:${botania_file_id}"
 
-    // Patchouli
-    implementation "vazkii.patchouli:Patchouli:${patchouli_version}"
+    implementation "vazkii.patchouli:patchouli-neoforge:${patchouli_version}"
 
-    // Curios
-    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
-    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+    compileOnly "maven.modrinth:curios:${curios_version}"
+    runtimeOnly "maven.modrinth:curios:${curios_version}"
 
-    // JEI (optional)
     compileOnly "mezz.jei:jei-${mcversion}-common-api:${jei_version}"
     compileOnly "mezz.jei:jei-${mcversion}-neoforge-api:${jei_version}"
     runtimeOnly "mezz.jei:jei-${mcversion}-neoforge:${jei_version}"
 
-    // EMI (optional)
-    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
-
-    // KubeJS (optional)
-    compileOnly "dev.latvian.mods:kubejs-neoforge:${kubejs_version}"
-    compileOnly "dev.latvian.mods:rhino:${rhino_version}"
+    compileOnly "maven.modrinth:kubejs:${kubejs_version}"
+    compileOnly "maven.modrinth:rhino:${rhino_version}"
 
     compileOnly 'org.jetbrains:annotations:24.1.0'
     compileOnly 'com.demonwav.mcdev:annotations:2.1.0'
@@ -169,7 +171,6 @@ jar {
     }
 }
 
-// Includes the license file in the built mod
 tasks.withType(Jar).configureEach {
     from(rootProject.file('LICENSE')) { rename { "${it}-${modid}" } }
 }
@@ -191,6 +192,7 @@ tasks.withType(ProcessResources).configureEach {
             botania_version_range        : botania_version_range,
             patchouli_version_range      : patchouli_version_range,
             curios_version_range         : curios_version_range,
+            jei_version_range            : jei_version_range,
             kubejs_version_range         : kubejs_version_range,
     ]
     inputs.properties replaceProperties
@@ -202,6 +204,15 @@ tasks.withType(ProcessResources).configureEach {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-    options.release = 21
-    options.compilerArgs.addAll(['-Xmaxerrs', '2000'])
+    options.release = 25
+    options.compilerArgs.addAll(['-Xmaxerrs', '100000'])
+}
+
+tasks.register('printCompileClasspath') {
+    def cp = sourceSets.main.compileClasspath
+    def gcp = sourceSets.gametest.compileClasspath
+    doLast {
+        file('build/cp.txt').text = cp.files.join(File.pathSeparator)
+        file('build/cp_gametest.txt').text = gcp.files.join(File.pathSeparator)
+    }
 }

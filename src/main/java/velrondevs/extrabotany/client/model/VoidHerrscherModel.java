@@ -11,8 +11,9 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 
-import velrondevs.extrabotany.common.entity.gaia.VoidHerrscher;
+import java.util.function.Supplier;
 
 /**
  * 空之律者的模型：一个玩家体型的人形，带一层外衣、一对翅膀和三面旋转的护盾。
@@ -21,8 +22,13 @@ import velrondevs.extrabotany.common.entity.gaia.VoidHerrscher;
  * <p>全部部件使用同一张 128x128 的贴图。下面的数值逐项来自 ExtraMeteorP 1.12 {@code ModelVoidHerrscher}。
  * <p>All parts use the same 128x128 texture. The values below come item by item from ExtraMeteorP 1.12 {@code ModelVoidHerrscher}.
  */
-public class VoidHerrscherModel extends HumanoidModel<VoidHerrscher> {
-	private static final int SHIELD_COUNT = 3;
+public class VoidHerrscherModel extends HumanoidModel<VoidHerrscherModel.State> {
+	public static final int SHIELD_COUNT = 3;
+
+	public static class State extends HumanoidRenderState {
+		public boolean rankII;
+		public int shields;
+	}
 
 	private final ModelPart[] outerLayer;
 	private final ModelPart[] bodyParts;
@@ -30,18 +36,18 @@ public class VoidHerrscherModel extends HumanoidModel<VoidHerrscher> {
 	private final ModelPart[] shields = new ModelPart[SHIELD_COUNT];
 
 	public VoidHerrscherModel() {
-		this(createLayer().bakeRoot());
+		this(createLayer().bakeRoot(), createEffectLayer().bakeRoot());
 	}
 
-	private VoidHerrscherModel(ModelPart root) {
+	private VoidHerrscherModel(ModelPart root, ModelPart effects) {
 		super(root);
 		outerLayer = new ModelPart[] {
 				root.getChild("body_wear"), root.getChild("left_arm_wear"), root.getChild("right_arm_wear"),
 				root.getChild("left_leg_wear"), root.getChild("right_leg_wear") };
 		bodyParts = new ModelPart[] { body, leftArm, rightArm, leftLeg, rightLeg };
-		wings = new ModelPart[] { root.getChild("left_wing"), root.getChild("right_wing") };
+		wings = new ModelPart[] { effects.getChild("left_wing"), effects.getChild("right_wing") };
 		for (int i = 0; i < SHIELD_COUNT; i++) {
-			shields[i] = root.getChild("shield" + (i + 1));
+			shields[i] = effects.getChild("shield" + (i + 1));
 		}
 	}
 
@@ -56,6 +62,12 @@ public class VoidHerrscherModel extends HumanoidModel<VoidHerrscher> {
 		root.addOrReplaceChild("left_leg_wear", CubeListBuilder.create().texOffs(0, 48).addBox(-2F, 0F, -2F, 4, 12, 4, outer), PartPose.offset(1.9F, 12F, 0F));
 		root.addOrReplaceChild("right_leg_wear", CubeListBuilder.create().texOffs(0, 32).addBox(-2F, 0F, -2F, 4, 12, 4, outer), PartPose.offset(-1.9F, 12F, 0F));
 		root.addOrReplaceChild("body_wear", CubeListBuilder.create().texOffs(16, 32).addBox(-4F, 0F, -2F, 8, 12, 4, outer), PartPose.ZERO);
+		return LayerDefinition.create(mesh, 128, 128);
+	}
+
+	private static LayerDefinition createEffectLayer() {
+		MeshDefinition mesh = new MeshDefinition();
+		PartDefinition root = mesh.getRoot();
 		root.addOrReplaceChild("left_wing", CubeListBuilder.create().texOffs(0, 64).addBox(0F, 0F, 0F, 26, 32, 0),
 				PartPose.offsetAndRotation(-30F, -11F, 5F, 0F, 0F, -0.1745329F));
 		root.addOrReplaceChild("right_wing", CubeListBuilder.create().texOffs(52, 64).addBox(0F, 0F, 0F, 26, 32, 0),
@@ -67,27 +79,10 @@ public class VoidHerrscherModel extends HumanoidModel<VoidHerrscher> {
 	}
 
 	@Override
-	public void setupAnim(VoidHerrscher boss, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-		super.setupAnim(boss, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+	public void setupAnim(State state) {
+		super.setupAnim(state);
 		for (int i = 0; i < outerLayer.length; i++) {
-			outerLayer[i].copyFrom(bodyParts[i]);
-		}
-		// 护盾均匀地排在身体周围，并且来回摆动。
-		// The shields are at equal angles around the body, and they swing back and forth.
-		int count = boss.getShields();
-		for (int i = 0; i < SHIELD_COUNT; i++) {
-			shields[i].visible = i < count;
-			if (count > 0) {
-				shields[i].yRot = (float) (Math.sin(ageInTicks * 0.1F) + Math.PI * 2 / count * (i + 1));
-			}
-		}
-	}
-
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
-		super.renderToBuffer(poseStack, buffer, packedLight, packedOverlay, color);
-		for (ModelPart part : outerLayer) {
-			part.render(poseStack, buffer, packedLight, packedOverlay, color);
+			outerLayer[i].loadPose(bodyParts[i].storePose());
 		}
 	}
 
@@ -97,9 +92,11 @@ public class VoidHerrscherModel extends HumanoidModel<VoidHerrscher> {
 		}
 	}
 
-	public void renderShields(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
-		for (ModelPart shield : shields) {
-			shield.render(poseStack, buffer, packedLight, packedOverlay, color);
+	public void renderShields(State state, PoseStack poseStack, Supplier<VertexConsumer> buffer, int packedLight, int packedOverlay, int color) {
+		int count = state.shields;
+		for (int i = 0; i < SHIELD_COUNT && i < count; i++) {
+			shields[i].yRot = (float) (Math.sin(state.ageInTicks * 0.1F) + Math.PI * 2 / count * (i + 1));
+			shields[i].render(poseStack, buffer.get(), packedLight, packedOverlay, color);
 		}
 	}
 }

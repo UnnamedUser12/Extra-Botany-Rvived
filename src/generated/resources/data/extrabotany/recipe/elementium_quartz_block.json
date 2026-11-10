@@ -3,16 +3,13 @@
   "category": "building",
   "group": "extrabotany:quartz_block",
   "key": {
-    "Q": {
-      "item": "extrabotany:elementium_quartz"
-    }
+    "Q": "extrabotany:elementium_quartz"
   },
   "pattern": [
     "QQ",
     "QQ"
   ],
   "result": {
-    "count": 1,
     "id": "extrabotany:elementium_quartz_block"
   }
 }

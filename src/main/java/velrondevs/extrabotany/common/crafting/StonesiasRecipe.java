@@ -10,6 +10,9 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+
+import velrondevs.botania.api.recipe.BotaniaRecipe;
+import velrondevs.botania.common.crafting.BotaniaRecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 
 import velrondevs.botania.api.recipe.StateIngredient;
@@ -41,7 +44,7 @@ public class StonesiasRecipe implements StonesiaRecipe {
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<? extends BotaniaRecipe> getSerializer() {
 		return ExtraBotanyRecipeTypes.STONESIA_SERIALIZER;
 	}
 
@@ -50,7 +53,7 @@ public class StonesiasRecipe implements StonesiaRecipe {
 		return ExtraBotanyRecipeTypes.STONESIA_RECIPE_TYPE;
 	}
 
-	public static class Serializer implements RecipeSerializer<StonesiasRecipe> {
+	public static class Serializer implements BotaniaRecipeSerializer<StonesiasRecipe> {
 		private static final MapCodec<StonesiasRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 				StateIngredientHelper.CODEC.fieldOf("input").forGetter(StonesiasRecipe::getInput),
 				Codec.INT.fieldOf("outputMana").forGetter(StonesiasRecipe::getManaOutput)

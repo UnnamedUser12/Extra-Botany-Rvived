@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "A": {
-      "item": "botania:livingrock"
-    },
-    "B": {
-      "item": "minecraft:lapis_block"
-    },
-    "C": {
-      "item": "extrabotany:hero_medal"
-    }
+    "A": "botania:livingrock",
+    "B": "minecraft:lapis_block",
+    "C": "extrabotany:hero_medal"
   },
   "pattern": [
     "ABA",

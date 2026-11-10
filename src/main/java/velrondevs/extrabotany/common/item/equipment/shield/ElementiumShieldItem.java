@@ -5,7 +5,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ToolMaterial;
 import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 
 import velrondevs.botania.api.BotaniaAPI;
@@ -21,7 +21,7 @@ public class ElementiumShieldItem extends ManasteelShieldItem {
 
 	private static final int MANA_PER_DAMAGE = 70;
 
-	public ElementiumShieldItem(Properties properties, Tier tier) {
+	public ElementiumShieldItem(Properties properties, ToolMaterial tier) {
 		super(properties, tier);
 	}
 
