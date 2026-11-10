@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.2
+- The mod now requires Botania Revived 2.0.0 or newer, and is built and tested against Botania Revived 2.0.0.
+
 ## 1.0.1
 - No gameplay changes. This version is built and uploaded automatically by GitHub Actions from the source repository.
 

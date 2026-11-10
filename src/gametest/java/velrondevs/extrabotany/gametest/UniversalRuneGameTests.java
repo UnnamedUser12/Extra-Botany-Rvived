@@ -161,6 +161,13 @@ public final class UniversalRuneGameTests {
 				if (!isRune) {
 					continue;
 				}
+				// The Rune of Deception (new in Botania 2.0.0) is tied to no season and no sin: neither universal rune replaces it.
+				boolean onlyDeception = Arrays.stream(ingredient.getItems()).allMatch(stack -> stack.is(BotaniaItems.runeDeception));
+				if (onlyDeception) {
+					helper.assertTrue(!ingredient.test(element) && !ingredient.test(sin),
+							holder.id() + ": a universal rune must not replace the Rune of Deception");
+					continue;
+				}
 				withRunes++;
 				helper.assertTrue(ingredient.test(element) || ingredient.test(sin), holder.id() + ": a rune ingredient must accept a universal rune");
 				helper.assertTrue(Arrays.stream(ingredient.getItems()).noneMatch(stack -> stack.is(ExtraBotanyItems.elementRune) || stack.is(ExtraBotanyItems.sinRune)),
