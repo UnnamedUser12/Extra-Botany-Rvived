@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.4
+- Fixed the Shadow Katana texture, which was drawn stretched because its animation file was missing.
+
 ## 1.0.3
 
 Botania Revived 2.0.2 Required
