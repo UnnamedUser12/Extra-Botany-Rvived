@@ -11,7 +11,7 @@ Mod id: `extrabotany`. Port author: UnnamedUser12.
 |---|---|
 | Minecraft | 26.1.2 |
 | NeoForge | 26.1.2.126 or later |
-| Botania Revived | 2.0.0 |
+| Botania Revived | 2.0.2 |
 | Patchouli | 26.1-94 |
 | Curios | 15.0.0+26.1.2 |
 | JEI, KubeJS | optional |
