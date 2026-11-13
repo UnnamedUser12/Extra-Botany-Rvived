@@ -3,6 +3,7 @@ package velrondevs.extrabotany.client.renderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -33,8 +34,16 @@ public class ColorHandler {
 
 	}
 
+	/**
+	 * Since 1.21 the alpha byte of an item color is used when rendering, so a plain 0xRRGGBB value is drawn
+	 * fully transparent. Every tint that is not "no tint" (-1) must be made opaque.
+	 */
+	private static int opaque(int color) {
+		return color == -1 ? -1 : FastColor.ARGB32.opaque(color);
+	}
+
 	public static void submitItems(ItemHandlerConsumer items) {
-		items.register((s, t) -> t == 0 ? Mth.hsvToRgb(ClientTickHandler.total() * 2 % 360 / 360F, 0.25F, 1F) : -1,
+		items.register((s, t) -> t == 0 ? opaque(Mth.hsvToRgb(ClientTickHandler.total() * 2 % 360 / 360F, 0.25F, 1F)) : -1,
 				ExtraBotanyItems.gaiaHammer);
 
 		items.register((s, t) -> {
@@ -44,7 +53,7 @@ public class ColorHandler {
 
 			Brew brew = BrewUtil.getBrew(s);
 			if (brew == BotaniaBrews.fallbackBrew) {
-				return s.getItem() instanceof TaintedBloodPendantItem ? 0xC6000E : 0x989898;
+				return opaque(s.getItem() instanceof TaintedBloodPendantItem ? 0xC6000E : 0x989898);
 			}
 
 			int color = brew.getColor(s);
@@ -55,14 +64,14 @@ public class ColorHandler {
 			int g = Math.max(0, Math.min(255, (color >> 8 & 0xFF) + add));
 			int b = Math.max(0, Math.min(255, (color & 0xFF) + add));
 
-			return r << 16 | g << 8 | b;
+			return opaque(r << 16 | g << 8 | b);
 		},
 				ExtraBotanyItems.manaCocktail,
 				ExtraBotanyItems.infiniteWine,
 				ExtraBotanyItems.holyWaterGrenade,
 				ExtraBotanyItems.voidArchives
 		);
-		ItemColor lensHandler = (s, t) -> t == 0 ? ((LensItem) s.getItem()).getLensColor(s, Minecraft.getInstance().level) : -1;
+		ItemColor lensHandler = (s, t) -> t == 0 ? opaque(((LensItem) s.getItem()).getLensColor(s, Minecraft.getInstance().level)) : -1;
 		items.register(lensHandler,
 				ExtraBotanyItems.lensPush, ExtraBotanyItems.lensSmelt, ExtraBotanyItems.lensMana,
 				ExtraBotanyItems.lensPotion, ExtraBotanyItems.lensCloud, ExtraBotanyItems.lensTrace);
